@@ -1,0 +1,42 @@
+# Promptfoo Configuration for CHW Edge LLM Evaluation Matrix
+# Run with: npx promptfoo eval && npx promptfoo view
+
+description: "CHW Edge LLM Clinical Summarization & Mini-RAG Protocol Benchmarks"
+
+prompts:
+  - file://chw-edge-evals/prompts/summarize_patient.md
+
+providers:
+  - id: "ollama:chat:gemma2:2b-instruct-q4_K_M"
+    config:
+      temperature: 0.0
+  - id: "ollama:chat:gemma4:latest"
+    config:
+      temperature: 0.0
+
+tests:
+  - description: "Case 01: ANC 32w Gestation, Hypertensive Jump, Resolved Malaria Trap"
+    vars:
+      patient_markdown: |
+        ## demographics
+        Fatima Bello | 1998-04-12 (28y) | female | Koro Village
+        ## conditions
+        Pregnancy 32 weeks | active | 2026-03-01 |
+        Pregnancy-induced hypertension | active | 2026-09-15 |
+        Malaria falciparum | resolved | 2025-11-10 | 2025-11-20
+        ## vitals
+        2026-10-14 | Blood Pressure | 148/96 mmHg | High
+        ## observations
+        2026-10-14 | Urine Protein Dipstick | 1+ | Abnormal
+        2026-10-14 | Symptom: Frontal headache | Present | Warning
+        ## tasks
+        requested | urgent | Refer to District Hospital for pre-eclampsia workup | 2026-10-16 | Overdue urgent referral
+    assert:
+      - type: icontains
+        value: "Fatima"
+      - type: icontains-any
+        value: ["148/96", "hypertension", "high bp"]
+      - type: not-icontains
+        value: "active malaria"
+      - type: word-count
+        threshold: 120
