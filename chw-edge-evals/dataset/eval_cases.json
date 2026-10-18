@@ -144,7 +144,7 @@
     "visit_prep_rag": {
       "max_words": 130,
       "must_include_all": [
-        ["prohibited", "outside guideline", "cannot administer", "not permitted", "do not inject", "refuse"],
+        ["prohibited", "outside guideline", "cannot administer", "not permitted", "do not inject", "refuse", "do not administer", "restricted"],
         ["oral amoxicillin", "pre-referral", "250mg"],
         ["refer", "immediate referral", "hospital", "chest indrawing"]
       ],
