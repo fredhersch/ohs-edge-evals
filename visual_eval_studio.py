@@ -555,7 +555,7 @@ def get_embedded_studio_html() -> str:
       --surface: #ffffff;
       --ink: #1c2830;
       --ink-soft: #4e5f6a;
-      --ink-faint: #778893;
+      --ink-faint: #475569;
       --line: #e1e8eb;
       --line-soft: #edf2f4;
 
@@ -734,7 +734,7 @@ def get_embedded_studio_html() -> str:
         <b>Open Health Stack</b>
         <span>Software Foundation &bull; AI Commons</span>
       </div>
-      <span class="hidden md:inline-flex text-[11px] font-semibold px-2.5 py-0.5 rounded-full badge-ai ml-2">
+      <span class="hidden md:inline-flex text-xs font-medium font-semibold px-2.5 py-0.5 rounded-full badge-ai ml-2">
         OHS Edge SLM Studio
       </span>
     </div>
@@ -767,7 +767,7 @@ def get_embedded_studio_html() -> str:
     </button>
     <button onclick="switchTab('rlhf')" id="tab-rlhf" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-scale-balanced text-xs"></i><span>RLHF / DPO Studio</span>
-      <span id="dpo-count-badge" class="ml-1 text-[10px] bg-[#f3effa] text-[#7a4db8] px-1.5 py-0.2 rounded-full font-bold">0</span>
+      <span id="dpo-count-badge" class="ml-1 text-xs font-semibold bg-[#f3effa] text-[#7a4db8] px-1.5 py-0.2 rounded-full font-bold">0</span>
     </button>
     <button onclick="switchTab('pipeline')" id="tab-pipeline" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-graduation-cap text-xs"></i><span>Fine-Tuning Guide</span>
@@ -787,7 +787,7 @@ def get_embedded_studio_html() -> str:
       <!-- Run Selector & Summary Banner -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 ohs-card p-5 bg-white border border-[#e1e8eb]">
         <div>
-          <label class="text-[11px] uppercase tracking-wider text-[#778893] font-semibold block mb-1">Active Benchmark Report</label>
+          <label class="text-xs font-medium uppercase tracking-wider text-[#778893] font-semibold block mb-1">Active Benchmark Report</label>
           <div class="flex items-center space-x-3">
             <select id="run-select" onchange="loadSelectedRun()" class="bg-[#f8faf9] border border-[#cbd7dc] text-[#1c2830] rounded-lg px-3.5 py-2 text-xs font-medium focus:ring-2 focus:ring-[#7a4db8] focus:outline-none">
               <option value="">Loading benchmark runs...</option>
@@ -797,7 +797,7 @@ def get_embedded_studio_html() -> str:
         </div>
         <div class="flex items-center space-x-3">
           <button onclick="switchTab('runner')" class="btn-pill btn-primary px-4 py-2 text-xs">
-            <i class="fa-solid fa-plus text-[11px]"></i><span>Launch New Run</span>
+            <i class="fa-solid fa-plus text-xs font-medium"></i><span>Launch New Run</span>
           </button>
         </div>
       </div>
@@ -953,7 +953,7 @@ def get_embedded_studio_html() -> str:
           <div>
             <label class="text-xs font-semibold text-[#4e5f6a] block mb-1">Target On-Device Model (Ollama)</label>
             <input type="text" id="runner-model-input" value="gemma2:2b-instruct-q4_K_M" class="w-full bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-3.5 py-2 text-xs text-[#1c2830] focus:ring-1 focus:ring-[#7a4db8] focus:outline-none">
-            <p class="text-[11px] text-[#778893] mt-1">E.g., gemma2:2b-instruct-q4_K_M, llama3.2:3b, qwen2.5:3b</p>
+            <p class="text-xs font-medium text-[#778893] mt-1">E.g., gemma2:2b-instruct-q4_K_M, llama3.2:3b, qwen2.5:3b</p>
           </div>
 
           <div>
@@ -975,7 +975,7 @@ def get_embedded_studio_html() -> str:
           <div>
             <label class="text-xs font-semibold text-[#4e5f6a] block mb-1">Judge API Key (Optional)</label>
             <input type="password" id="runner-judgekey-input" placeholder="GEMINI_API_KEY / OPENAI_API_KEY" class="w-full bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-3.5 py-2 text-xs text-[#1c2830] focus:ring-1 focus:ring-[#7a4db8] focus:outline-none">
-            <p class="text-[11px] text-[#778893] mt-1">If blank, loads from local environment or .env</p>
+            <p class="text-xs font-medium text-[#778893] mt-1">If blank, loads from local environment or .env</p>
           </div>
 
           <div class="flex items-center space-x-2 pt-2">
@@ -1017,13 +1017,13 @@ def get_embedded_studio_html() -> str:
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="synthesizeAdversarialPairs()" class="btn-pill btn-primary px-3.5 py-2 text-xs" style="background-color: var(--ai);">
-            <i class="fa-solid fa-bolt text-[11px]"></i><span>Synthesize Adversarial Pairs (RLAIF)</span>
+            <i class="fa-solid fa-bolt text-xs font-medium"></i><span>Synthesize Adversarial Pairs (RLAIF)</span>
           </button>
           <button onclick="autoBootstrapDpo()" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
-            <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i><span>Auto-Bootstrap Pairs</span>
+            <i class="fa-solid fa-wand-magic-sparkles text-xs font-medium"></i><span>Auto-Bootstrap Pairs</span>
           </button>
           <a href="/api/preferences" target="_blank" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
-            <i class="fa-solid fa-download text-[11px] text-[#4e5f6a]"></i><span>Export TRL JSONL</span>
+            <i class="fa-solid fa-download text-xs font-medium text-[#4e5f6a]"></i><span>Export TRL JSONL</span>
           </a>
         </div>
       </div>
@@ -1058,7 +1058,7 @@ def get_embedded_studio_html() -> str:
               <i class="fa-solid fa-clipboard-question text-[#1f75a8]"></i>
               <span>Patient Clinical Context & Instruction Prompt</span>
             </span>
-            <span class="text-[10px] text-[#778893] font-medium" id="prompt-toggle-icon">Click to toggle</span>
+            <span class="text-xs font-semibold text-[#778893] font-medium" id="prompt-toggle-icon">Click to toggle</span>
           </div>
           <pre id="rlhf-prompt-text" class="text-xs text-[#d6e2e9] bg-[#111820] p-3 rounded-lg border border-[#23313d] mt-2 whitespace-pre-wrap max-h-36 overflow-y-auto custom-scroll hidden"></pre>
         </div>
@@ -1072,7 +1072,7 @@ def get_embedded_studio_html() -> str:
                 <span class="text-xs font-bold text-[#1ca564] flex items-center space-x-1.5">
                   <i class="fa-solid fa-cube"></i><span id="rlhf-model-a-name">Candidate Model A</span>
                 </span>
-                <span id="rlhf-model-a-words" class="text-[11px] text-[#778893] font-medium">-- words</span>
+                <span id="rlhf-model-a-words" class="text-xs font-medium text-[#778893] font-medium">-- words</span>
               </div>
               <div id="rlhf-output-a" class="mt-3 text-xs text-[#1c2830] whitespace-pre-wrap leading-relaxed min-h-[140px]"></div>
             </div>
@@ -1088,7 +1088,7 @@ def get_embedded_studio_html() -> str:
                 <span class="text-xs font-bold text-[#1f75a8] flex items-center space-x-1.5">
                   <i class="fa-solid fa-cube"></i><span id="rlhf-model-b-name">Candidate Model B</span>
                 </span>
-                <span id="rlhf-model-b-words" class="text-[11px] text-[#778893] font-medium">-- words</span>
+                <span id="rlhf-model-b-words" class="text-xs font-medium text-[#778893] font-medium">-- words</span>
               </div>
               <div id="rlhf-output-b" class="mt-3 text-xs text-[#1c2830] whitespace-pre-wrap leading-relaxed min-h-[140px]"></div>
             </div>
@@ -1128,7 +1128,7 @@ def get_embedded_studio_html() -> str:
               <i class="fa-solid fa-pen-to-square text-[#7a4db8]"></i>
               <span>Human Expert Gold Demonstration (Optional Correction for SFT / DPO Target)</span>
             </label>
-            <span id="gold-word-counter" class="text-[11px] text-[#778893] font-medium">0 words</span>
+            <span id="gold-word-counter" class="text-xs font-medium text-[#778893] font-medium">0 words</span>
           </div>
           <textarea id="rlhf-gold-editor" oninput="updateGoldWordCount()" rows="4" placeholder="Edit or write the ideal clinical response here..." class="w-full bg-[#f8faf9] border border-[#cbd7dc] rounded-lg p-3 text-xs text-[#1c2830] focus:ring-1 focus:ring-[#7a4db8] focus:outline-none custom-scroll"></textarea>
           <div class="flex justify-end space-x-3">
@@ -1155,13 +1155,13 @@ def get_embedded_studio_html() -> str:
           <div class="p-4 rounded-xl bg-[#f8faf9] border border-[#e1e8eb]">
             <h3 class="text-xs font-bold text-[#1ca564] uppercase tracking-wider mb-1">Step 1: Inspect & Validate Exported DPO Dataset</h3>
             <p class="text-xs text-[#4e5f6a] mb-2">Check the generated pairs in <code class="text-[#1c2830] font-bold">chw-edge-evals/dataset/dpo_preference_data.jsonl</code>:</p>
-            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-[11px] overflow-x-auto">python3 fine_tune_slm_dpo.py --dataset chw-edge-evals/dataset/dpo_preference_data.jsonl --dry-run</pre>
+            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs font-medium overflow-x-auto">python3 fine_tune_slm_dpo.py --dataset chw-edge-evals/dataset/dpo_preference_data.jsonl --dry-run</pre>
           </div>
 
           <div class="p-4 rounded-xl bg-[#f8faf9] border border-[#e1e8eb]">
             <h3 class="text-xs font-bold text-[#1f75a8] uppercase tracking-wider mb-1">Step 2: Run DPO QLoRA Fine-Tuning</h3>
             <p class="text-xs text-[#4e5f6a] mb-2">Train the LoRA adapter with Hugging Face TRL on GPU or Mac MPS:</p>
-            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-[11px] overflow-x-auto">python3 fine_tune_slm_dpo.py \
+            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs font-medium overflow-x-auto">python3 fine_tune_slm_dpo.py \
   --dataset chw-edge-evals/dataset/dpo_preference_data.jsonl \
   --model-id google/gemma-2-2b-it \
   --output-dir ./gemma2_chw_dpo_adapter \
@@ -1171,7 +1171,7 @@ def get_embedded_studio_html() -> str:
           <div class="p-4 rounded-xl bg-[#f8faf9] border border-[#e1e8eb]">
             <h3 class="text-xs font-bold text-[#7a4db8] uppercase tracking-wider mb-1">Step 3: Convert to GGUF and Register in Ollama</h3>
             <p class="text-xs text-[#4e5f6a] mb-2">Merge weights, quantize to INT4/INT8 GGUF, and verify in the Visual Runner:</p>
-            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-[11px] overflow-x-auto"># Merge adapter and export to GGUF
+            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs font-medium overflow-x-auto"># Merge adapter and export to GGUF
 python3 llama.cpp/convert_hf_to_gguf.py ./merged_model --outfile ./gemma2-2b-chw-dpo.gguf --outtype q8_0
 
 # Create Ollama model
@@ -1229,7 +1229,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
         <div class="pt-2">
           <div class="flex items-center justify-between pb-1.5">
             <span class="text-xs font-bold text-[#4e5f6a]">Live Training Telemetry & Logs</span>
-            <span id="train-time" class="text-[11px] text-[#778893]">Ready</span>
+            <span id="train-time" class="text-xs font-medium text-[#778893]">Ready</span>
           </div>
           <pre id="train-logs" class="bg-[#111820] text-[#d6e2e9] p-4 rounded-lg border border-[#23313d] text-xs font-mono h-48 overflow-y-auto custom-scroll whitespace-pre-wrap">Awaiting training job launch...</pre>
         </div>
@@ -1412,7 +1412,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
             <span>${r.model}</span>
           </td>
           <td class="px-5 py-3 font-mono font-medium">${r.passes}/${r.total_checks}</td>
-          <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${passBadge}">${r.pass_rate_pct}%</span></td>
+          <td class="px-5 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-medium font-bold ${passBadge}">${r.pass_rate_pct}%</span></td>
           <td class="px-5 py-3 text-[#4e5f6a]">${r.cases_count} cases</td>
           <td class="px-5 py-3 text-[#4e5f6a]">${r.cases_count} cases</td>
           <td class="px-5 py-3 text-[#778893]">${r.judge_model || 'None'}</td>
@@ -1458,7 +1458,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
           <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-[#e1e8eb] gap-2">
             <div>
               <div class="flex items-center space-x-2">
-                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-toolkit">${caseMeta.domain || 'General'}</span>
+                <span class="text-xs font-semibold font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-toolkit">${caseMeta.domain || 'General'}</span>
                 <h3 class="font-bold text-[#1c2830] text-sm">${res.title}</h3>
               </div>
               <p class="text-xs text-[#778893] mt-0.5 font-mono">${res.id}</p>
@@ -1481,14 +1481,14 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
                   <i class="fa-solid fa-file-lines text-[#1f75a8]"></i>
                   <span>Pre-Visit Summary (${res.summarization?.metrics?.latency_s || '--'}s, ${res.summarization?.metrics?.tok_per_sec || '--'} t/s)</span>
                 </span>
-                <span class="text-[11px] text-[#778893] font-medium">${res.summarization?.output?.split(/\\s+/).length || 0} words</span>
+                <span class="text-xs font-medium text-[#778893] font-medium">${res.summarization?.output?.split(/\\s+/).length || 0} words</span>
               </div>
               <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg whitespace-pre-wrap max-h-40 overflow-y-auto custom-scroll">${escapeHtml(res.summarization?.output || 'No output')}</pre>
               ${res.summarization?.tier1_failures?.length ? `
-                <div class="text-[#dc3e42] text-[11px] font-semibold space-y-0.5 pt-1">
+                <div class="text-[#dc3e42] text-xs font-medium font-semibold space-y-0.5 pt-1">
                   ${res.summarization.tier1_failures.map(f => `<div><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(f)}</div>`).join('')}
                 </div>
-              ` : '<div class="text-[#1ca564] text-[11px] font-semibold"><i class="fa-solid fa-check mr-1"></i>All Tier-1 format and entity checks passed</div>'}
+              ` : '<div class="text-[#1ca564] text-xs font-medium font-semibold"><i class="fa-solid fa-check mr-1"></i>All Tier-1 format and entity checks passed</div>'}
             </div>
 
             <!-- Mini-RAG Protocol Check -->
@@ -1498,14 +1498,14 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
                   <i class="fa-solid fa-notes-medical text-[#7a4db8]"></i>
                   <span>Mini-RAG Protocol Counseling (${res.visit_prep_rag?.metrics?.latency_s || '--'}s)</span>
                 </span>
-                <span class="text-[11px] text-[#778893] font-medium">${res.visit_prep_rag?.output?.split(/\\s+/).length || 0} words</span>
+                <span class="text-xs font-medium text-[#778893] font-medium">${res.visit_prep_rag?.output?.split(/\\s+/).length || 0} words</span>
               </div>
               <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg whitespace-pre-wrap max-h-40 overflow-y-auto custom-scroll">${escapeHtml(res.visit_prep_rag?.output || 'No output')}</pre>
               ${res.visit_prep_rag?.tier1_failures?.length ? `
-                <div class="text-[#dc3e42] text-[11px] font-semibold space-y-0.5 pt-1">
+                <div class="text-[#dc3e42] text-xs font-medium font-semibold space-y-0.5 pt-1">
                   ${res.visit_prep_rag.tier1_failures.map(f => `<div><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(f)}</div>`).join('')}
                 </div>
-              ` : '<div class="text-[#1ca564] text-[11px] font-semibold"><i class="fa-solid fa-check mr-1"></i>All danger signs and guideline assertions preserved</div>'}
+              ` : '<div class="text-[#1ca564] text-xs font-medium font-semibold"><i class="fa-solid fa-check mr-1"></i>All danger signs and guideline assertions preserved</div>'}
             </div>
           </div>
         `;
@@ -1624,7 +1624,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       const label = document.getElementById('gold-word-counter');
       if (label) {
         label.innerText = `${words} words`;
-        label.className = words > 120 ? 'text-[11px] text-red-400 font-bold' : 'text-[11px] text-emerald-400 font-bold';
+        label.className = words > 120 ? 'text-xs font-medium text-red-400 font-bold' : 'text-xs font-medium text-emerald-400 font-bold';
       }
     }
 
