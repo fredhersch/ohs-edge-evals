@@ -1,0 +1,10 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "immunizations",
+  "resource": "Immunization",
+  "select": [
+    {"column": [{"name": "vaccine", "path": "vaccineCode.coding.first().display"}]},
+    {"column": [{"name": "date", "path": "occurrenceDateTime"}]},
+    {"column": [{"name": "status", "path": "status"}]}
+  ]
+}

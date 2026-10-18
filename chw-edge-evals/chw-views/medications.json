@@ -1,0 +1,11 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "medications",
+  "resource": "MedicationRequest",
+  "select": [
+    {"column": [{"name": "medication", "path": "medicationCodeableConcept.coding.first().display"}]},
+    {"column": [{"name": "status", "path": "status"}]},
+    {"column": [{"name": "authoredOn", "path": "authoredOn"}]},
+    {"column": [{"name": "dosage", "path": "dosageInstruction.first().text"}]}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "relatedpersons",
+  "resource": "RelatedPerson",
+  "select": [
+    {"column": [{"name": "name", "path": "name.first().text"}]},
+    {"column": [{"name": "relationship", "path": "relationship.first().coding.first().display"}]},
+    {"column": [{"name": "gender", "path": "gender"}]},
+    {"column": [{"name": "birthDate", "path": "birthDate"}]}
+  ]
+}

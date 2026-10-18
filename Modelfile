@@ -1,0 +1,5 @@
+FROM gemma2:2b-instruct-q4_K_M
+PARAMETER temperature 0.0
+PARAMETER seed 42
+PARAMETER num_ctx 4096
+SYSTEM "You are a precise, helpful assistant being evaluated on accuracy and instruction following. Answer concisely as requested."

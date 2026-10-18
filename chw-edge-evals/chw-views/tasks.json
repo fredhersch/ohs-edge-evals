@@ -1,0 +1,15 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "tasks",
+  "resource": "Task",
+  "where": [
+    {"path": "status != 'cancelled'"}
+  ],
+  "select": [
+    {"column": [{"name": "status", "path": "status"}]},
+    {"column": [{"name": "priority", "path": "priority"}]},
+    {"column": [{"name": "description", "path": "description"}]},
+    {"column": [{"name": "due", "path": "executionPeriod.end"}]},
+    {"column": [{"name": "note", "path": "note.first().text"}]}
+  ]
+}

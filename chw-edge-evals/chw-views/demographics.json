@@ -1,0 +1,11 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "demographics",
+  "resource": "Patient",
+  "select": [
+    {"column": [{"name": "name", "path": "name.first().text"}]},
+    {"column": [{"name": "birthDate", "path": "birthDate"}]},
+    {"column": [{"name": "gender", "path": "gender"}]},
+    {"column": [{"name": "village", "path": "address.first().city"}]}
+  ]
+}

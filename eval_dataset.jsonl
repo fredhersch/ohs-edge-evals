@@ -1,0 +1,5 @@
+{"id": "math_01", "category": "arithmetic", "prompt": "What is 17 * 24? Reply with ONLY the number.", "expected": "408", "match_type": "exact"}
+{"id": "logic_01", "category": "reasoning", "prompt": "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops definitely Lazzies? Reply with ONLY Yes or No.", "expected": "Yes", "match_type": "exact"}
+{"id": "fact_01", "category": "knowledge", "prompt": "What is the chemical symbol for gold? Reply with ONLY the symbol.", "expected": "Au", "match_type": "exact"}
+{"id": "extract_01", "category": "extraction", "prompt": "Extract the email address from this text: 'Contact support at help@example.org for refunds.' Reply with ONLY the email address.", "expected": "help@example.org", "match_type": "contains"}
+{"id": "json_01", "category": "structured_output", "prompt": "Return a valid JSON object with keys \"planet\" set to \"Mars\" and \"moons\" set to 2. Output ONLY raw JSON without markdown fences.", "expected": "{\"planet\": \"Mars\", \"moons\": 2}", "match_type": "json"}

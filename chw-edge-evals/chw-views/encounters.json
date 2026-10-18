@@ -1,0 +1,10 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "encounters",
+  "resource": "Encounter",
+  "select": [
+    {"column": [{"name": "date", "path": "period.start"}]},
+    {"column": [{"name": "type", "path": "type.first().coding.first().display"}]},
+    {"column": [{"name": "reason", "path": "reasonCode.first().coding.first().display"}]}
+  ]
+}

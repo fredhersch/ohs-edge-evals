@@ -1,0 +1,14 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "observations",
+  "resource": "Observation",
+  "where": [
+    {"path": "category.coding.exists(code != 'vital-signs')"}
+  ],
+  "select": [
+    {"column": [{"name": "date", "path": "effectiveDateTime"}]},
+    {"column": [{"name": "display", "path": "code.coding.first().display"}]},
+    {"column": [{"name": "result", "path": "iif(valueCodeableConcept.exists(), valueCodeableConcept.coding.first().display, iif(valueQuantity.exists(), valueQuantity.value.toString() + ' ' + valueQuantity.unit, valueString))"}]},
+    {"column": [{"name": "flag", "path": "interpretation.coding.first().code"}]}
+  ]
+}
