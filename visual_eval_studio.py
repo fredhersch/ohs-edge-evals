@@ -44,6 +44,19 @@ ACTIVE_RUN = {
     "output_file": None,
 }
 
+TRAIN_LOCK = threading.Lock()
+ACTIVE_TRAIN = {
+    "is_running": False,
+    "started_at": None,
+    "completed_at": None,
+    "process": None,
+    "logs": [],
+    "model_id": None,
+    "algorithm": "orpo",
+    "status": "idle",
+    "exit_code": None,
+}
+
 
 def load_eval_cases() -> List[Dict[str, Any]]:
     if EVAL_CASES_FILE.exists():
@@ -166,6 +179,55 @@ def run_eval_worker(cmd: List[str], output_file: str, model_name: str):
             ACTIVE_RUN["status"] = f"error: {str(exc)}"
             ACTIVE_RUN["completed_at"] = datetime.datetime.now().isoformat()
             ACTIVE_RUN["logs"].append(f"\n[Execution error: {str(exc)}]\n")
+
+
+def run_train_process(cmd: List[str], model_id: str, algorithm: str):
+    global ACTIVE_TRAIN
+    try:
+        with TRAIN_LOCK:
+            ACTIVE_TRAIN["is_running"] = True
+            ACTIVE_TRAIN["started_at"] = datetime.datetime.now().isoformat()
+            ACTIVE_TRAIN["completed_at"] = None
+            ACTIVE_TRAIN["logs"] = [f"[Launching {algorithm.upper()} Alignment for {model_id}]\n$ {' '.join(cmd)}\n\n"]
+            ACTIVE_TRAIN["model_id"] = model_id
+            ACTIVE_TRAIN["algorithm"] = algorithm
+            ACTIVE_TRAIN["status"] = "running"
+            ACTIVE_TRAIN["exit_code"] = None
+
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=str(WORKSPACE_DIR),
+            text=True,
+            bufsize=1,
+            env=os.environ.copy(),
+        )
+
+        with TRAIN_LOCK:
+            ACTIVE_TRAIN["process"] = proc
+
+        for line in iter(proc.stdout.readline, ""):
+            with TRAIN_LOCK:
+                ACTIVE_TRAIN["logs"].append(line)
+                if len(ACTIVE_TRAIN["logs"]) > 2000:
+                    ACTIVE_TRAIN["logs"].pop(0)
+
+        proc.stdout.close()
+        code = proc.wait()
+        with TRAIN_LOCK:
+            ACTIVE_TRAIN["exit_code"] = code
+            ACTIVE_TRAIN["is_running"] = False
+            ACTIVE_TRAIN["status"] = "completed" if code == 0 else "failed"
+            ACTIVE_TRAIN["completed_at"] = datetime.datetime.now().isoformat()
+            ACTIVE_TRAIN["logs"].append(f"\n[Training process completed with exit code {code}]\n")
+    except Exception as exc:
+        with TRAIN_LOCK:
+            ACTIVE_TRAIN["exit_code"] = -1
+            ACTIVE_TRAIN["is_running"] = False
+            ACTIVE_TRAIN["status"] = f"error: {str(exc)}"
+            ACTIVE_TRAIN["completed_at"] = datetime.datetime.now().isoformat()
+            ACTIVE_TRAIN["logs"].append(f"\n[Training execution error: {str(exc)}]\n")
 
 
 class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
@@ -595,7 +657,7 @@ def get_embedded_studio_html() -> str:
         <span>Software Foundation &bull; AI Commons</span>
       </div>
       <span class="hidden md:inline-flex text-[11px] font-semibold px-2.5 py-0.5 rounded-full badge-ai ml-2">
-        OHS Edge Edge Evals
+        OHS Edge SLM Studio
       </span>
     </div>
 
@@ -632,7 +694,7 @@ def get_embedded_studio_html() -> str:
     <button onclick="switchTab('pipeline')" id="tab-pipeline" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-graduation-cap text-xs"></i><span>Fine-Tuning Guide</span>
     </button>
-    <a href="http://localhost:8080" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 my-auto ml-auto font-semibold text-xs text-[#7a4db8] hover:text-[#54328c] bg-[#f3effa] hover:bg-[#ede5f7] border border-[#7a4db8]/25 rounded-lg flex items-center space-x-1.5 transition shadow-xs" title="Open 3-Way Benchmark Dashboard & Published Report">
+    <a href="index.html" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 my-auto ml-auto font-semibold text-xs text-[#7a4db8] hover:text-[#54328c] bg-[#f3effa] hover:bg-[#ede5f7] border border-[#7a4db8]/25 rounded-lg flex items-center space-x-1.5 transition shadow-xs" title="Open 3-Way Benchmark Dashboard & Published Report">
       <i class="fa-solid fa-chart-line text-xs"></i>
       <span>3-Way Benchmark &amp; Full Report :8080 ↗</span>
     </a>

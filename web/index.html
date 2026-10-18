@@ -49,10 +49,10 @@
 
       <!-- External Studio Link & Utility Actions -->
       <div class="flex items-center gap-2">
-        <a href="http://localhost:8501" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-sm group" title="Open Visual Evals & RLHF Studio on Port 8501">
+        <a href="studio.html" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-sm group" title="Open Visual Evals & RLHF Studio">
           <svg class="w-4 h-4 text-purple-200 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
           <span>Visual Evals & RLHF Studio</span>
-          <span class="text-[10px] bg-white/20 px-1 py-0.2 rounded font-mono">:8501 ↗</span>
+          <span class="text-[10px] bg-white/20 px-1 py-0.2 rounded font-mono">Studio ↗</span>
         </a>
         <button onclick="openStudioModal()" class="p-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] border border-[var(--border)] hover:border-purple-500/50 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors" title="Launch instructions for Visual Evals & RLHF Studio">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -755,7 +755,7 @@
           </div>
           <div>
             <h3 class="text-base font-bold text-[var(--foreground)]">Visual Evals &amp; RLHF Studio</h3>
-            <p class="text-xs text-[var(--muted-foreground)]">Interactive model runner &amp; preference curator on port 8501</p>
+            <p class="text-xs text-[var(--muted-foreground)]">Interactive model runner &amp; preference curator via relative path or local port</p>
           </div>
         </div>
 
@@ -777,7 +777,7 @@
           <button onclick="closeStudioModal()" class="px-4 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] text-[var(--foreground)] hover:bg-[var(--border)] transition-colors">
             Close
           </button>
-          <a href="http://localhost:8501" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center gap-1.5 shadow-sm">
+          <a href="studio.html" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center gap-1.5 shadow-sm">
             <span>Open Studio</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
           </a>
@@ -791,7 +791,7 @@
       <div class="flex items-center gap-4 text-[11px]">
         <button onclick="switchMainView('dashboard')" class="hover:text-[var(--foreground)]">Benchmark Studio</button>
         <button onclick="switchMainView('report')" class="hover:text-[var(--foreground)]">Full Report</button>
-        <a href="http://localhost:8501" target="_blank" class="text-purple-400 hover:underline">Visual Studio :8501 ↗</a>
+        <a href="studio.html" target="_blank" class="text-purple-400 hover:underline">Visual Studio Studio ↗</a>
       </div>
     </footer>
 
