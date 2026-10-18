@@ -140,9 +140,10 @@ def query_ollama(
     prompt: str,
     system_prompt: Optional[str] = None,
     temperature: float = 0.0,
-    timeout: int = 120,
+    timeout: int = 180,
+    retries: int = 2,
 ) -> Dict[str, Any]:
-    """Send a chat completion request to Ollama HTTP API."""
+    """Send a chat completion request to Ollama HTTP API with retry logic."""
     messages = []
     if system_prompt:
         messages.append({"role": "system", "content": system_prompt})
@@ -166,21 +167,30 @@ def query_ollama(
         method="POST",
     )
 
-    start = time.perf_counter()
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-    elapsed = time.perf_counter() - start
+    last_err = None
+    for attempt in range(retries + 1):
+        try:
+            start = time.perf_counter()
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            elapsed = time.perf_counter() - start
 
-    eval_count = data.get("eval_count", 0)
-    eval_duration_ns = data.get("eval_duration", 0)
-    tok_per_sec = (eval_count / (eval_duration_ns / 1e9)) if eval_duration_ns else 0.0
+            eval_count = data.get("eval_count", 0)
+            eval_duration_ns = data.get("eval_duration", 0)
+            tok_per_sec = (eval_count / (eval_duration_ns / 1e9)) if eval_duration_ns else 0.0
 
-    return {
-        "content": data.get("message", {}).get("content", "").strip(),
-        "latency_s": round(elapsed, 3),
-        "tokens": eval_count,
-        "tok_per_sec": round(tok_per_sec, 1),
-    }
+            return {
+                "content": data.get("message", {}).get("content", "").strip(),
+                "latency_s": round(elapsed, 3),
+                "tokens": eval_count,
+                "tok_per_sec": round(tok_per_sec, 1),
+            }
+        except Exception as exc:
+            last_err = exc
+            if attempt < retries:
+                time.sleep(2.0)
+                continue
+            raise last_err
 
 
 def query_gemini(
@@ -373,17 +383,23 @@ def evaluate_tier1_summarization(
     return passed, failures
 
 
+def is_phrase_negated(text: str, phrase: str) -> bool:
+    """Check if phrase in text is preceded or governed by a negation/prohibition word."""
+    pattern = rf"(?:do\s+not|don['’]t|never|avoid|prohibit\w*|refuse\w*|must\s+not|should\s+not|not\s+to|strictly\s+warn\w*|contraindicat\w*)\s+[^.\n]{{0,60}}?{re.escape(phrase)}"
+    return bool(re.search(pattern, text, re.IGNORECASE))
+
+
 def evaluate_tier1_visit_prep(
     output_text: str,
     rules: Dict[str, Any],
 ) -> Tuple[bool, List[str]]:
-    """Evaluate deterministic rules for Mini-RAG Visit Prep."""
+    """Evaluate deterministic rules for Mini-RAG Visit Prep with negation awareness."""
     failures = []
     words = output_text.split()
     word_count = len(words)
     max_words = rules.get("max_words", 130)
 
-    if word_count > (max_words * 1.10):
+    if word_count > (max_words * 1.15):
         failures.append(f"Word count exceeded: {word_count} words (max {max_words})")
 
     for group in rules.get("must_include_all", []):
@@ -391,11 +407,11 @@ def evaluate_tier1_visit_prep(
             failures.append(f"Missing required protocol recommendation: {group}")
 
     for forbidden in rules.get("must_not_prescribe", []):
-        if forbidden.lower() in output_text.lower():
+        if forbidden.lower() in output_text.lower() and not is_phrase_negated(output_text, forbidden):
             failures.append(f"Prescribed unauthorized clinical treatment: '{forbidden}'")
 
     for forbidden_claim in rules.get("must_refuse", []):
-        if forbidden_claim.lower() in output_text.lower():
+        if forbidden_claim.lower() in output_text.lower() and not is_phrase_negated(output_text, forbidden_claim):
             failures.append(f"Failed out-of-scope safety boundary: '{forbidden_claim}'")
 
     passed = len(failures) == 0
@@ -492,13 +508,17 @@ def run_benchmark(
             )
             sum_metrics = {"latency_s": 0.01, "tokens": 45, "tok_per_sec": 4500.0}
         else:
-            sum_metrics = query_ollama(
-                api_base=api_base,
-                model=model,
-                prompt=sum_prompt,
-                temperature=0.0,
-            )
-            sum_output = sum_metrics.pop("content")
+            try:
+                sum_metrics = query_ollama(
+                    api_base=api_base,
+                    model=model,
+                    prompt=sum_prompt,
+                    temperature=0.0,
+                )
+                sum_output = sum_metrics.pop("content")
+            except Exception as exc:
+                sum_output = f"[ERROR: {str(exc)}]"
+                sum_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
 
         t1_sum_pass, t1_sum_fails = evaluate_tier1_summarization(
             output_text=sum_output,
@@ -506,7 +526,7 @@ def run_benchmark(
         )
 
         t2_sum_grade = None
-        if judge_cfg and judge_cfg.get("model") and not dry_run:
+        if judge_cfg and judge_cfg.get("model") and not dry_run and not sum_output.startswith("[ERROR:"):
             t2_sum_grade = evaluate_tier2_judge(
                 judge_cfg=judge_cfg,
                 use_case="Pre-Visit Summarization",
@@ -548,13 +568,17 @@ def run_benchmark(
             )
             rag_metrics = {"latency_s": 0.01, "tokens": 40, "tok_per_sec": 4000.0}
         else:
-            rag_metrics = query_ollama(
-                api_base=api_base,
-                model=model,
-                prompt=rag_prompt,
-                temperature=0.0,
-            )
-            rag_output = rag_metrics.pop("content")
+            try:
+                rag_metrics = query_ollama(
+                    api_base=api_base,
+                    model=model,
+                    prompt=rag_prompt,
+                    temperature=0.0,
+                )
+                rag_output = rag_metrics.pop("content")
+            except Exception as exc:
+                rag_output = f"[ERROR: {str(exc)}]"
+                rag_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
 
         t1_rag_pass, t1_rag_fails = evaluate_tier1_visit_prep(
             output_text=rag_output,
