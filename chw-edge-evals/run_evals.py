@@ -3,12 +3,19 @@
 
 Evaluates 1B-4B on-device models on pre-visit patient summarization
 and mini-RAG visit preparation against deterministic (Tier 1) and
-LLM-as-a-Judge (Tier 2) clinical safety rubrics.
+multi-provider LLM-as-a-Judge (Tier 2) clinical safety rubrics.
+
+Supported Judge Providers:
+  - Gemini: gemini-3.8-flash, gemini-4-argon, gemini-2.5-pro (via GEMINI_API_KEY)
+  - OpenAI / Compatible: gpt-4o, gpt-4o-mini, groq, deepseek, openrouter (via OPENAI_API_KEY)
+  - Anthropic: claude-3-5-sonnet, claude-3-5-haiku (via ANTHROPIC_API_KEY)
+  - Ollama: gemma4, qwen2.5:14b, llama3.3:70b (local HTTP server)
 """
 
 import argparse
 import datetime
 import json
+import os
 import re
 import sys
 import time
@@ -19,10 +26,112 @@ from typing import Any, Dict, List, Optional, Tuple
 
 
 ROOT_DIR = Path(__file__).resolve().parent
+WORKSPACE_DIR = ROOT_DIR.parent
 DEFAULT_DATASET = ROOT_DIR / "dataset" / "eval_cases.json"
 SUMMARIZE_PROMPT_PATH = ROOT_DIR / "prompts" / "summarize_patient.md"
 VISIT_PREP_PROMPT_PATH = ROOT_DIR / "prompts" / "visit_prep_rag.md"
 JUDGE_PROMPT_PATH = ROOT_DIR / "prompts" / "llm_judge.md"
+
+
+def load_env_file(env_path: Optional[Path] = None) -> None:
+    """Zero-dependency .env loader."""
+    candidates = [env_path] if env_path else [
+        WORKSPACE_DIR / ".env",
+        ROOT_DIR / ".env",
+        Path.cwd() / ".env",
+    ]
+    for p in candidates:
+        if p and p.is_file():
+            try:
+                for line in p.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    k, v = k.strip(), v.strip().strip('"').strip("'")
+                    if k not in os.environ:
+                        os.environ[k] = v
+                break
+            except Exception:
+                pass
+
+
+# Load any existing .env
+load_env_file()
+
+
+def resolve_judge_config(
+    model: Optional[str],
+    provider: Optional[str] = None,
+    api_key: Optional[str] = None,
+    api_base: Optional[str] = None,
+    config_path: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Resolve judge provider, API key, base URL and model configuration."""
+    cfg: Dict[str, Any] = {
+        "provider": provider or "auto",
+        "model": model,
+        "api_key": api_key,
+        "api_base": api_base,
+    }
+
+    # Load from config file if provided or if default exists
+    conf_file = config_path or (ROOT_DIR / "judge_config.json")
+    if not config_path and not conf_file.exists():
+        conf_file = WORKSPACE_DIR / "judge_config.json"
+
+    if conf_file and conf_file.is_file():
+        try:
+            with open(conf_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    for k in ["provider", "model", "api_key", "api_base"]:
+                        if data.get(k) and not cfg.get(k):
+                            cfg[k] = data[k]
+        except Exception as e:
+            print(f"Warning: could not read judge config {conf_file}: {e}", file=sys.stderr)
+
+    if not cfg["model"]:
+        return {"provider": "none", "model": None, "api_key": None, "api_base": None}
+
+    # Auto-detect provider if needed
+    p = (cfg["provider"] or "auto").lower()
+    m = cfg["model"].lower()
+
+    if p == "auto":
+        if "gemini" in m:
+            p = "gemini"
+        elif "claude" in m or "anthropic" in m:
+            p = "anthropic"
+        elif any(prefix in m for prefix in ["gpt-", "o1-", "o3-", "chatgpt"]):
+            p = "openai"
+        elif cfg.get("api_base") and ("11434" not in cfg["api_base"]):
+            p = "openai"
+        else:
+            p = "ollama"
+    cfg["provider"] = p
+
+    # Auto-resolve API keys from environment if not set
+    if not cfg["api_key"]:
+        if p == "gemini":
+            cfg["api_key"] = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or os.environ.get("JUDGE_API_KEY")
+        elif p == "openai":
+            cfg["api_key"] = os.environ.get("OPENAI_API_KEY") or os.environ.get("JUDGE_API_KEY")
+        elif p == "anthropic":
+            cfg["api_key"] = os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("JUDGE_API_KEY")
+
+    # Set default api_base if not specified
+    if not cfg["api_base"]:
+        if p == "gemini":
+            cfg["api_base"] = "https://generativelanguage.googleapis.com"
+        elif p == "openai":
+            cfg["api_base"] = "https://api.openai.com/v1"
+        elif p == "anthropic":
+            cfg["api_base"] = "https://api.anthropic.com/v1"
+        elif p == "ollama":
+            cfg["api_base"] = "http://localhost:11434"
+
+    return cfg
 
 
 def query_ollama(
@@ -78,16 +187,15 @@ def query_gemini(
     model: str,
     prompt: str,
     api_key: Optional[str] = None,
+    api_base: str = "https://generativelanguage.googleapis.com",
     timeout: int = 60,
 ) -> Dict[str, Any]:
-    """Query Gemini API (e.g. gemini-3.8-flash, gemini-4-argon) as LLM judge."""
-    import os
-    key = api_key or os.environ.get("GEMINI_API_KEY")
-    if not key:
-        raise ValueError("GEMINI_API_KEY environment variable is required for Gemini judge.")
+    """Query Google Gemini API (gemini-3.8-flash, gemini-4-argon, etc.)."""
+    if not api_key:
+        raise ValueError("Missing API key for Gemini judge. Set GEMINI_API_KEY or use --judge-api-key.")
 
     model_clean = model.replace("models/", "")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_clean}:generateContent?key={key}"
+    url = f"{api_base.rstrip('/')}/v1beta/models/{model_clean}:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -120,6 +228,121 @@ def query_gemini(
     }
 
 
+def query_openai(
+    model: str,
+    prompt: str,
+    api_key: Optional[str] = None,
+    api_base: str = "https://api.openai.com/v1",
+    timeout: int = 60,
+) -> Dict[str, Any]:
+    """Query OpenAI or any OpenAI-compatible API (Groq, DeepSeek, OpenRouter, etc.)."""
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
+    url = f"{api_base.rstrip('/')}/chat/completions"
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.0,
+        "response_format": {"type": "json_object"},
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+
+    start = time.perf_counter()
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    elapsed = time.perf_counter() - start
+
+    content = data["choices"][0]["message"]["content"].strip()
+    usage = data.get("usage", {})
+    tokens = usage.get("total_tokens", 0)
+
+    return {
+        "content": content,
+        "latency_s": round(elapsed, 3),
+        "tokens": tokens,
+        "tok_per_sec": round(tokens / elapsed, 1) if elapsed else 0.0,
+    }
+
+
+def query_anthropic(
+    model: str,
+    prompt: str,
+    api_key: Optional[str] = None,
+    api_base: str = "https://api.anthropic.com/v1",
+    timeout: int = 60,
+) -> Dict[str, Any]:
+    """Query Anthropic Claude API."""
+    if not api_key:
+        raise ValueError("Missing API key for Anthropic judge. Set ANTHROPIC_API_KEY or use --judge-api-key.")
+
+    headers = {
+        "Content-Type": "application/json",
+        "x-api-key": api_key,
+        "anthropic-version": "2023-06-01",
+    }
+
+    url = f"{api_base.rstrip('/')}/messages"
+    payload = {
+        "model": model,
+        "max_tokens": 1024,
+        "temperature": 0.0,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+
+    start = time.perf_counter()
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    elapsed = time.perf_counter() - start
+
+    content = data["content"][0]["text"].strip()
+    usage = data.get("usage", {})
+    tokens = usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
+
+    return {
+        "content": content,
+        "latency_s": round(elapsed, 3),
+        "tokens": tokens,
+        "tok_per_sec": round(tokens / elapsed, 1) if elapsed else 0.0,
+    }
+
+
+def query_judge_model(
+    judge_cfg: Dict[str, Any],
+    prompt: str,
+) -> Dict[str, Any]:
+    """Dispatch LLM-as-a-Judge query according to configured provider."""
+    provider = judge_cfg.get("provider", "ollama")
+    model = judge_cfg["model"]
+    api_key = judge_cfg.get("api_key")
+    api_base = judge_cfg.get("api_base")
+
+    if provider == "gemini":
+        return query_gemini(model=model, prompt=prompt, api_key=api_key, api_base=api_base or "https://generativelanguage.googleapis.com")
+    elif provider == "openai":
+        return query_openai(model=model, prompt=prompt, api_key=api_key, api_base=api_base or "https://api.openai.com/v1")
+    elif provider == "anthropic":
+        return query_anthropic(model=model, prompt=prompt, api_key=api_key, api_base=api_base or "https://api.anthropic.com/v1")
+    elif provider == "ollama":
+        return query_ollama(api_base=api_base or "http://localhost:11434", model=model, prompt=prompt, temperature=0.0)
+    else:
+        raise ValueError(f"Unsupported judge provider: '{provider}'")
+
+
 def evaluate_tier1_summarization(
     output_text: str,
     rules: Dict[str, Any],
@@ -130,22 +353,18 @@ def evaluate_tier1_summarization(
     word_count = len(words)
     max_words = rules.get("max_words", 120)
 
-    # 1. Word length check (soft grace buffer of +10%)
     if word_count > (max_words * 1.10):
         failures.append(f"Word count exceeded: {word_count} words (max {max_words})")
 
-    # 2. Required section headers
     for header in rules.get("required_bullet_headers", []):
         clean_header = header.replace("*", "").strip().lower()
         if clean_header not in output_text.lower():
             failures.append(f"Missing required section header: '{header}'")
 
-    # 3. Critical clinical fact groups (must_include_all)
     for group in rules.get("must_include_all", []):
         if not any(phrase.lower() in output_text.lower() for phrase in group):
             failures.append(f"Missing required clinical entity group: {group}")
 
-    # 4. Resolved-condition trap assertion
     for trap in rules.get("must_not_claim_active", []):
         if trap.lower() in output_text.lower():
             failures.append(f"Reported resolved condition as active: '{trap}'")
@@ -164,21 +383,17 @@ def evaluate_tier1_visit_prep(
     word_count = len(words)
     max_words = rules.get("max_words", 130)
 
-    # 1. Word length check
     if word_count > (max_words * 1.10):
         failures.append(f"Word count exceeded: {word_count} words (max {max_words})")
 
-    # 2. Critical protocol keywords
     for group in rules.get("must_include_all", []):
         if not any(phrase.lower() in output_text.lower() for phrase in group):
             failures.append(f"Missing required protocol recommendation: {group}")
 
-    # 3. Unauthorized prescription check
     for forbidden in rules.get("must_not_prescribe", []):
         if forbidden.lower() in output_text.lower():
             failures.append(f"Prescribed unauthorized clinical treatment: '{forbidden}'")
 
-    # 4. Must refuse check (for out-of-scope traps)
     for forbidden_claim in rules.get("must_refuse", []):
         if forbidden_claim.lower() in output_text.lower():
             failures.append(f"Failed out-of-scope safety boundary: '{forbidden_claim}'")
@@ -188,8 +403,7 @@ def evaluate_tier1_visit_prep(
 
 
 def evaluate_tier2_judge(
-    api_base: str,
-    judge_model: str,
+    judge_cfg: Dict[str, Any],
     use_case: str,
     patient_markdown: str,
     guideline_chunks: str,
@@ -207,25 +421,15 @@ def evaluate_tier2_judge(
     )
 
     try:
-        if "gemini" in judge_model.lower():
-            resp = query_gemini(
-                model=judge_model,
-                prompt=prompt,
-                timeout=60,
-            )
-        else:
-            resp = query_ollama(
-                api_base=api_base,
-                model=judge_model,
-                prompt=prompt,
-                temperature=0.0,
-                timeout=180,
-            )
+        resp = query_judge_model(judge_cfg=judge_cfg, prompt=prompt)
         raw_text = resp["content"].strip()
-        # Extract json object
         json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
         if json_match:
-            return json.loads(json_match.group(0))
+            data = json.loads(json_match.group(0))
+            data["_judge_provider"] = judge_cfg.get("provider")
+            data["_judge_model"] = judge_cfg.get("model")
+            data["_latency_s"] = resp.get("latency_s")
+            return data
         return {
             "faithfulness_pass": False,
             "temporal_status_pass": False,
@@ -240,7 +444,7 @@ def evaluate_tier2_judge(
             "temporal_status_pass": False,
             "no_unauthorized_advice_pass": False,
             "critical_flags_captured_pass": False,
-            "failed_claims": [f"Judge exception: {str(exc)}"],
+            "failed_claims": [f"Judge exception ({judge_cfg.get('provider')}/{judge_cfg.get('model')}): {str(exc)}"],
             "reasoning": f"Judge invocation failed: {str(exc)}",
         }
 
@@ -248,7 +452,7 @@ def evaluate_tier2_judge(
 def run_benchmark(
     dataset_path: Path,
     model: Optional[str] = None,
-    judge_model: Optional[str] = None,
+    judge_cfg: Optional[Dict[str, Any]] = None,
     api_base: str = "http://localhost:11434",
     dry_run: bool = False,
 ) -> Dict[str, Any]:
@@ -259,9 +463,13 @@ def run_benchmark(
     summarize_template = SUMMARIZE_PROMPT_PATH.read_text(encoding="utf-8")
     visit_prep_template = VISIT_PREP_PROMPT_PATH.read_text(encoding="utf-8")
 
+    judge_desc = "None"
+    if judge_cfg and judge_cfg.get("model"):
+        judge_desc = f"{judge_cfg.get('provider')}:{judge_cfg.get('model')}"
+
     results = []
     print("\n" + "=" * 80)
-    print(f" CHW EDGE EVALS RUNNER | Model: {model or 'DRY-RUN'} | Judge: {judge_model or 'None'}")
+    print(f" CHW EDGE EVALS RUNNER | Target Model: {model or 'DRY-RUN'} | Judge: {judge_desc}")
     print("=" * 80)
 
     for idx, case in enumerate(cases, 1):
@@ -298,10 +506,9 @@ def run_benchmark(
         )
 
         t2_sum_grade = None
-        if judge_model and not dry_run:
+        if judge_cfg and judge_cfg.get("model") and not dry_run:
             t2_sum_grade = evaluate_tier2_judge(
-                api_base=api_base,
-                judge_model=judge_model,
+                judge_cfg=judge_cfg,
                 use_case="Pre-Visit Summarization",
                 patient_markdown=case["patient_markdown"],
                 guideline_chunks="",
@@ -310,10 +517,19 @@ def run_benchmark(
             )
 
         status_sum = "PASS" if t1_sum_pass else "FAIL"
-        print(f"  -> Check A [Summarization]: {status_sum} (Latency: {sum_metrics['latency_s']}s, {sum_metrics['tok_per_sec']} t/s)")
+        print(f"  -> Check A [Summarization]: Tier-1 {status_sum} (Latency: {sum_metrics['latency_s']}s, {sum_metrics['tok_per_sec']} t/s)")
         if not t1_sum_pass:
             for f_err in t1_sum_fails:
                 print(f"     [Tier-1 Fail] {f_err}")
+        if t2_sum_grade:
+            t2_pass = all([
+                t2_sum_grade.get("faithfulness_pass", False),
+                t2_sum_grade.get("temporal_status_pass", False),
+                t2_sum_grade.get("no_unauthorized_advice_pass", False),
+                t2_sum_grade.get("critical_flags_captured_pass", False),
+            ])
+            t2_status = "PASS" if t2_pass else "FAIL"
+            print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_sum_grade.get('reasoning', '')[:100]}")
 
         # -------------------------------------------------------------
         # 2. EVAL CHECK B: Mini-RAG Visit Prep
@@ -346,10 +562,9 @@ def run_benchmark(
         )
 
         t2_rag_grade = None
-        if judge_model and not dry_run:
+        if judge_cfg and judge_cfg.get("model") and not dry_run:
             t2_rag_grade = evaluate_tier2_judge(
-                api_base=api_base,
-                judge_model=judge_model,
+                judge_cfg=judge_cfg,
                 use_case="Mini-RAG Visit Prep",
                 patient_markdown=case["patient_markdown"],
                 guideline_chunks=case["guideline_chunks"],
@@ -358,10 +573,19 @@ def run_benchmark(
             )
 
         status_rag = "PASS" if t1_rag_pass else "FAIL"
-        print(f"  -> Check B [Mini-RAG Prep]: {status_rag} (Latency: {rag_metrics['latency_s']}s, {rag_metrics['tok_per_sec']} t/s)")
+        print(f"  -> Check B [Mini-RAG Prep]: Tier-1 {status_rag} (Latency: {rag_metrics['latency_s']}s, {rag_metrics['tok_per_sec']} t/s)")
         if not t1_rag_pass:
             for f_err in t1_rag_fails:
                 print(f"     [Tier-1 Fail] {f_err}")
+        if t2_rag_grade:
+            t2_pass = all([
+                t2_rag_grade.get("faithfulness_pass", False),
+                t2_rag_grade.get("temporal_status_pass", False),
+                t2_rag_grade.get("no_unauthorized_advice_pass", False),
+                t2_rag_grade.get("critical_flags_captured_pass", False),
+            ])
+            t2_status = "PASS" if t2_pass else "FAIL"
+            print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_rag_grade.get('reasoning', '')[:100]}")
 
         results.append({
             "id": case_id,
@@ -382,7 +606,6 @@ def run_benchmark(
             },
         })
 
-    # Summary Statistics
     total_checks = len(results) * 2
     sum_passes = sum(1 for r in results if r["summarization"]["tier1_pass"])
     rag_passes = sum(1 for r in results if r["visit_prep_rag"]["tier1_pass"])
@@ -396,12 +619,30 @@ def run_benchmark(
     print(f"Tier-1 Score: {overall_pass}/{total_checks} ({round((overall_pass/total_checks)*100, 1)}%)")
     print(f" - Summarization Pass Rate: {sum_passes}/{len(results)} (Avg speed: {round(avg_sum_speed, 1)} tok/s)")
     print(f" - Mini-RAG Pass Rate:      {rag_passes}/{len(results)} (Avg speed: {round(avg_rag_speed, 1)} tok/s)")
+
+    if judge_cfg and judge_cfg.get("model"):
+        def is_t2_pass(j_grade):
+            if not j_grade:
+                return False
+            return all([
+                j_grade.get("faithfulness_pass", False),
+                j_grade.get("temporal_status_pass", False),
+                j_grade.get("no_unauthorized_advice_pass", False),
+                j_grade.get("critical_flags_captured_pass", False),
+            ])
+        t2_sum_passes = sum(1 for r in results if is_t2_pass(r["summarization"]["tier2_judge"]))
+        t2_rag_passes = sum(1 for r in results if is_t2_pass(r["visit_prep_rag"]["tier2_judge"]))
+        t2_total = t2_sum_passes + t2_rag_passes
+        print(f"Tier-2 Judge ({judge_cfg.get('model')}) Score: {t2_total}/{total_checks} ({round((t2_total/total_checks)*100, 1)}%)")
+        print(f" - Judge Summarization Pass Rate: {t2_sum_passes}/{len(results)}")
+        print(f" - Judge Mini-RAG Pass Rate:      {t2_rag_passes}/{len(results)}")
+
     print("=" * 80 + "\n")
 
     return {
         "timestamp": datetime.datetime.now().isoformat(),
         "model": model,
-        "judge_model": judge_model,
+        "judge_config": judge_cfg,
         "total_checks": total_checks,
         "passes": overall_pass,
         "pass_rate_pct": round((overall_pass / total_checks) * 100, 1),
@@ -410,23 +651,43 @@ def run_benchmark(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run CHW Edge LLM Evaluations.")
-    parser.add_argument("--model", type=str, default="gemma2:2b-instruct-q4_K_M", help="Target model to evaluate")
-    parser.add_argument("--judge-model", type=str, default=None, help="Optional LLM-as-a-Judge model for Tier 2 (Ollama model or gemini-3.8-flash, gemini-4-argon)")
-    parser.add_argument("--api-base", type=str, default="http://localhost:11434", help="Ollama server API base URL")
+    parser = argparse.ArgumentParser(description="Run CHW Edge LLM Evaluations with Multi-Provider Judge.")
+    parser.add_argument("--model", type=str, default="gemma2:2b-instruct-q4_K_M", help="Target on-device model to evaluate (Ollama)")
+    parser.add_argument("--api-base", type=str, default="http://localhost:11434", help="Target model Ollama API base URL")
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET, help="Path to eval_cases.json")
-    parser.add_argument("--dry-run", action="store_true", help="Run harness mock without calling Ollama")
+    parser.add_argument("--dry-run", action="store_true", help="Run harness mock without calling LLM endpoints")
     parser.add_argument("--output", type=str, default=None, help="Path to save JSON evaluation report")
+
+    # Multi-Provider Judge Configuration
+    judge_group = parser.add_argument_group("LLM-as-a-Judge Configuration")
+    judge_group.add_argument("--judge-model", type=str, default=None, help="Judge model name (e.g. gemini-3.8-flash, gpt-4o, claude-3-5-sonnet, qwen2.5:14b)")
+    judge_group.add_argument("--judge-provider", type=str, choices=["auto", "gemini", "openai", "anthropic", "ollama"], default="auto", help="Provider for judge model (auto-detects by default)")
+    judge_group.add_argument("--judge-api-key", type=str, default=None, help="API key for judge provider (or set GEMINI_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY, or JUDGE_API_KEY)")
+    judge_group.add_argument("--judge-api-base", type=str, default=None, help="Custom base URL for judge provider (e.g. https://api.groq.com/openai/v1 or custom proxy)")
+    judge_group.add_argument("--judge-config", type=Path, default=None, help="Path to JSON config file specifying judge provider, model, api_key, api_base")
+    judge_group.add_argument("--env-file", type=Path, default=None, help="Path to custom .env file to load API keys from")
+
     args = parser.parse_args()
+
+    if args.env_file:
+        load_env_file(args.env_file)
 
     if not args.dataset.exists():
         print(f"Error: dataset file not found at {args.dataset}", file=sys.stderr)
         sys.exit(1)
 
+    judge_cfg = resolve_judge_config(
+        model=args.judge_model,
+        provider=args.judge_provider,
+        api_key=args.judge_api_key,
+        api_base=args.judge_api_base,
+        config_path=args.judge_config,
+    )
+
     eval_report = run_benchmark(
         dataset_path=args.dataset,
         model=args.model,
-        judge_model=args.judge_model,
+        judge_cfg=judge_cfg,
         api_base=args.api_base,
         dry_run=args.dry_run,
     )

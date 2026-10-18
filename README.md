@@ -67,6 +67,7 @@ flowchart LR
   ```
 
 ### 2. Running Evaluations
+
 ```bash
 # Dry run to validate dataset structure and prompt templates
 python3 chw-edge-evals/run_evals.py --dry-run
@@ -74,6 +75,29 @@ python3 chw-edge-evals/run_evals.py --dry-run
 # Run Tier-1 deterministic evaluation against local Gemma 2 2B
 python3 chw-edge-evals/run_evals.py --model gemma2:2b-instruct-q4_K_M
 
-# Run with Tier-2 LLM-as-a-Judge grading
+# Run with local Ollama judge (e.g. gemma4, qwen2.5:14b)
 python3 chw-edge-evals/run_evals.py --model gemma2:2b-instruct-q4_K_M --judge-model gemma4:latest
+
+# Run with Gemini 3.8 / 4 judge via API key
+python3 chw-edge-evals/run_evals.py \
+  --model gemma2:2b-instruct-q4_K_M \
+  --judge-model gemini-3.8-flash \
+  --judge-api-key "YOUR_KEY"
+
+# Or configure via judge_config.json:
+python3 chw-edge-evals/run_evals.py \
+  --model gemma2:2b-instruct-q4_K_M \
+  --judge-config judge_config.json
 ```
+
+### 3. LLM-as-a-Judge Configuration Options
+
+The Tier-2 judge supports any provider via environment variables, CLI flags, or a `judge_config.json`:
+
+| Provider | Model Examples | API Key Flag / Env Var | Default Endpoint |
+| :--- | :--- | :--- | :--- |
+| **Gemini** | `gemini-3.8-flash`, `gemini-4-argon`, `gemini-2.5-pro` | `--judge-api-key` or `GEMINI_API_KEY` | `https://generativelanguage.googleapis.com` |
+| **OpenAI** | `gpt-4o`, `gpt-4o-mini`, `o3-mini` | `--judge-api-key` or `OPENAI_API_KEY` | `https://api.openai.com/v1` |
+| **Anthropic** | `claude-3-5-sonnet-20241022`, `claude-3-5-haiku` | `--judge-api-key` or `ANTHROPIC_API_KEY` | `https://api.anthropic.com/v1` |
+| **Compatible** | Groq, DeepSeek, OpenRouter, Together | `--judge-api-key` & `--judge-api-base` | Custom (e.g. `https://api.groq.com/openai/v1`) |
+| **Ollama** | `gemma4:latest`, `qwen2.5:14b`, `llama3.3:70b` | None (Local server) | `http://localhost:11434` |

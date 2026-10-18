@@ -1,0 +1,6 @@
+{
+  "provider": "gemini",
+  "model": "gemini-3.8-flash",
+  "api_key": "YOUR_GEMINI_API_KEY_HERE",
+  "api_base": "https://generativelanguage.googleapis.com"
+}
