@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""3-Way Tokempic Comparison Benchmark for OHS Player (10 Clinical Archetypes).
+"""3-Way Tokempic Comparison Benchmark for OHS Edge (10 Clinical Archetypes).
 
 Compares:
   Variant A: Legacy Tokempic (Original compact Markdown)

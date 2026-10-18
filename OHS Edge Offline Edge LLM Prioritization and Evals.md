@@ -1,6 +1,6 @@
 ---
 type: synthesis
-topic: OHS Player Offline Edge LLM Use Cases and Evaluation Framework
+topic: OHS Edge Offline Edge LLM Use Cases and Evaluation Framework
 created: 2026-10-18
 last_processed: 2026-10-18
 status: active
@@ -14,11 +14,11 @@ tags:
 ---
 
 > [!ABSTRACT] Executive Summary
-> Prioritization and evaluation blueprint for offline on-device LLM (1B–4B parameter class on [[Android]] / [[MediaPipe]] / [[LiteRT]]) use cases integrated with the [[Open Health Stack]] ([[OHS Player]]). Focuses on top two priorities—**Pre-Visit Patient Summarization** over [[FHIR]] and **Mini-RAG for CHW Visit Preparation**—using [[Tokempic]] ([[SQL-on-FHIR]] `ViewDefinition`s) for deterministic [[FHIR]]-to-Markdown compression.
+> Prioritization and evaluation blueprint for offline on-device LLM (1B–4B parameter class on [[Android]] / [[MediaPipe]] / [[LiteRT]]) use cases integrated with the [[Open Health Stack]] ([[OHS Edge]]). Focuses on top two priorities—**Pre-Visit Patient Summarization** over [[FHIR]] and **Mini-RAG for CHW Visit Preparation**—using [[Tokempic]] ([[SQL-on-FHIR]] `ViewDefinition`s) for deterministic [[FHIR]]-to-Markdown compression.
 
 ## Map of Content (MOC)
 
-- **Core Architecture:** [[Open Health Stack]] | [[OHS Player]] | [[Kotlin FHIR Engine]] | [[FHIR]] | [[SQL-on-FHIR]] | [[Tokempic]] | [[fhir-pipes-rs]]
+- **Core Architecture:** [[Open Health Stack]] | [[OHS Edge]] | [[Kotlin FHIR Engine]] | [[FHIR]] | [[SQL-on-FHIR]] | [[Tokempic]] | [[fhir-pipes-rs]]
 - **Edge AI Stack:** [[Edge LLM]] | [[LiteRT]] | [[MediaPipe]] | [[Gemma]] | [[Llama]] | [[Qwen]]
 - **Clinical & Workflow Context:** [[Community Health Workers]] | [[iCCM]] | [[Antenatal Care]] | [[Postnatal Care]]
 - **Related Notes:** [[Kotlin FHIR Engine Review and CLI Proposal]]
@@ -33,7 +33,7 @@ Evaluated across four dimensions: **[[Community Health Workers|CHW]] workflow va
 
 | Rank | Use Case | Value to CHW | Edge Feasibility | Safety / Hallucination Risk | Rationale |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Pre-Visit Patient & Household Summarization (over [[FHIR]])** | **High** — Saves time digging through historical `Encounter` and `Observation` records before a household visit. | **High** — Pre-filtered [[FHIR]] resources converted via [[Tokempic]] to compact Markdown fit in a 1k–2k token window and can be pre-computed asynchronously. | **Low–Medium** — Strictly extractive/abstractive over structured records (non-diagnostic). | Bounded input, clear grounding criteria, and immediate UX value inside an [[OHS Player]] patient summary view. |
+| **1** | **Pre-Visit Patient & Household Summarization (over [[FHIR]])** | **High** — Saves time digging through historical `Encounter` and `Observation` records before a household visit. | **High** — Pre-filtered [[FHIR]] resources converted via [[Tokempic]] to compact Markdown fit in a 1k–2k token window and can be pre-computed asynchronously. | **Low–Medium** — Strictly extractive/abstractive over structured records (non-diagnostic). | Bounded input, clear grounding criteria, and immediate UX value inside an [[OHS Edge]] patient summary view. |
 | **2** | **CHW Visit Prep / Mini-RAG (Protocol & FAQ Prep)** | **High** — Surfaces contextual counseling talking points or protocol reminders tailored to active patient flags. | **Medium–High** — On-device lightweight retrieval ([[SQLite]] FTS5 or small embeddings) + short synthesis prompt runs reliably on-device. | **Medium** — Requires strict grounding in approved [[Ministry of Health]] / [[WHO]] guidelines to prevent ungrounded clinical advice. | Pairs naturally with #1 ("Patient summary + 3 grounded talking points from the CHW manual for today's visit"). |
 | **3** | **Daily Task & Visit Planning** | **Medium–High** — Helps triage overdue `Task` and `CarePlan` items across households. | **Low–Medium** — Cross-patient reasoning requires stuffing many patient profiles into context, where 1B–4B models struggle with sorting and date math. | **Low** — Operational rather than clinical, though dropping an urgent follow-up has downstream risk. | Heavy lifting (due dates, priority flags, proximity) should be solved **deterministically** via [[FHIR]] queries, using the LLM only to narrate the plan. |
 | **4** | **Audio / Voice-to-[[FHIR]] (`QuestionnaireResponse`)** | **Very High** — Reduces tedious form tapping during or after a visit. | **Low** — Requires on-device ASR + structured schema extraction (`StructuredDataCapture`), which is brittle on small models and accented/multilingual speech. | **Medium–High** — Mis-transcribing a vital sign or symptom directly corrupts the medical record unless gated by human review. | High reward, but highest technical and UX friction on constrained offline devices. Tackle as "voice-to-form-draft" after text pipelines mature. |

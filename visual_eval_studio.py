@@ -403,7 +403,7 @@ def get_embedded_studio_html() -> str:
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OHS Player | Edge SLM Evaluation & RLHF Studio</title>
+  <title>OHS Edge | Edge SLM Evaluation & RLHF Studio</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -595,7 +595,7 @@ def get_embedded_studio_html() -> str:
         <span>Software Foundation &bull; AI Commons</span>
       </div>
       <span class="hidden md:inline-flex text-[11px] font-semibold px-2.5 py-0.5 rounded-full badge-ai ml-2">
-        OHS Player Edge Evals
+        OHS Edge Edge Evals
       </span>
     </div>
 

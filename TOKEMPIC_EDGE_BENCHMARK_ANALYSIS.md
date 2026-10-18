@@ -1,6 +1,6 @@
 # Empirical Evaluation: Original Tokempic vs. Optimized Tokempic vs. Raw FHIR JSON on 2B Edge LLMs
 
-**Project:** Open Health Stack (OHS) Player — Offline Edge Clinical LLM  
+**Project:** Open Health Stack (OHS) Edge — Offline Edge Clinical LLM  
 **Date:** 2026-10-18  
 **Model Under Test:** `gemma2:2b-instruct-q4_K_M` (Ollama 4-bit quantized, 1.7 GB)  
 **Evaluation Harness:** `chw-edge-evals` (10 Clinical Archetypes / 30 Evaluations)  
@@ -108,7 +108,7 @@ Quantized 2B models lack internal arithmetic circuitry to reliably subtract an I
 
 ---
 
-## 5. Architectural Implications for OHS Player on Edge Hardware
+## 5. Architectural Implications for OHS Edge on Edge Hardware
 
 1. **Context Window Preservation for Mini-RAG**:
    On budget Android devices, edge runtimes (LiteRT / MediaPipe) typically allocate a 2,048 or 4,096 token context window to constrain RAM consumption to under 1.5–2.0 GB. 
@@ -121,7 +121,7 @@ Quantized 2B models lack internal arithmetic circuitry to reliably subtract an I
 
 ## 6. Recommendations
 
-1. **Mandate SQL-on-FHIR Pre-Filtering**: The OHS Player should never expose raw FHIR JSON bundles directly to edge LLMs. All LLM inputs must pass through deterministic Tokempic views.
+1. **Mandate SQL-on-FHIR Pre-Filtering**: The OHS Edge should never expose raw FHIR JSON bundles directly to edge LLMs. All LLM inputs must pass through deterministic Tokempic views.
 2. **Pre-Compute Relative Age Units**: SQL-on-FHIR views should always emit explicit age strings (`16m`, `4y`, `28y`) alongside ISO birthdates to prevent edge LLMs from performing date arithmetic.
 3. **Deploy Dedicated `tasks.json` and `observations.json` Views**: Always include CHW referral tasks and POC dipsticks in the SQL-on-FHIR schema to avoid clinical blindspots.
 4. **Strip Technical Codes**: Strip raw LOINC and SNOMED numeric code strings in `chw-views/`, retaining only clean human-readable displays to eliminate numeric token confusion.

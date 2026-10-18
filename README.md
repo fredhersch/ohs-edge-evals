@@ -1,6 +1,6 @@
-# OHS Player Offline Edge LLM Evaluation Framework (`chw-edge-evals`)
+# OHS Edge Offline Edge LLM Evaluation Framework (`chw-edge-evals`)
 
-Evaluation harness and benchmark suite for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Player**.
+Evaluation harness and benchmark suite for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Edge**.
 
 ## Overview
 
@@ -26,7 +26,7 @@ flowchart LR
 ```
 .
 ├── Modelfile                     # Deterministic Ollama profile for gemma2:2b
-├── OHS Player Offline Edge LLM Prioritization and Evals.md  # Core blueprint & architecture
+├── OHS Edge Offline Edge LLM Prioritization and Evals.md  # Core blueprint & architecture
 ├── chw-edge-evals/
 │   ├── chw-views/                # Tokempic SQL-on-FHIR ViewDefinitions
 │   ├── dataset/

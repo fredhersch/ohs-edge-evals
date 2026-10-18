@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OHS Player: Offline Edge LLM & Tokempic 3-Way Benchmark</title>
+  <title>OHS Edge: Offline Edge LLM & Tokempic 3-Way Benchmark</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <style>
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -30,7 +30,7 @@
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-500 border border-amber-500/20">3-Way Architecture</span>
           </div>
           <h1 class="text-2xl md:text-3xl font-bold tracking-tight text-[var(--foreground)]">
-            OHS Player: Original Tokempic vs. Optimized Tokempic vs. Raw FHIR
+            OHS Edge: Original Tokempic vs. Optimized Tokempic vs. Raw FHIR
           </h1>
           <p class="text-sm text-[var(--muted-foreground)] mt-1 max-w-3xl">
             Empirical benchmark on a 2B on-device model demonstrating how <strong>Optimized Tokempic (<code class="bg-[var(--surface-hover,#262626)] px-1 rounded">chw-views/</code>)</strong> eliminates LOINC code bleed, prevents task omission blindspots, and stops date-math hallucinations.
@@ -262,7 +262,7 @@
 
     <!-- Footer -->
     <footer class="text-center text-xs text-[var(--muted-foreground)] py-4 border-t border-[var(--border)]">
-      Open Health Stack (OHS) Player Evaluation Suite • Built for offline edge LLMs on Android • Intelligent Hypatia
+      Open Health Stack (OHS) Edge Evaluation Suite • Built for offline edge LLMs on Android • Intelligent Hypatia
     </footer>
 
   </div>
@@ -584,7 +584,7 @@
     }
 
     function copySummary() {
-      const summaryText = `# OHS Player: 3-Way Tokempic vs. Raw FHIR Edge LLM Benchmark
+      const summaryText = `# OHS Edge: 3-Way Tokempic vs. Raw FHIR Edge LLM Benchmark
 - Model: Gemma 2 2B (Q4_K_M quantized, 1.7 GB)
 - 1. Raw FHIR JSON: 1,029 avg tokens (3.1x larger). 20% failure rate on date-math (e.g. 16m infant -> 25y adult).
 - 2. Original Standard Tokempic: ~325 avg tokens. Corrupted blood pressure to '126/8480-6' (LOINC bleed) and completely omitted Task resources (overdue pre-eclampsia referrals dropped).

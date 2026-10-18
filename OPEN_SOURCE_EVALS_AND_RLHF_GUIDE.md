@@ -1,6 +1,6 @@
 # Open Source LLM Evaluation & RLHF Framework Guide for Edge SLMs
 
-This guide evaluates open-source frameworks for running visual evaluations and driving **Reinforcement Learning from Human Feedback (RLHF)** / **Direct Preference Optimization (DPO)** for Small Language Models (1B–4B parameter class, e.g., Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) deployed in offline clinical settings like **Open Health Stack (OHS) Player**.
+This guide evaluates open-source frameworks for running visual evaluations and driving **Reinforcement Learning from Human Feedback (RLHF)** / **Direct Preference Optimization (DPO)** for Small Language Models (1B–4B parameter class, e.g., Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) deployed in offline clinical settings like **Open Health Stack (OHS) Edge**.
 
 ---
 
@@ -20,7 +20,7 @@ Evaluating and aligning 1B–4B edge SLMs presents unique constraints:
 | **DeepEval (Confident AI)** | LLM Unit Testing (Pytest) | **Strong** (Local web dashboard & CI reports) | Low (Focuses on grading metrics, not preference curation) | Good (Custom LLM endpoints) | Automated regression test suites in CI/CD pipelines |
 | **Arize Phoenix** | Tracing & Observability | **Strong** (In-notebook / local UI) | Low (Traces & evals, not preference dataset builder) | Good (OpenTelemetry spans) | Tracing Mini-RAG retrieval steps (SQLite FTS5 / LiteRT embeddings) |
 | **Hugging Face TRL + Unsloth** | RLHF / DPO / SFT Training | CLI / TensorBoard / W&B | **Definitive Engine** (DPOTrainer, KTO, ORPO, PPO) | Native (Supports QLoRA, GGUF export for Ollama) | Actually fine-tuning the 1B–4B models on exported preference data |
-| **Built-in Visual Studio (`visual_eval_studio.py`)** | Zero-dependency CHW Eval + RLHF Studio | **Built for OHS Player** (Single command, real-time) | **Direct** (Pairwise voting, clinical tagger, 1-click TRL DPO & SFT export) | 100% Native (Direct tie to `run_evals.py` & Ollama) | Immediate turn-key visual runner, model comparison, and DPO generation |
+| **Built-in Visual Studio (`visual_eval_studio.py`)** | Zero-dependency CHW Eval + RLHF Studio | **Built for OHS Edge** (Single command, real-time) | **Direct** (Pairwise voting, clinical tagger, 1-click TRL DPO & SFT export) | 100% Native (Direct tie to `run_evals.py` & Ollama) | Immediate turn-key visual runner, model comparison, and DPO generation |
 
 ---
 
@@ -60,7 +60,7 @@ Evaluating and aligning 1B–4B edge SLMs presents unique constraints:
 
 ---
 
-## 3. The End-to-End Alignment Pipeline for OHS Player
+## 3. The End-to-End Alignment Pipeline for OHS Edge
 
 ```mermaid
 flowchart TD
@@ -69,7 +69,7 @@ flowchart TD
     C --> D["4. Export TRL DPO Dataset\n(prompt, chosen, rejected)"]
     D --> E["5. QLoRA DPO Fine-Tuning\n(fine_tune_slm_dpo.py)"]
     E --> F["6. Export GGUF / LiteRT\n(llama.cpp / LiteRT converter)"]
-    F --> G["7. Deploy to Ollama / Android OHS Player"]
+    F --> G["7. Deploy to Ollama / Android OHS Edge"]
     G --> A
 ```
 

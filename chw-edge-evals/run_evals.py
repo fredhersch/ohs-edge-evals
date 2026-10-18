@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CHW Edge LLM Evaluation Runner for Open Health Stack (OHS) Player.
+"""CHW Edge LLM Evaluation Runner for Open Health Stack (OHS) Edge.
 
 Evaluates 1B-4B on-device models on pre-visit patient summarization
 and mini-RAG visit preparation against deterministic (Tier 1) and
