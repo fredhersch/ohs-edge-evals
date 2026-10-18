@@ -1,0 +1,23 @@
+{
+  "case_01": {
+    "title": "Fatima Bello (ANC 32w Pre-Eclampsia)",
+    "prompt_tokens": 430,
+    "latency_s": 2.727,
+    "chars": 558,
+    "output": "**Patient & Context:** Fatima Bello is a 38-year-old female from Koro Village. She is currently 32 weeks pregnant.\n\n**Recent Vitals & Findings:**  \n* Blood pressure readings on 2026-09-15 were 126/8480-6 and 8462-4: 82. On 2026-10-14, blood pressure readings were 148/8480-6 and 8462-4: 96. \n\n**Open Tasks & Due Items:**\n* Review and discuss the patient's current blood pressure readings.\n* Ensure the patient is taking her prescribed medications as directed. \n* Assess the patient's overall health and well-being."
+  },
+  "case_07": {
+    "title": "Kofi Mensah (iCCM 16m Faltering MUAC & Overdue MR2)",
+    "prompt_tokens": 296,
+    "latency_s": 1.645,
+    "chars": 347,
+    "output": "**Patient & Context:** Kofi Mensah is a 20-year-old male from Danfa Village. He is experiencing growth faltering and mild malnutrition.\n\n**Recent Vitals & Findings:** Kofi's body weight was 8.6 kg on August 10, 2026, and 8.4 kg on October 15, 2026. \n\n**Open Tasks & Due Items:** \n* Assess Kofi's growth faltering and malnutrition.\n*  Review his dietary intake and identify potential contributing factors. \n*  Provide education and counseling on appropriate nutrition and hydration."
+  },
+  "case_08": {
+    "title": "Zainab Umaru (iCCM 4y Severe Pneumonia)",
+    "prompt_tokens": 249,
+    "latency_s": 1.194,
+    "chars": 245,
+    "output": "**Patient & Context:**\nZainab Umaru is a 20-year-old female residing in Sabon Gari.\n\n**Recent Vitals & Findings:**\n- Respiratory rate: 46 breaths per minute.\n- Body temperature: 38.2 degrees Celsius.\n\n**Open Tasks & Due Items:**\n-  Severe pneumonia is an active condition. \n-  Follow-up with a healthcare professional is recommended."
+  }
+}

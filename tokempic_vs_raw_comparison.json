@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-18T11:06:45.398232",
+  "model": "gemma2:2b-instruct-q4_K_M",
+  "metrics": {
+    "token_compression_ratio": 5.1,
+    "char_compression_ratio": 10.0,
+    "avg_latency_tokempic_s": 2.257,
+    "avg_latency_raw_s": 3.991,
+    "accuracy_tokempic_pct": 100,
+    "accuracy_raw_pct": 100
+  },
+  "cases": [
+    {
+      "id": "case_01",
+      "title": "Fatima Bello (ANC 32w, BP jump 148/96, Proteinuria 1+, Resolved Malaria)",
+      "tokempic": {
+        "chars": 765,
+        "prompt_tokens": 454,
+        "latency_s": 2.713,
+        "speed_tps": 91.6,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Fatima Bello is a 28-year-old female from Koro Village. She is currently 32 weeks pregnant.\n\n**Recent Vitals & Findings:** \n* Blood pressure was 126/82 mmHg on 2026-09-15 and 148/96 mmHg on 2026-10-14. \n* Urine protein dipstick was 1+ on 2026-10-14. \n* She reports a frontal headache.\n\n**Open Tasks & Due Items:**\n* Urgent referral to the District Hospital for pre-eclampsia workup is overdue. \n* Continue ferrous sulfate and folic acid as prescribed."
+      },
+      "raw_fhir": {
+        "chars": 11201,
+        "prompt_tokens": 3353,
+        "latency_s": 5.466,
+        "speed_tps": 78.4,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient Review: Fatima Bello\n\n**Patient & Context:** Fatima Bello is a female, 28 years old, residing in Koro Village, Ghana. She is currently pregnant and experiencing pregnancy-induced hypertension.\n\n**Recent Vitals & Findings:** \n* Blood pressure readings: \n    * Systolic: 126 mmHg\n    * Diastolic: 82 mmHg\n* Protein in urine: 1+\n* Headache: Present\n\n**Open Tasks & Due Items:**\n* **Urgent Referral:** Refer to District Hospital for pre-eclampsia workup by 2026-10-16.\n* **Medication:** Order Ferrous Sulfate 200mg and Folic Acid 5mg."
+      }
+    },
+    {
+      "id": "case_02",
+      "title": "Kofi Mensah (Child 16m, Faltering Weight 8.4kg, Overdue MR2, Past Diarrhea)",
+      "tokempic": {
+        "chars": 745,
+        "prompt_tokens": 473,
+        "latency_s": 2.804,
+        "speed_tps": 90.4,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Kofi Mensah is a 16-year-old male from Danfa Village. He is experiencing growth faltering and mild malnutrition.\n\n**Recent Vitals & Findings:** \n* Kofi's weight has decreased from 8.6 kg on 2026-08-10 to 8.4 kg on 2026-10-15. \n* His MUAC (Mid-Upper Arm Circumference) has decreased from 13.2 cm on 2026-08-10 to 12.6 cm on 2026-10-15. \n* His temperature is normal at 36.7 C.\n\n**Open Tasks & Due Items:**\n* Administer Measles-Rubella 2 (MR2) vaccine due on 2026-09-15. \n* Assess for bilateral pitting oedema."
+      },
+      "raw_fhir": {
+        "chars": 4600,
+        "prompt_tokens": 1618,
+        "latency_s": 3.736,
+        "speed_tps": 87.5,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient & Context:\n\n* Kofi Mensah is a 25-year-old male from Danfa Village, Ghana. \n* He was born on June 10, 2025.\n\n## Recent Vitals & Findings:\n\n* Kofi Mensah's weight was 8.6 kg on August 10, 2026.\n* His mid-upper arm circumference was 13.2 cm on August 10, 2026.\n* His weight was 8.4 kg on October 15, 2026.\n* His mid-upper arm circumference was 12.6 cm on October 15, 2026.\n\n## Open Tasks & Due Items:\n\n* Administer Measles-Rubella 2 (MR2) vaccine to Kofi Mensah. The task is overdue by 1 month."
+      }
+    },
+    {
+      "id": "case_03",
+      "title": "Zainab Umaru (Child 4y, Severe Pneumonia, RR 46, Chest Indrawing, Stridor Absent)",
+      "tokempic": {
+        "chars": 474,
+        "prompt_tokens": 315,
+        "latency_s": 1.253,
+        "speed_tps": 95.7,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Zainab Umaru is a 4-year-old female from Sabon Gari. She is currently experiencing severe pneumonia.\n\n**Recent Vitals & Findings:** \n* Respiratory Rate: 46 breaths/min (Fast breathing)\n* Temperature: 38.2 C (Fever)\n\n**Open Tasks & Due Items:**\n* Urgent: Emergency transport to tertiary hospital due."
+      },
+      "raw_fhir": {
+        "chars": 3947,
+        "prompt_tokens": 1383,
+        "latency_s": 2.772,
+        "speed_tps": 89.4,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient & Context:\n\n* Zainab Umaru is a 21-year-old female from Sabon Gari, Nigeria. \n* She was diagnosed with severe pneumonia on October 18, 2026.\n\n## Recent Vitals & Findings:\n\n* Respiratory rate: 46 breaths per minute.\n* Body temperature: 38.2 degrees Celsius.\n* Subcostal retraction/chest indrawing is present.\n* Stridor in a calm child is absent.\n\n## Open Tasks & Due Items:\n\n* Emergency transport to a tertiary hospital is required. The task is due immediately."
+      }
+    }
+  ]
+}
