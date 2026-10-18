@@ -261,6 +261,19 @@ class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
                     "logs": "".join(ACTIVE_RUN["logs"][-200:]),
                 }
             self.send_json_response(resp)
+        elif path == "/api/train/status":
+            with TRAIN_LOCK:
+                resp = {
+                    "is_running": ACTIVE_TRAIN["is_running"],
+                    "status": ACTIVE_TRAIN["status"],
+                    "started_at": ACTIVE_TRAIN["started_at"],
+                    "completed_at": ACTIVE_TRAIN["completed_at"],
+                    "model_id": ACTIVE_TRAIN["model_id"],
+                    "algorithm": ACTIVE_TRAIN["algorithm"],
+                    "exit_code": ACTIVE_TRAIN["exit_code"],
+                    "logs": "".join(ACTIVE_TRAIN["logs"][-200:]),
+                }
+            self.send_json_response(resp)
         elif path == "/" or path == "/index.html":
             self.serve_studio_html()
         else:
@@ -285,6 +298,10 @@ class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_auto_bootstrap_dpo(body)
         elif path == "/api/sft/save":
             self.handle_save_sft(body)
+        elif path == "/api/train/start":
+            self.handle_start_train(body)
+        elif path == "/api/preferences/synthesize-adversarial":
+            self.handle_synthesize_adversarial(body)
         else:
             self.send_error_response(404, "Endpoint not found")
 
@@ -447,6 +464,67 @@ class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
                 created += 1
 
         self.send_json_response({"message": f"Auto-bootstrapped {created} preference pairs", "pairs_created": created})
+
+    def handle_synthesize_adversarial(self, body: Dict[str, Any]):
+        try:
+            import synthesize_adversarial_dpo
+            overwrite = body.get("overwrite", False)
+            dry_run = body.get("dry_run", False)
+            written, pairs = synthesize_adversarial_dpo.synthesize_all_cases(
+                cases_path=EVAL_CASES_FILE,
+                output_path=DPO_FILE,
+                append=not overwrite,
+                dry_run=dry_run,
+            )
+            self.send_json_response({
+                "message": f"Successfully generated {len(pairs)} contrastive pairs ({written} new records written)",
+                "pairs_generated": len(pairs),
+                "written": written,
+                "total_preferences": len(load_preferences()),
+            })
+        except Exception as exc:
+            self.send_error_response(500, f"Error generating adversarial pairs: {str(exc)}")
+
+    def handle_start_train(self, body: Dict[str, Any]):
+        global ACTIVE_TRAIN
+        with TRAIN_LOCK:
+            if ACTIVE_TRAIN["is_running"]:
+                self.send_error_response(400, "A fine-tuning run is already actively running")
+                return
+
+        model_id = body.get("model_id", "google/gemma-2-2b-it")
+        algorithm = body.get("algorithm", "orpo")
+        epochs = body.get("epochs", 3)
+        lr = body.get("lr", 5e-6)
+        beta = body.get("beta", 0.1)
+        dry_run = body.get("dry_run", False)
+        output_dir = body.get("output_dir", "./dpo_trained_adapter")
+
+        cmd = [
+            sys.executable,
+            str(WORKSPACE_DIR / "fine_tune_slm_dpo.py"),
+            "--model-id", model_id,
+            "--algorithm", algorithm,
+            "--dataset", str(DPO_FILE),
+            "--output-dir", str(WORKSPACE_DIR / output_dir),
+            "--epochs", str(epochs),
+            "--lr", str(lr),
+            "--beta", str(beta),
+        ]
+        if dry_run:
+            cmd.append("--dry-run")
+
+        thread = threading.Thread(
+            target=run_train_process,
+            args=(cmd, model_id, algorithm),
+            daemon=True,
+        )
+        thread.start()
+        self.send_json_response({
+            "message": f"Started {algorithm.upper()} fine-tuning for {model_id}",
+            "algorithm": algorithm,
+            "dry_run": dry_run,
+        })
 
     def serve_studio_html(self):
         html = get_embedded_studio_html()
@@ -938,7 +1016,10 @@ def get_embedded_studio_html() -> str:
           <p class="text-xs text-[#4e5f6a] mt-1">Review candidate SLM responses, vote on clinical preference, edit gold corrections, and export directly to Hugging Face TRL.</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-          <button onclick="autoBootstrapDpo()" class="btn-pill btn-primary px-3.5 py-2 text-xs">
+          <button onclick="synthesizeAdversarialPairs()" class="btn-pill btn-primary px-3.5 py-2 text-xs" style="background-color: var(--ai);">
+            <i class="fa-solid fa-bolt text-[11px]"></i><span>Synthesize Adversarial Pairs (RLAIF)</span>
+          </button>
+          <button onclick="autoBootstrapDpo()" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
             <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i><span>Auto-Bootstrap Pairs</span>
           </button>
           <a href="/api/preferences" target="_blank" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
@@ -1101,6 +1182,58 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
           </div>
         </div>
       </div>
+
+      <!-- Interactive In-Studio Alignment Job Runner -->
+      <div class="ohs-card p-6 bg-white border border-[#e1e8eb] space-y-4 mt-6">
+        <div class="flex items-center justify-between pb-3 border-b border-[#e1e8eb]">
+          <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-play text-[#1ca564]"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-[#1c2830]">Execute In-Studio Alignment Run</h3>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span id="train-status-dot" class="w-2 h-2 rounded-full bg-[#cbd7dc]"></span>
+            <span id="train-status-text" class="text-xs font-semibold text-[#4e5f6a]">Trainer Idle</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="text-xs font-semibold text-[#4e5f6a] block mb-1">Base Model ID (HF)</label>
+            <input type="text" id="train-model-input" value="google/gemma-2-2b-it" class="w-full bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-3 py-2 text-xs text-[#1c2830] focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-[#4e5f6a] block mb-1">Alignment Algorithm</label>
+            <select id="train-algorithm-select" class="w-full bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-3 py-2 text-xs text-[#1c2830] focus:outline-none font-semibold">
+              <option value="orpo" selected>ORPO (1-pass, no ref model - recommended)</option>
+              <option value="dpo">DPO (Traditional dual-model)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-[#4e5f6a] block mb-1">Epochs & Learning Rate</label>
+            <div class="flex items-center space-x-2">
+              <input type="number" id="train-epochs-input" value="3" min="1" max="10" class="w-16 bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-2.5 py-2 text-xs text-[#1c2830] focus:outline-none">
+              <input type="text" id="train-lr-input" value="5e-6" class="flex-1 bg-[#f8faf9] border border-[#cbd7dc] rounded-lg px-2.5 py-2 text-xs text-[#1c2830] focus:outline-none">
+            </div>
+          </div>
+          <div class="flex flex-col justify-end space-y-2">
+            <div class="flex items-center space-x-2">
+              <input type="checkbox" id="train-dryrun-input" checked class="rounded bg-[#f8faf9] border-[#cbd7dc] text-[#1ca564] focus:ring-0">
+              <label for="train-dryrun-input" class="text-xs text-[#4e5f6a] font-medium cursor-pointer">Dry-Run (Verify only)</label>
+            </div>
+            <button onclick="startTrainingRun()" class="btn-pill btn-success w-full py-2 text-xs font-bold justify-center">
+              <i class="fa-solid fa-play text-xs mr-1"></i><span>Launch Alignment Job</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <div class="flex items-center justify-between pb-1.5">
+            <span class="text-xs font-bold text-[#4e5f6a]">Live Training Telemetry & Logs</span>
+            <span id="train-time" class="text-[11px] text-[#778893]">Ready</span>
+          </div>
+          <pre id="train-logs" class="bg-[#111820] text-[#d6e2e9] p-4 rounded-lg border border-[#23313d] text-xs font-mono h-48 overflow-y-auto custom-scroll whitespace-pre-wrap">Awaiting training job launch...</pre>
+        </div>
+      </div>
     </section>
 
 
@@ -1120,6 +1253,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       await loadRuns();
       await loadPreferencesCount();
       startRunnerPolling();
+      startTrainingPolling();
     }
 
     async function loadCases() {
@@ -1672,6 +1806,93 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       if (tabId === 'rlhf') renderRlhfStudio();
     }
 
+    let trainPollInterval = null;
+
+    async function synthesizeAdversarialPairs() {
+      if (!confirm('Synthesize 100 systematic adversarial contrastive pairs (resolved-to-active hallucination, scope violations, missed danger signs, verbosity) derived from evaluation scenarios?')) {
+        return;
+      }
+      try {
+        const res = await fetch('/api/preferences/synthesize-adversarial', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ overwrite: false, dry_run: false })
+        });
+        const data = await res.json();
+        alert(data.message);
+        loadPreferencesCount();
+      } catch (e) {
+        alert('Failed to synthesize adversarial pairs: ' + e);
+      }
+    }
+
+    async function startTrainingRun() {
+      const modelId = document.getElementById('train-model-input')?.value || 'google/gemma-2-2b-it';
+      const algorithm = document.getElementById('train-algorithm-select')?.value || 'orpo';
+      const epochs = parseInt(document.getElementById('train-epochs-input')?.value || '3', 10);
+      const lr = parseFloat(document.getElementById('train-lr-input')?.value || '5e-6');
+      const dryRun = document.getElementById('train-dryrun-input')?.checked || false;
+
+      const payload = {
+        model_id: modelId,
+        algorithm: algorithm,
+        epochs: epochs,
+        lr: lr,
+        dry_run: dryRun
+      };
+
+      try {
+        const res = await fetch('/api/train/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          const logsEl = document.getElementById('train-logs');
+          if (logsEl) logsEl.innerText = `Starting ${algorithm.toUpperCase()} fine-tuning job for ${modelId}...\n`;
+        } else {
+          const err = await res.json();
+          alert('Training Error: ' + err.error);
+        }
+      } catch (e) {
+        alert('Failed to start training run: ' + e);
+      }
+    }
+
+    function startTrainingPolling() {
+      if (trainPollInterval) clearInterval(trainPollInterval);
+      trainPollInterval = setInterval(async () => {
+        try {
+          const res = await fetch('/api/train/status');
+          const data = await res.json();
+
+          const dot = document.getElementById('train-status-dot');
+          const text = document.getElementById('train-status-text');
+          const logsEl = document.getElementById('train-logs');
+
+          if (!dot || !text) return;
+
+          if (data.is_running) {
+            dot.className = 'w-2 h-2 rounded-full bg-[#7a4db8] animate-pulse';
+            text.innerText = `Training ${data.algorithm?.toUpperCase()} (${data.model_id})...`;
+          } else if (data.status === 'completed') {
+            dot.className = 'w-2 h-2 rounded-full bg-[#1ca564]';
+            text.innerText = 'Training Completed';
+          } else if (data.status === 'failed') {
+            dot.className = 'w-2 h-2 rounded-full bg-[#dc3e42]';
+            text.innerText = 'Training Failed';
+          } else {
+            dot.className = 'w-2 h-2 rounded-full bg-[#cbd7dc]';
+            text.innerText = 'Trainer Idle';
+          }
+
+          if (data.logs && logsEl) {
+            logsEl.innerText = data.logs;
+            logsEl.scrollTop = logsEl.scrollHeight;
+          }
+        } catch (e) {}
+      }, 1500);
+    }
 
     function refreshAll() {
       loadRuns();

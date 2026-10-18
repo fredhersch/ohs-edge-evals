@@ -18,11 +18,16 @@ from pathlib import Path
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Fine-tune Edge SLMs with DPO on CHW Preference Data")
+    SCRIPT_DIR = Path(__file__).resolve().parent
+    default_dpo_file = SCRIPT_DIR / "chw-edge-evals" / "dataset" / "dpo_preference_data.jsonl"
+    if not default_dpo_file.exists():
+        default_dpo_file = SCRIPT_DIR / "dataset" / "dpo_preference_data.jsonl"
+
+    parser = argparse.ArgumentParser(description="Fine-tune Edge SLMs with DPO/ORPO on CHW Preference Data")
     parser.add_argument(
         "--dataset",
         type=str,
-        default="dataset/dpo_preference_data.jsonl",
+        default=str(default_dpo_file),
         help="Path to JSONL preference dataset with prompt, chosen, rejected fields",
     )
     parser.add_argument(
@@ -37,11 +42,18 @@ def parse_args():
         default="./dpo_trained_adapter",
         help="Directory to save the fine-tuned LoRA adapter",
     )
+    parser.add_argument(
+        "--algorithm",
+        type=str,
+        choices=["orpo", "dpo"],
+        default="orpo",
+        help="Preference alignment algorithm: 'orpo' (recommended for SLMs: no reference model, single-step SFT+preference) or 'dpo'",
+    )
     parser.add_argument("--epochs", type=int, default=3, help="Training epochs")
     parser.add_argument("--batch-size", type=int, default=2, help="Per-device train batch size")
     parser.add_argument("--grad-accum", type=int, default=4, help="Gradient accumulation steps")
-    parser.add_argument("--lr", type=float, default=5e-6, help="Learning rate for DPO")
-    parser.add_argument("--beta", type=float, default=0.1, help="DPO temperature parameter (beta)")
+    parser.add_argument("--lr", type=float, default=5e-6, help="Learning rate")
+    parser.add_argument("--beta", type=float, default=0.1, help="DPO/ORPO temperature parameter (beta / lambda)")
     parser.add_argument("--max-length", type=int, default=1024, help="Max sequence length")
     parser.add_argument("--max-prompt-length", type=int, default=768, help="Max prompt length")
     parser.add_argument("--dry-run", action="store_true", help="Validate dataset and print training config without starting training")
@@ -133,14 +145,17 @@ def main():
         from datasets import Dataset
         from peft import LoraConfig, TaskType
         from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
-        from trl import DPOConfig, DPOTrainer
+        if args.algorithm == "orpo":
+            from trl import ORPOConfig, ORPOTrainer
+        else:
+            from trl import DPOConfig, DPOTrainer
     except ImportError as e:
         print(f"\nMissing required ML dependencies for live training: {e}", file=sys.stderr)
         print("To install required training libraries run:", file=sys.stderr)
         print("  pip install torch transformers datasets trl peft bitsandbytes accelerate", file=sys.stderr)
         sys.exit(1)
 
-    print(f"\nInitializing base model: {args.model_id}")
+    print(f"\nInitializing base model: {args.model_id} using {args.algorithm.upper()}...")
     tokenizer = AutoTokenizer.from_pretrained(args.model_id)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -157,39 +172,63 @@ def main():
 
     hf_dataset = Dataset.from_list(dataset_records)
 
-    dpo_config = DPOConfig(
-        output_dir=args.output_dir,
-        beta=args.beta,
-        learning_rate=args.lr,
-        num_train_epochs=args.epochs,
-        per_device_train_batch_size=args.batch_size,
-        gradient_accumulation_steps=args.grad_accum,
-        max_length=args.max_length,
-        max_prompt_length=args.max_prompt_length,
-        logging_steps=1,
-        save_strategy="epoch",
-        evaluation_strategy="no",
-        fp16=torch.cuda.is_available(),
-        optim="adamw_torch",
-        remove_unused_columns=False,
-    )
-
     model = AutoModelForCausalLM.from_pretrained(
         args.model_id,
         torch_dtype=torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float32,
         device_map="auto",
     )
 
-    trainer = DPOTrainer(
-        model=model,
-        ref_model=None,  # Implicit reference model handled by TRL
-        args=dpo_config,
-        train_dataset=hf_dataset,
-        tokenizer=tokenizer,
-        peft_config=peft_config,
-    )
+    if args.algorithm == "orpo":
+        train_config = ORPOConfig(
+            output_dir=args.output_dir,
+            beta=args.beta,
+            learning_rate=args.lr,
+            num_train_epochs=args.epochs,
+            per_device_train_batch_size=args.batch_size,
+            gradient_accumulation_steps=args.grad_accum,
+            max_length=args.max_length,
+            max_prompt_length=args.max_prompt_length,
+            logging_steps=1,
+            save_strategy="epoch",
+            evaluation_strategy="no",
+            fp16=torch.cuda.is_available(),
+            optim="adamw_torch",
+            remove_unused_columns=False,
+        )
+        trainer = ORPOTrainer(
+            model=model,
+            args=train_config,
+            train_dataset=hf_dataset,
+            tokenizer=tokenizer,
+            peft_config=peft_config,
+        )
+    else:
+        train_config = DPOConfig(
+            output_dir=args.output_dir,
+            beta=args.beta,
+            learning_rate=args.lr,
+            num_train_epochs=args.epochs,
+            per_device_train_batch_size=args.batch_size,
+            gradient_accumulation_steps=args.grad_accum,
+            max_length=args.max_length,
+            max_prompt_length=args.max_prompt_length,
+            logging_steps=1,
+            save_strategy="epoch",
+            evaluation_strategy="no",
+            fp16=torch.cuda.is_available(),
+            optim="adamw_torch",
+            remove_unused_columns=False,
+        )
+        trainer = DPOTrainer(
+            model=model,
+            ref_model=None,  # Implicit reference model handled by TRL
+            args=train_config,
+            train_dataset=hf_dataset,
+            tokenizer=tokenizer,
+            peft_config=peft_config,
+        )
 
-    print("\nStarting DPO Training...")
+    print(f"\nStarting {args.algorithm.upper()} Training...")
     trainer.train()
 
     print(f"Saving fine-tuned LoRA adapter to: {args.output_dir}")
