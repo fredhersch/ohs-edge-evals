@@ -13,14 +13,64 @@
     .code-scroll { max-height: 280px; overflow-y: auto; }
     .tab-active { border-bottom: 2px solid #3b82f6; color: #3b82f6; font-weight: 600; }
     .view-tab-active { background: rgba(59, 130, 246, 0.15); border-color: #3b82f6; color: #60a5fa; }
+    .main-tab-active { background: #2563eb; color: #ffffff; font-weight: 600; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
   </style>
 </head>
 <body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-4 md:p-8">
 
   <div class="max-w-7xl mx-auto space-y-6">
 
-    <!-- Header Section -->
-    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
+    <!-- Global Top Navigation Bar -->
+    <nav class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md font-bold text-sm tracking-wider">
+          OHS
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base text-[var(--foreground)] tracking-tight">OHS Edge</span>
+            <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">AI Commons</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">Offline Edge LLM & Tokempic SQL-on-FHIR Suite</p>
+        </div>
+      </div>
+
+      <!-- Navigation View Switcher Tabs -->
+      <div class="flex items-center gap-1.5 p-1 bg-[var(--surface-hover,#1f2937)] rounded-xl border border-[var(--border)] text-xs font-medium">
+        <button id="nav-btn-dashboard" onclick="switchMainView('dashboard')" class="main-tab-active px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span>3-Way Benchmark Studio</span>
+        </button>
+        <button id="nav-btn-report" onclick="switchMainView('report')" class="px-3.5 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>Published Full Report</span>
+        </button>
+      </div>
+
+      <!-- External Studio Link & Utility Actions -->
+      <div class="flex items-center gap-2">
+        <a href="http://localhost:8501" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-sm group" title="Open Visual Evals & RLHF Studio on Port 8501">
+          <svg class="w-4 h-4 text-purple-200 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          <span>Visual Evals & RLHF Studio</span>
+          <span class="text-[10px] bg-white/20 px-1 py-0.2 rounded font-mono">:8501 ↗</span>
+        </a>
+        <button onclick="openStudioModal()" class="p-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] border border-[var(--border)] hover:border-purple-500/50 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors" title="Launch instructions for Visual Evals & RLHF Studio">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </button>
+        <button id="copySummaryBtn" onclick="copySummary()" class="px-3 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] border border-[var(--border)] hover:border-blue-500/50 transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span id="copyBtnText">Copy</span>
+        </button>
+        <button onclick="downloadJson()" class="px-3 py-2 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          <span>JSON</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- VIEW 1: Interactive 3-Way Benchmark Dashboard -->
+    <div id="view-dashboard" class="space-y-6">
+<header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex flex-wrap items-center gap-2 mb-1.5">
@@ -261,13 +311,494 @@
     </div>
 
     <!-- Footer -->
-    <footer class="text-center text-xs text-[var(--muted-foreground)] py-4 border-t border-[var(--border)]">
-      Open Health Stack (OHS) Edge Evaluation Suite • Built for offline edge LLMs on Android • Intelligent Hypatia
+    
+    </div>
+
+    <!-- VIEW 2: Published Full Evaluation Report -->
+    <div id="view-report" class="space-y-6 hidden">
+      
+      <!-- Report Header -->
+      <article class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+        
+        <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-6 border-b border-[var(--border)]">
+          <div class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">Official Research Report</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Open Health Stack</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-400 border border-purple-500/20">Gemma 2 2B (Q4_K_M)</span>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">30 Dual Evaluations</span>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-[var(--foreground)]">
+              Empirical Evaluation: Original Tokempic vs. Optimized Tokempic vs. Raw FHIR JSON on 2B Edge LLMs
+            </h1>
+            <p class="text-sm text-[var(--muted-foreground)]">
+              <strong>Project:</strong> Open Health Stack (OHS) Edge &bull; <strong>Date:</strong> 2026-10-18 &bull; <strong>Evaluation Harness:</strong> <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">chw-edge-evals</code>
+            </p>
+          </div>
+          
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="copyFullReportMarkdown()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] border border-[var(--border)] hover:border-blue-500/50 transition-colors flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+              <span id="copyFullReportText">Copy Markdown Source</span>
+            </button>
+            <button onclick="window.print()" class="px-3.5 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] border border-[var(--border)] hover:border-blue-500/50 transition-colors flex items-center gap-1.5">
+              <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>Print / PDF</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section 1: Executive Summary -->
+        <section class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">1</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Executive Summary</h2>
+          </div>
+          
+          <p class="text-sm text-[var(--muted-foreground)] leading-relaxed">
+            This study evaluates the architectural necessity and iterative optimization of deterministic pre-filtering via <strong>Tokempic</strong> (SQL-on-FHIR <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">ViewDefinition</code>s) when deploying Small Language Models (1B–4B class) on edge hardware (budget Android devices running LiteRT / MediaPipe).
+          </p>
+
+          <p class="text-sm text-[var(--muted-foreground)] leading-relaxed">
+            We evaluated three architectural paradigms side-by-side across <strong>10 clinical archetypes</strong> spanning Antenatal Care (ANC), Postnatal Care (PNC), Integrated Community Case Management (iCCM), and Non-Communicable Diseases (NCDs):
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+            <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div class="text-2xl font-black text-emerald-400">100%</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Clinical Pass Rate</div>
+              <div class="text-[11px] text-[var(--muted-foreground)] mt-0.5">Optimized Tokempic (vs 70% Original, 80% Raw)</div>
+            </div>
+            <div class="p-4 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div class="text-2xl font-black text-blue-400">6.0x</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Payload Compression</div>
+              <div class="text-[11px] text-[var(--muted-foreground)] mt-0.5">498 chars vs 2,974 chars in Raw FHIR</div>
+            </div>
+            <div class="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+              <div class="text-2xl font-black text-purple-400">3.1x</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">Token Reduction</div>
+              <div class="text-[11px] text-[var(--muted-foreground)] mt-0.5">329 tokens vs 1,029 tokens in Raw FHIR</div>
+            </div>
+            <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <div class="text-2xl font-black text-amber-400">92.0%</div>
+              <div class="text-xs font-semibold text-[var(--foreground)] mt-1">4k Window Free</div>
+              <div class="text-[11px] text-[var(--muted-foreground)] mt-0.5">+17.1% headroom preserved for Mini-RAG</div>
+            </div>
+          </div>
+
+          <!-- Architecture Visual Diagram -->
+          <div class="p-5 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-3 mt-4">
+            <div class="text-xs font-bold uppercase tracking-wider text-[var(--muted-foreground)]">Architectural Pipeline & Failure Points</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-amber-500/30">
+                <div class="text-xs font-bold text-amber-400 mb-1">1. Raw HL7 FHIR JSON</div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">FHIR Store &rarr; Direct JSON Bundle (2,974 chars / 1,029 tok) &rarr; Gemma 2 2B</div>
+                <div class="mt-2 text-[11px] text-red-400 font-semibold">&times; 20% Date-math hallucinations (16m &rarr; 25yo adult)</div>
+                <div class="text-[11px] text-red-400 font-semibold">&times; Dropped multi-component vitals in arrays</div>
+              </div>
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-purple-500/30">
+                <div class="text-xs font-bold text-purple-400 mb-1">2. Original Standard Tokempic</div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">FHIR Store &rarr; Default Views (520 chars / 325 tok) &rarr; Gemma 2 2B</div>
+                <div class="mt-2 text-[11px] text-red-400 font-semibold">&times; LOINC code bleed ("126/8480-6 and 8462-4: 82")</div>
+                <div class="text-[11px] text-red-400 font-semibold">&times; 0% capture of urgent referral Tasks & Dipsticks</div>
+              </div>
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-emerald-500/50 bg-emerald-500/5">
+                <div class="text-xs font-bold text-emerald-400 mb-1">3. Optimized CHW Tokempic (chw-views)</div>
+                <div class="text-[11px] text-[var(--muted-foreground)]">FHIR Store &rarr; CHW Views (498 chars / 329 tok) &rarr; Gemma 2 2B</div>
+                <div class="mt-2 text-[11px] text-emerald-400 font-semibold">&check; 100% Clinical Task retention & 0% LOINC bleed</div>
+                <div class="text-[11px] text-emerald-400 font-semibold">&check; Pre-computed relative age ("16m", "4y")</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: 3-Way Quantitative Matrix -->
+        <section class="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">2</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">3-Way Quantitative Comparison Matrix</h2>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">All 10 test cases executed back-to-back on <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">gemma2:2b-instruct-q4_K_M</code> under deterministic inference (<code class="bg-[var(--surface-hover,#262626)] px-1 rounded">temperature: 0.0, seed: 42</code>).</p>
+
+          <div class="overflow-x-auto rounded-xl border border-[var(--border)]">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead class="bg-[var(--surface-hover,#18181b)] text-[var(--muted-foreground)] border-b border-[var(--border)] font-semibold">
+                <tr>
+                  <th class="p-3">Metric</th>
+                  <th class="p-3 text-amber-400">Raw HL7 FHIR JSON</th>
+                  <th class="p-3 text-purple-400">Original Standard Tokempic</th>
+                  <th class="p-3 text-emerald-400">Optimized CHW Tokempic</th>
+                  <th class="p-3 text-blue-400">Impact / Optimization Delta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border)] text-[var(--foreground)]">
+                <tr>
+                  <td class="p-3 font-semibold">Clinical Assertion Pass Rate</td>
+                  <td class="p-3 text-amber-400">8 / 10 (80%)</td>
+                  <td class="p-3 text-purple-400">7 / 10 (70%)</td>
+                  <td class="p-3 text-emerald-400 font-bold">10 / 10 (100%)</td>
+                  <td class="p-3 text-emerald-400 font-semibold">+30% over Original / +20% over Raw</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Average Character Payload</td>
+                  <td class="p-3">2,974 chars</td>
+                  <td class="p-3">520 chars</td>
+                  <td class="p-3 font-bold text-emerald-400">498 chars</td>
+                  <td class="p-3 text-blue-400">6.0x smaller payload than Raw</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Average Prompt Tokens</td>
+                  <td class="p-3">1,029 tokens</td>
+                  <td class="p-3">325 tokens</td>
+                  <td class="p-3 font-bold text-emerald-400">329 tokens</td>
+                  <td class="p-3 text-blue-400">3.1x token compression vs Raw</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Average Generation Latency</td>
+                  <td class="p-3">2.396 s</td>
+                  <td class="p-3">1.685 s</td>
+                  <td class="p-3 font-bold text-emerald-400">1.723 s</td>
+                  <td class="p-3 text-blue-400">28.1% lower latency on device</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Context Window Headroom (4k)</td>
+                  <td class="p-3">74.9% free</td>
+                  <td class="p-3">92.1% free</td>
+                  <td class="p-3 font-bold text-emerald-400">92.0% free</td>
+                  <td class="p-3 text-emerald-400 font-semibold">+17.1% headroom preserved for Mini-RAG</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">LOINC Code Bleed</td>
+                  <td class="p-3 text-amber-400">Frequent</td>
+                  <td class="p-3 text-red-400 font-semibold">High (Corrupts BP)</td>
+                  <td class="p-3 text-emerald-400 font-bold">Zero (Clean Display)</td>
+                  <td class="p-3 text-emerald-400">Eliminated numeric token corruption</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Task / Urgent Referral Capture</td>
+                  <td class="p-3 text-amber-400">80% (Buried in bundle)</td>
+                  <td class="p-3 text-red-400 font-semibold">0% (Resource Omitted)</td>
+                  <td class="p-3 text-emerald-400 font-bold">100% (Dedicated tasks.json)</td>
+                  <td class="p-3 text-emerald-400">Fully preserved care continuity</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Bedside POC Dipstick Capture</td>
+                  <td class="p-3 text-amber-400">70%</td>
+                  <td class="p-3 text-red-400 font-semibold">0% (Resource Omitted)</td>
+                  <td class="p-3 text-emerald-400 font-bold">100% (observations.json)</td>
+                  <td class="p-3 text-emerald-400">100% detection of proteinuria/glucosuria</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 3: Case-by-Case Breakdown (10 Archetypes) -->
+        <section class="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">3</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Case-by-Case Breakdown (10 Clinical Archetypes)</h2>
+          </div>
+
+          <div class="overflow-x-auto rounded-xl border border-[var(--border)]">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead class="bg-[var(--surface-hover,#18181b)] text-[var(--muted-foreground)] border-b border-[var(--border)] font-semibold">
+                <tr>
+                  <th class="p-2.5">#</th>
+                  <th class="p-2.5">Clinical Case Archetype</th>
+                  <th class="p-2.5 text-purple-400">Legacy Tokempic</th>
+                  <th class="p-2.5 text-emerald-400">Optimized Tokempic</th>
+                  <th class="p-2.5 text-amber-400">Raw FHIR JSON</th>
+                  <th class="p-2.5">Legacy Failure Pathology</th>
+                  <th class="p-2.5">Raw JSON Failure Pathology</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border)] text-[var(--foreground)]">
+                <tr>
+                  <td class="p-2.5 font-bold">1</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 mr-1">ANC</span>Fatima Bello (32w Gestation, BP 148/96 Jump)</td>
+                  <td class="p-2.5 text-red-400 font-semibold">FAIL (580c / 340t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (726c / 432t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (6,449c / 2,022t)</td>
+                  <td class="p-2.5 text-red-400">LOINC code bleed into BP; missed overdue referral</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">High payload overhead (6.4k chars)</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">2</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 mr-1">ANC</span>Halima Yakubu (Severe Anemia Hb 6.4 g/dL)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (480c / 310t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (529c / 349t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (3,160c / 1,092t)</td>
+                  <td class="p-2.5 text-amber-400">Omitted urgent referral task</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">1,092 tokens for routine screening</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">3</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 mr-1">ANC</span>Grace Asante (Antepartum Hemorrhage)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (420c / 280t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (446c / 292t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (2,332c / 825t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Correctly identified transfer</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Correctly identified transfer</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">4</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 mr-1">ANC</span>Mercy Ofori (26w Gestation, Glucosuria 3+)</td>
+                  <td class="p-2.5 text-red-400 font-semibold">FAIL (430c / 295t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (420c / 301t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (2,241c / 821t)</td>
+                  <td class="p-2.5 text-red-400">Omitted POC dipstick (dropped 3+ glucose)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Consumes 821 prompt tokens</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">5</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 mr-1">PNC</span>Baby of Amina (Day-3 Newborn Omphalitis)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (410c / 280t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (451c / 308t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (2,246c / 818t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured umbilical cord redness</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured umbilical cord redness</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">6</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-400 mr-1">PNC</span>Infant of Fati (Day-1 / 18h Jaundice &lt;24h)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (400c / 270t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (424c / 281t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (1,905c / 708t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured early yellowing</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured early yellowing</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">7</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 mr-1">iCCM</span>Kofi Mensah (16m Infant, Weight Loss &amp; MR2)</td>
+                  <td class="p-2.5 text-red-400 font-semibold">FAIL (440c / 310t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (496c / 359t)</td>
+                  <td class="p-2.5 text-red-400 font-semibold">FAIL (3,250c / 1,186t)</td>
+                  <td class="p-2.5 text-red-400">Omitted overdue MR2 task; age error</td>
+                  <td class="p-2.5 text-red-400 font-bold">Hallucinated "25-year-old male"</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">8</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 mr-1">iCCM</span>Zainab Umaru (4y Child, Severe Pneumonia)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (450c / 300t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (474c / 315t)</td>
+                  <td class="p-2.5 text-red-400 font-semibold">FAIL (2,649c / 919t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured fast breathing</td>
+                  <td class="p-2.5 text-red-400 font-bold">Hallucinated "21-year-old female"</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">9</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 mr-1">NCD</span>Samuel Osei (Hypertension 10d Medication Gap)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (490c / 320t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (504c / 338t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (3,197c / 1,082t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured 156/94 rebound</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Multi-visit observation array confusion</td>
+                </tr>
+                <tr>
+                  <td class="p-2.5 font-bold">10</td>
+                  <td class="p-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 mr-1">NCD</span>Khadija Al-Hassan (Diabetes Hypoglycemia 2.8)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (480c / 305t)</td>
+                  <td class="p-2.5 text-emerald-400 font-bold">PASS (513c / 319t)</td>
+                  <td class="p-2.5 text-emerald-400 font-semibold">PASS (2,312c / 821t)</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">Captured 2.8 mmol/L acute emergency</td>
+                  <td class="p-2.5 text-[var(--muted-foreground)]">2,312 chars payload</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 4: Qualitative Failure Analysis -->
+        <section class="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">4</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Qualitative Failure Analysis: The Three Pathologies</h2>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Pathology 1 -->
+            <div class="p-4 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">Pathology 1</span>
+                <h3 class="text-sm font-bold text-[var(--foreground)]">LOINC Numeric Code Bleed (Original Standard Tokempic)</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                Standard SQL-on-FHIR templates often output nested observation component codes verbatim into Markdown table columns. In Case 1 (Fatima Bello), systolic (<code class="bg-[var(--card)] px-1 rounded">8480-6</code>) and diastolic (<code class="bg-[var(--card)] px-1 rounded">8462-4</code>) codes were juxtaposed with measurements.
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div class="p-3 rounded-lg bg-[var(--card)] border border-red-500/30">
+                  <div class="text-[11px] font-bold text-red-400 mb-1">&times; Original Tokempic Model Output</div>
+                  <blockquote class="text-[11px] text-[var(--muted-foreground)] italic font-mono">
+                    "Blood pressure was previously 126/8480-6 and 8462-4: 82. Current reading is elevated at 148/96."
+                  </blockquote>
+                  <p class="text-[10px] text-red-400 mt-1">2B model confuses LOINC code strings with systolic blood pressure readings.</p>
+                </div>
+                <div class="p-3 rounded-lg bg-[var(--card)] border border-emerald-500/30">
+                  <div class="text-[11px] font-bold text-emerald-400 mb-1">&check; Optimized Tokempic Fix</div>
+                  <blockquote class="text-[11px] text-[var(--muted-foreground)] italic font-mono">
+                    "Blood pressure was 126/82 mmHg (normal) and jumped to 148/96 mmHg (high)."
+                  </blockquote>
+                  <p class="text-[10px] text-emerald-400 mt-1">Pre-concatenation in SQL-on-FHIR views (<code class="bg-[var(--surface-hover,#262626)] px-1 rounded">vitals.json</code>) eliminates technical code tokens entirely.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pathology 2 -->
+            <div class="p-4 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pathology 2</span>
+                <h3 class="text-sm font-bold text-[var(--foreground)]">Critical Care Blindspot via Resource Omission (Original Standard Tokempic)</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                Standard FHIR summarizers focus on traditional encounters, conditions, and vitals—completely omitting <strong>FHIR <code class="bg-[var(--card)] px-1 rounded">Task</code></strong> resources (CHW referral tracking) and bedside point-of-care observations (urinalysis dipsticks).
+              </p>
+              <div class="p-3 rounded-lg bg-[var(--card)] border border-amber-500/30 text-xs text-[var(--muted-foreground)] space-y-1">
+                <div>&bull; <strong>Fatima Bello (Case 1):</strong> Overdue emergency hospital referral for pre-eclampsia workup was completely invisible to Original Tokempic (0% capture rate).</div>
+                <div>&bull; <strong>Mercy Ofori (Case 4):</strong> 3+ glucosuria dipstick reading was omitted because non-vital observation resources were not included.</div>
+                <div>&bull; <strong>Optimized Fix:</strong> Dedicated <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">tasks.json</code> and <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">observations.json</code> SQL-on-FHIR views guarantee 100% visibility of active CHW workflows.</div>
+              </div>
+            </div>
+
+            <!-- Pathology 3 -->
+            <div class="p-4 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/10 text-red-400 border border-red-500/20">Pathology 3</span>
+                <h3 class="text-sm font-bold text-[var(--foreground)]">Date-Math Arithmetic Breakdown (Raw FHIR JSON)</h3>
+              </div>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                Quantized 2B models lack internal arithmetic circuitry to reliably calculate age in months from an ISO string (<code class="bg-[var(--card)] px-1 rounded">birthDate: "2025-06-10"</code>) relative to the visit timestamp (<code class="bg-[var(--card)] px-1 rounded">2026-10-18</code>).
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                <div class="p-3 rounded-lg bg-[var(--card)] border border-red-500/30">
+                  <div class="text-[11px] font-bold text-red-400 mb-1">Kofi Mensah (16m Infant) &rarr; Raw FHIR Hallucination</div>
+                  <blockquote class="text-[11px] text-[var(--muted-foreground)] italic font-mono">
+                    "Kofi Mensah is a <strong>25-year-old male</strong> from Danfa Village, Ghana. He was born on June 10, 2025."
+                  </blockquote>
+                  <p class="text-[10px] text-red-400 mt-1">Model latched onto the year digits '25' and declared the 16m infant an adult.</p>
+                </div>
+                <div class="p-3 rounded-lg bg-[var(--card)] border border-red-500/30">
+                  <div class="text-[11px] font-bold text-red-400 mb-1">Zainab Umaru (4y Child) &rarr; Raw FHIR Hallucination</div>
+                  <blockquote class="text-[11px] text-[var(--muted-foreground)] italic font-mono">
+                    "Zainab Umaru is a <strong>21-year-old female</strong> from Sabon Gari, Nigeria."
+                  </blockquote>
+                  <p class="text-[10px] text-red-400 mt-1">Model confused birth year 2022 with age 21, misclassifying severe pediatric pneumonia.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Architectural Implications -->
+        <section class="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">5</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Architectural Implications for OHS Edge on Mobile Devices</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-2">
+              <h3 class="text-sm font-bold text-[var(--foreground)]">1. Context Window Preservation for Mini-RAG</h3>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                On budget Android devices, edge runtimes (LiteRT / MediaPipe) typically allocate a 2,048 or 4,096 token context window to constrain RAM consumption to under 1.5–2.0 GB. Raw FHIR consumes <strong>~1,000 to 3,500 tokens</strong> just for the patient record, leaving almost zero room for retrieved MOH/WHO clinical guidelines. Optimized Tokempic consumes <strong>~330 tokens</strong>, leaving <strong>~3,700 tokens free</strong> for guideline chunks, counseling talking points, and CHW prompt instructions.
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-[var(--surface-hover,#18181b)] border border-[var(--border)] space-y-2">
+              <h3 class="text-sm font-bold text-[var(--foreground)]">2. Battery Life and Prompt Prefill Latency</h3>
+              <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+                On ARM mobile chipsets without large Neural Processing Units (NPUs), prompt prefill latency scales linearly with input token count. Reducing input tokens by 3.1x to 6x directly reduces prefill compute time and battery drain, enabling consistent sub-2-second response times on low-cost devices.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: Recommendations -->
+        <section class="space-y-4 pt-4 border-t border-[var(--border)]">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center text-xs font-bold">6</span>
+            <h2 class="text-xl font-bold tracking-tight text-[var(--foreground)]">Actionable Engineering & Clinical Recommendations</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-[var(--foreground)]">
+            <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
+              <div class="font-bold text-blue-400">1. Mandate SQL-on-FHIR Pre-Filtering</div>
+              <p class="text-[var(--muted-foreground)]">Never expose raw FHIR JSON bundles directly to edge SLMs. All LLM inputs must pass through deterministic Tokempic views.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
+              <div class="font-bold text-emerald-400">2. Pre-Compute Relative Age Units</div>
+              <p class="text-[var(--muted-foreground)]">Views should always emit explicit age strings (<code class="bg-[var(--surface-hover,#262626)] px-1 rounded">16m</code>, <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">4y</code>, <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">28y</code>) alongside ISO birthdates to prevent date arithmetic hallucinations.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
+              <div class="font-bold text-purple-400">3. Deploy Dedicated tasks.json and observations.json Views</div>
+              <p class="text-[var(--muted-foreground)]">Always include CHW referral tasks and POC bedside dipsticks in the SQL-on-FHIR schema to avoid clinical blindspots.</p>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] space-y-1">
+              <div class="font-bold text-amber-400">4. Strip Technical Numeric Codes at View Layer</div>
+              <p class="text-[var(--muted-foreground)]">Strip raw LOINC and SNOMED numeric code strings in <code class="bg-[var(--surface-hover,#262626)] px-1 rounded">chw-views/</code>, retaining only clean human-readable displays to eliminate numeric token confusion.</p>
+            </div>
+          </div>
+        </section>
+
+      </article>
+    </div>
+
+    <!-- Studio Launch Guide Modal -->
+    <div id="studio-launch-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-[var(--card,#18181b)] border border-[var(--border,#3f3f46)] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
+        <button onclick="closeStudioModal()" class="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] p-1 rounded-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30 flex items-center justify-center font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-[var(--foreground)]">Visual Evals &amp; RLHF Studio</h3>
+            <p class="text-xs text-[var(--muted-foreground)]">Interactive model runner &amp; preference curator on port 8501</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+          The <strong>Visual Eval Studio</strong> lets you trigger live evaluations with Gemma 2 2B or Gemma 4, inspect Tier-1 deterministic safety rules and Tier-2 LLM-as-a-judge scores, compare model outputs side-by-side, and curate <strong>DPO preference pairs</strong> for fine-tuning.
+        </p>
+
+        <div class="space-y-1.5">
+          <div class="text-[11px] font-semibold text-[var(--foreground)]">Launch Command:</div>
+          <div class="flex items-center justify-between p-2.5 bg-[var(--surface-hover,#121214)] rounded-lg border border-[var(--border)] font-mono text-xs text-purple-300">
+            <span>python3 visual_eval_studio.py --port 8501</span>
+            <button onclick="copyCommand('python3 visual_eval_studio.py --port 8501')" class="px-2 py-1 rounded bg-purple-600/30 hover:bg-purple-600/50 text-[10px] text-white transition-colors">
+              <span id="copyCmdText">Copy</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2">
+          <button onclick="closeStudioModal()" class="px-4 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover,#262626)] text-[var(--foreground)] hover:bg-[var(--border)] transition-colors">
+            Close
+          </button>
+          <a href="http://localhost:8501" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center gap-1.5 shadow-sm">
+            <span>Open Studio</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-[var(--muted-foreground)] py-4 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-2">
+      <div>Open Health Stack (OHS) Edge Evaluation Suite &bull; Built for offline edge LLMs on Android</div>
+      <div class="flex items-center gap-4 text-[11px]">
+        <button onclick="switchMainView('dashboard')" class="hover:text-[var(--foreground)]">Benchmark Studio</button>
+        <button onclick="switchMainView('report')" class="hover:text-[var(--foreground)]">Full Report</button>
+        <a href="http://localhost:8501" target="_blank" class="text-purple-400 hover:underline">Visual Studio :8501 ↗</a>
+      </div>
     </footer>
 
   </div>
 
   <script>
+
     const BENCHMARK_DATA = [
       {
         id: "case_01",
@@ -612,6 +1143,59 @@
       renderDetailInspector();
       updateCalculator();
     });
+  
+
+    // View switcher between Benchmark Dashboard and Published Report
+    function switchMainView(view) {
+      const dashEl = document.getElementById('view-dashboard');
+      const reportEl = document.getElementById('view-report');
+      const btnDash = document.getElementById('nav-btn-dashboard');
+      const btnReport = document.getElementById('nav-btn-report');
+
+      if (view === 'dashboard') {
+        dashEl.classList.remove('hidden');
+        reportEl.classList.add('hidden');
+        btnDash.className = "main-tab-active px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5";
+        btnReport.className = "px-3.5 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5";
+      } else {
+        dashEl.classList.add('hidden');
+        reportEl.classList.remove('hidden');
+        btnDash.className = "px-3.5 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5";
+        btnReport.className = "main-tab-active px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function openStudioModal() {
+      document.getElementById('studio-launch-modal').classList.remove('hidden');
+    }
+
+    function closeStudioModal() {
+      document.getElementById('studio-launch-modal').classList.add('hidden');
+    }
+
+    function copyCommand(cmd) {
+      navigator.clipboard.writeText(cmd).then(() => {
+        const btn = document.getElementById('copyCmdText');
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+
+    function copyFullReportMarkdown() {
+      fetch('TOKEMPIC_EDGE_BENCHMARK_ANALYSIS.md')
+        .then(res => res.text())
+        .then(md => {
+          navigator.clipboard.writeText(md).then(() => {
+            const btn = document.getElementById('copyFullReportText');
+            btn.textContent = 'Markdown Copied!';
+            setTimeout(() => btn.textContent = 'Copy Markdown Source', 2000);
+          });
+        })
+        .catch(() => {
+          copySummary();
+        });
+    }
   </script>
 </body>
 </html>

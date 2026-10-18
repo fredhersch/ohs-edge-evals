@@ -8,7 +8,17 @@
   "select": [
     {"column": [{"name": "date", "path": "effectiveDateTime"}]},
     {"column": [{"name": "display", "path": "code.coding.first().display"}]},
-    {"column": [{"name": "result", "path": "iif(valueCodeableConcept.exists(), valueCodeableConcept.coding.first().display, iif(valueQuantity.exists(), valueQuantity.value.toString() + ' ' + valueQuantity.unit, valueString))"}]},
-    {"column": [{"name": "flag", "path": "interpretation.coding.first().code"}]}
+    {
+      "column": [{
+        "name": "result",
+        "path": "iif(valueCodeableConcept.exists(), valueCodeableConcept.coding.first().display, iif(valueQuantity.exists(), valueQuantity.value.toString() + ' ' + valueQuantity.unit, valueString))"
+      }]
+    },
+    {
+      "column": [{
+        "name": "flag",
+        "path": "iif(interpretation.coding.first().code = 'Yellow', 'Yellow (Moderate Malnutrition / At-Risk)', iif(interpretation.coding.first().code = 'Red', 'Red (Severe Acute Malnutrition / Danger Sign)', iif(interpretation.coding.first().code = 'Abnormal' and code.coding.first().display.contains('Protein'), '1+ Abnormal (Proteinuria / Pre-Eclampsia Sign)', iif(interpretation.coding.first().code = 'Normal', 'Normal', interpretation.coding.first().display))))"
+      }]
+    }
   ]
 }

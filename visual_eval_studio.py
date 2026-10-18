@@ -632,6 +632,10 @@ def get_embedded_studio_html() -> str:
     <button onclick="switchTab('pipeline')" id="tab-pipeline" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-graduation-cap text-xs"></i><span>Fine-Tuning Guide</span>
     </button>
+    <a href="http://localhost:8080" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 my-auto ml-auto font-semibold text-xs text-[#7a4db8] hover:text-[#54328c] bg-[#f3effa] hover:bg-[#ede5f7] border border-[#7a4db8]/25 rounded-lg flex items-center space-x-1.5 transition shadow-xs" title="Open 3-Way Benchmark Dashboard & Published Report">
+      <i class="fa-solid fa-chart-line text-xs"></i>
+      <span>3-Way Benchmark &amp; Full Report :8080 ↗</span>
+    </a>
   </nav>
 
 

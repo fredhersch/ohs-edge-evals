@@ -4,7 +4,12 @@
   "resource": "Patient",
   "select": [
     {"column": [{"name": "name", "path": "name.first().text"}]},
-    {"column": [{"name": "birthDate", "path": "birthDate"}]},
+    {
+      "column": [{
+        "name": "formatted_age_dob",
+        "path": "iif(birthDate.exists(), 'Age: ' + iif((today() - birthDate) < 30 'days', (today() - birthDate).toString() + ' days', iif((today() - birthDate) < 730 'days', ((today() - birthDate) / 30.4375).round(0).toString() + ' months', ((today() - birthDate) / 365.25).floor().toString() + ' years')) + ' (DOB: ' + birthDate + ')', 'Age unknown')"
+      }]
+    },
     {"column": [{"name": "gender", "path": "gender"}]},
     {"column": [{"name": "village", "path": "address.first().city"}]}
   ]

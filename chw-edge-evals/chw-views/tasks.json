@@ -3,11 +3,10 @@
   "name": "tasks",
   "resource": "Task",
   "where": [
-    {"path": "status != 'cancelled'"}
+    {"path": "status != 'cancelled' and status != 'completed'"}
   ],
   "select": [
-    {"column": [{"name": "status", "path": "status"}]},
-    {"column": [{"name": "priority", "path": "priority"}]},
+    {"column": [{"name": "priority", "path": "priority.upper()"}]},
     {"column": [{"name": "description", "path": "description"}]},
     {"column": [{"name": "due", "path": "executionPeriod.end"}]},
     {"column": [{"name": "note", "path": "note.first().text"}]}

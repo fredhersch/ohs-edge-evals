@@ -4,7 +4,12 @@
   "resource": "Condition",
   "select": [
     {"column": [{"name": "display", "path": "code.coding.first().display"}]},
-    {"column": [{"name": "clinicalStatus", "path": "clinicalStatus.coding.first().code"}]},
+    {
+      "column": [{
+        "name": "status",
+        "path": "iif(clinicalStatus.coding.first().code = 'active', 'ACTIVE', 'RESOLVED - Past History (Do Not Report As Current)')"
+      }]
+    },
     {"column": [{"name": "onset", "path": "onsetDateTime"}]},
     {"column": [{"name": "abatement", "path": "abatementDateTime"}]}
   ]
