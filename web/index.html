@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OHS Edge: Offline Edge LLM & Tokempic 3-Way Benchmark</title>
-  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
     :root {
       /* Dark Mode Palette (Default) */
@@ -120,16 +120,8 @@
         </button>
       </div>
 
-      <!-- External Studio Link & Utility Actions -->
+      <!-- Utility Actions -->
       <div class="flex items-center gap-2">
-        <a href="studio.html" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-lg text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white transition-all flex items-center gap-1.5 shadow-sm group" title="Open Visual Evals & RLHF Studio">
-          <svg class="w-4 h-4 text-purple-200 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-          <span>Visual Evals & RLHF Studio</span>
-          <span class="text-xs font-semibold bg-white/20 px-1 py-0.2 rounded font-mono">Studio ↗</span>
-        </a>
-        <button onclick="openStudioModal()" class="p-2 rounded-lg text-xs font-medium bg-[var(--surface-hover)] border border-[var(--border)] hover:border-purple-500/50 text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors" title="Launch instructions for Visual Evals & RLHF Studio">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        </button>
         
         <!-- Theme Toggle Button (Light/Dark Mode) -->
         <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg text-xs font-medium bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-blue-500/50 transition-colors flex items-center justify-center" title="Toggle Light/Dark Theme">
@@ -970,48 +962,7 @@
       </article>
     </div>
 
-    <!-- Studio Launch Guide Modal -->
-    <div id="studio-launch-modal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-[var(--card,#18181b)] border border-[var(--border,#3f3f46)] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative space-y-4">
-        <button onclick="closeStudioModal()" class="absolute top-4 right-4 text-[var(--muted-foreground)] hover:text-[var(--foreground)] p-1 rounded-lg">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-        
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-[var(--text-purple)] border border-purple-500/30 flex items-center justify-center font-bold">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-          </div>
-          <div>
-            <h3 class="text-base font-bold text-[var(--foreground)]">Visual Evals &amp; RLHF Studio</h3>
-            <p class="text-xs text-[var(--muted-foreground)]">Interactive model runner &amp; preference curator via relative path or local port</p>
-          </div>
-        </div>
 
-        <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-          The <strong>Visual Eval Studio</strong> lets you trigger live evaluations with Gemma 2 2B or Gemma 4, inspect Tier-1 deterministic safety rules and Tier-2 LLM-as-a-judge scores, compare model outputs side-by-side, and curate <strong>DPO preference pairs</strong> for fine-tuning.
-        </p>
-
-        <div class="space-y-1.5">
-          <div class="text-xs font-medium font-semibold text-[var(--foreground)]">Launch Command:</div>
-          <div class="flex items-center justify-between p-2.5 bg-[var(--surface-hover)] rounded-lg border border-[var(--border)] font-mono text-xs text-[var(--text-purple)]">
-            <span>python3 visual_eval_studio.py --port 8501</span>
-            <button onclick="copyCommand('python3 visual_eval_studio.py --port 8501')" class="px-2 py-1 rounded bg-purple-600/30 hover:bg-purple-600/50 text-xs font-semibold text-white transition-colors">
-              <span id="copyCmdText">Copy</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-end gap-2 pt-2">
-          <button onclick="closeStudioModal()" class="px-4 py-2 rounded-lg text-xs font-medium bg-[var(--surface-hover)] text-[var(--foreground)] hover:bg-[var(--border)] transition-colors">
-            Close
-          </button>
-          <a href="studio.html" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-colors flex items-center gap-1.5 shadow-sm">
-            <span>Open Studio</span>
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-          </a>
-        </div>
-      </div>
-    </div>
 
     <!-- Footer -->
     <footer class="text-center text-xs text-[var(--muted-foreground)] py-4 border-t border-[var(--border)] flex flex-col md:flex-row items-center justify-between gap-2">
@@ -1019,7 +970,6 @@
       <div class="flex items-center gap-4 text-xs font-medium">
         <button onclick="switchMainView('dashboard')" class="hover:text-[var(--foreground)]">Benchmark Studio</button>
         <button onclick="switchMainView('report')" class="hover:text-[var(--foreground)]">Full Report</button>
-        <a href="studio.html" target="_blank" class="text-[var(--text-purple)] hover:underline">Visual Studio Studio ↗</a>
       </div>
     </footer>
 
@@ -1527,21 +1477,7 @@
       }
     }
 
-    function openStudioModal() {
-      document.getElementById('studio-launch-modal').classList.remove('hidden');
-    }
 
-    function closeStudioModal() {
-      document.getElementById('studio-launch-modal').classList.add('hidden');
-    }
-
-    function copyCommand(cmd) {
-      navigator.clipboard.writeText(cmd).then(() => {
-        const btn = document.getElementById('copyCmdText');
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-    }
 
     function copyFullReportMarkdown() {
       fetch('TOKEMPIC_EDGE_BENCHMARK_ANALYSIS.md')
