@@ -341,60 +341,201 @@
       </div>
     </div>
 
-    <!-- Context Window Budget & Resource Simulator -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 shadow-sm space-y-4">
-      <div class="flex items-center justify-between">
+        <!-- Context Window Budget & Resource Simulator -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+      
+      <!-- Simulator Header & Window Size Selector -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[var(--border)]">
         <div>
-          <h2 class="text-base font-semibold text-[var(--foreground)]">Real-Time Mobile Context Window Simulator (4,096 Tokens)</h2>
-          <p class="text-xs text-[var(--muted-foreground)]">Simulate how patient history scaling impacts LiteRT / MediaPipe on Android</p>
-        </div>
-        <span class="text-xs px-2.5 py-1 rounded-full bg-blue-500/10 text-[var(--text-blue)] border border-blue-500/20 font-mono">Dynamic Scaling</span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-        <div class="space-y-2">
-          <div class="flex justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">Historical Encounters</span>
-            <span id="encountersVal" class="font-semibold text-[var(--text-blue)]">4 visits</span>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-[var(--text-blue)] border border-blue-500/20">Memory & Budget Simulator</span>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--text-emerald)] border border-emerald-500/20">Android LiteRT / MediaPipe</span>
           </div>
-          <input type="range" id="encountersSlider" min="1" max="25" value="4" class="w-full accent-blue-500 cursor-pointer" oninput="updateCalculator()">
+          <h2 class="text-xl font-bold text-[var(--foreground)] tracking-tight">On-Device Context Window Headroom Simulator</h2>
+          <p class="text-xs text-[var(--muted-foreground)] mt-0.5">
+            Compare remaining context headroom side-by-side: <strong>With Optimized Tokempic</strong> vs. <strong>Without Tokempic (Raw FHIR JSON)</strong> as patient history scales.
+          </p>
         </div>
 
-        <div class="space-y-2">
-          <div class="flex justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">Vitals & Labs Recorded</span>
-            <span id="vitalsVal" class="font-semibold text-[var(--text-blue)]">8 records</span>
-          </div>
-          <input type="range" id="vitalsSlider" min="2" max="60" value="8" class="w-full accent-blue-500 cursor-pointer" oninput="updateCalculator()">
-        </div>
-
-        <div class="space-y-2">
-          <div class="flex justify-between text-xs">
-            <span class="text-[var(--muted-foreground)]">MOH Clinical Guidelines</span>
-            <span id="guidelineVal" class="font-semibold text-[var(--text-blue)]">400 tokens</span>
-          </div>
-          <input type="range" id="guidelineSlider" min="100" max="1500" step="50" value="400" class="w-full accent-blue-500 cursor-pointer" oninput="updateCalculator()">
+        <!-- Window Limit Switcher -->
+        <div class="flex items-center gap-1.5 p-1 bg-[var(--surface-hover)] rounded-xl border border-[var(--border)] text-xs font-medium shrink-0">
+          <button id="sim-win-4096" onclick="setWindowLimit(4096)" class="px-3 py-1.5 rounded-lg main-tab-active font-semibold transition-all">
+            4,096 Tokens (Standard SLM)
+          </button>
+          <button id="sim-win-2048" onclick="setWindowLimit(2048)" class="px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all">
+            2,048 Tokens (Low-RAM Android)
+          </button>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-[var(--border)]">
-        <div>
-          <div class="text-xs font-medium text-[var(--muted-foreground)]">Optimized Tokempic Tokens</div>
-          <div id="simTokTokens" class="text-xl font-bold text-[var(--text-emerald)]">~210 tok</div>
+      <!-- Sliders Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="space-y-2 p-3.5 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-medium text-[var(--foreground)]">Historical Visits / Encounters</span>
+            <span id="encountersVal" class="font-bold text-[var(--text-blue)] font-mono text-sm">4 visits</span>
+          </div>
+          <input type="range" id="encountersSlider" min="1" max="25" value="4" class="w-full accent-blue-500 cursor-pointer h-2 bg-[var(--border)] rounded-lg" oninput="updateCalculator()">
+          <div class="flex justify-between text-xs text-[var(--muted-foreground)]">
+            <span>1 (Single encounter)</span>
+            <span>25 (Longitudinal care)</span>
+          </div>
         </div>
-        <div>
-          <div class="text-xs font-medium text-[var(--muted-foreground)]">Original Tokempic Tokens</div>
-          <div id="simOrigTokens" class="text-xl font-bold text-[var(--text-purple)]">~205 tok (Tasks lost!)</div>
+
+        <div class="space-y-2 p-3.5 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-medium text-[var(--foreground)]">Vitals &amp; Lab Records</span>
+            <span id="vitalsVal" class="font-bold text-[var(--text-blue)] font-mono text-sm">8 records</span>
+          </div>
+          <input type="range" id="vitalsSlider" min="2" max="60" value="8" class="w-full accent-blue-500 cursor-pointer h-2 bg-[var(--border)] rounded-lg" oninput="updateCalculator()">
+          <div class="flex justify-between text-xs text-[var(--muted-foreground)]">
+            <span>2 (Recent screening)</span>
+            <span>60 (Chronic tracking)</span>
+          </div>
         </div>
-        <div>
-          <div class="text-xs font-medium text-[var(--muted-foreground)]">Raw FHIR JSON Tokens</div>
-          <div id="simRawTokens" class="text-xl font-bold text-[var(--text-amber)]">~1,840 tok</div>
-        </div>
-        <div>
-          <div class="text-xs font-medium text-[var(--muted-foreground)]">4k Context Status</div>
-          <div id="simWindowStatus" class="text-xs font-semibold text-[var(--text-emerald)] mt-1">✓ Safe (<15% used)</div>
+
+        <div class="space-y-2 p-3.5 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)]">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-medium text-[var(--foreground)]">Retrieved MOH Guidelines (RAG)</span>
+            <span id="guidelineVal" class="font-bold text-[var(--text-blue)] font-mono text-sm">400 tokens</span>
+          </div>
+          <input type="range" id="guidelineSlider" min="100" max="1500" step="50" value="400" class="w-full accent-blue-500 cursor-pointer h-2 bg-[var(--border)] rounded-lg" oninput="updateCalculator()">
+          <div class="flex justify-between text-xs text-[var(--muted-foreground)]">
+            <span>100 (Single protocol)</span>
+            <span>1,500 (Detailed pathways)</span>
+          </div>
         </div>
       </div>
+
+      <!-- Side-by-Side Headroom Comparison Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+        
+        <!-- APPROACH A: WITH OPTIMIZED TOKEMPIC -->
+        <div class="p-5 rounded-2xl border-2 border-emerald-500/50 bg-gradient-to-b from-emerald-500/10 via-[var(--card)] to-[var(--card)] shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-emerald-500/20">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-[var(--text-emerald)]">1. With Optimized Tokempic (SQL-on-FHIR)</span>
+            </div>
+            <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-[var(--text-emerald)] border border-emerald-500/30">Target Approach</span>
+          </div>
+
+          <!-- Big Counter for Headroom Remaining -->
+          <div>
+            <div class="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Remaining Free Context Headroom</div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="tokFreeTokens" class="text-3xl md:text-4xl font-black text-[var(--text-emerald)]">3,236</span>
+              <span class="text-sm font-semibold text-[var(--text-emerald)]">tokens FREE</span>
+              <span id="tokFreePct" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-[var(--text-emerald)] ml-auto">79.0% Available</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs text-[var(--muted-foreground)]">
+              <span>Tokens Used: <strong id="tokUsedTokens" class="text-[var(--foreground)]">860</strong> / <span class="winLimitLabel">4,096</span></span>
+              <span id="tokUsedPct" class="font-semibold text-[var(--foreground)]">21.0% used</span>
+            </div>
+            <div class="w-full h-4 bg-[var(--surface-hover)] rounded-full overflow-hidden p-0.5 border border-[var(--border)]">
+              <div id="tokBar" class="h-full bg-gradient-to-r from-emerald-600 to-teal-400 rounded-full transition-all duration-300" style="width: 21%;"></div>
+            </div>
+          </div>
+
+          <!-- Breakdown Tags -->
+          <div class="grid grid-cols-3 gap-2 text-xs pt-1">
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Patient Record</div>
+              <div id="tokRecordCost" class="font-bold text-[var(--foreground)] mt-0.5">210 tok</div>
+            </div>
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Guidelines (RAG)</div>
+              <div id="tokRagCost" class="font-bold text-[var(--foreground)] mt-0.5">400 tok</div>
+            </div>
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Base Prompt</div>
+              <div class="font-bold text-[var(--foreground)] mt-0.5">250 tok</div>
+            </div>
+          </div>
+
+          <!-- Status Box -->
+          <div id="tokStatusBox" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-[var(--text-emerald)] flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span class="font-semibold">Safe on Edge: Ample room for multi-turn CHW dialogue &amp; comprehensive MOH guidelines.</span>
+          </div>
+        </div>
+
+        <!-- APPROACH B: WITHOUT TOKEMPIC (RAW FHIR JSON) -->
+        <div id="rawCard" class="p-5 rounded-2xl border-2 border-amber-500/40 bg-gradient-to-b from-amber-500/5 via-[var(--card)] to-[var(--card)] shadow-sm space-y-4 transition-all">
+          <div class="flex items-center justify-between pb-2 border-b border-[var(--border)]">
+            <div class="flex items-center gap-2">
+              <span id="rawDot" class="w-3 h-3 rounded-full bg-amber-500"></span>
+              <span class="text-xs font-bold uppercase tracking-wider text-[var(--text-amber)]">2. Without Tokempic (Raw FHIR JSON)</span>
+            </div>
+            <span id="rawBadge" class="px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-[var(--text-amber)] border border-amber-500/30">Direct JSON</span>
+          </div>
+
+          <!-- Big Counter for Headroom Remaining -->
+          <div>
+            <div class="text-xs font-semibold text-[var(--muted-foreground)] uppercase tracking-wider">Remaining Free Context Headroom</div>
+            <div class="flex items-baseline gap-2 mt-1">
+              <span id="rawFreeTokens" class="text-3xl md:text-4xl font-black text-[var(--text-amber)]">1,606</span>
+              <span id="rawFreeLabel" class="text-sm font-semibold text-[var(--text-amber)]">tokens FREE</span>
+              <span id="rawFreePct" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/20 text-[var(--text-amber)] ml-auto">39.2% Available</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-xs text-[var(--muted-foreground)]">
+              <span>Tokens Used: <strong id="rawUsedTokens" class="text-[var(--foreground)]">2,490</strong> / <span class="winLimitLabel">4,096</span></span>
+              <span id="rawUsedPct" class="font-semibold text-[var(--foreground)]">60.8% used</span>
+            </div>
+            <div class="w-full h-4 bg-[var(--surface-hover)] rounded-full overflow-hidden p-0.5 border border-[var(--border)]">
+              <div id="rawBar" class="h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-full transition-all duration-300" style="width: 60.8%;"></div>
+            </div>
+          </div>
+
+          <!-- Breakdown Tags -->
+          <div class="grid grid-cols-3 gap-2 text-xs pt-1">
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Patient Record</div>
+              <div id="rawRecordCost" class="font-bold text-[var(--text-amber)] mt-0.5">1,840 tok</div>
+            </div>
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Guidelines (RAG)</div>
+              <div id="rawRagCost" class="font-bold text-[var(--foreground)] mt-0.5">400 tok</div>
+            </div>
+            <div class="p-2 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)]">
+              <div class="text-xs text-[var(--muted-foreground)]">Base Prompt</div>
+              <div class="font-bold text-[var(--foreground)] mt-0.5">250 tok</div>
+            </div>
+          </div>
+
+          <!-- Status Box -->
+          <div id="rawStatusBox" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-[var(--text-amber)] flex items-center gap-2">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            <span id="rawStatusText" class="font-semibold">Context Depletion Risk: Raw FHIR consumes 6x more tokens, starving local guideline retrieval.</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Live Savings Banner -->
+      <div class="p-4 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-[var(--text-blue)] flex items-center justify-center font-bold text-sm">
+            Δ
+          </div>
+          <div>
+            <span class="font-bold text-[var(--foreground)]">Tokempic Efficiency Advantage:</span>
+            <span id="tokAdvantageText" class="text-[var(--muted-foreground)] ml-1">Saving 1,630 tokens (7.8x smaller payload) on this patient history.</span>
+          </div>
+        </div>
+        <div class="text-right font-mono font-bold text-[var(--text-emerald)] shrink-0 text-sm" id="headroomGainBadge">
+          +39.8% Extra Headroom Preserved
+        </div>
+      </div>
+
     </div>
 
     <!-- Footer -->
@@ -1173,32 +1314,130 @@
       renderCaseList();
     }
 
+        let currentWindowLimit = 4096;
+
+    function setWindowLimit(limit) {
+      currentWindowLimit = limit;
+      const btn4096 = document.getElementById('sim-win-4096');
+      const btn2048 = document.getElementById('sim-win-2048');
+      if (limit === 4096) {
+        btn4096.className = "px-3 py-1.5 rounded-lg main-tab-active font-semibold transition-all";
+        btn2048.className = "px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all";
+      } else {
+        btn4096.className = "px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all";
+        btn2048.className = "px-3 py-1.5 rounded-lg main-tab-active font-semibold transition-all";
+      }
+      document.querySelectorAll('.winLimitLabel').forEach(el => el.textContent = limit.toLocaleString());
+      updateCalculator();
+    }
+
     function updateCalculator() {
       const enc = parseInt(document.getElementById('encountersSlider').value);
       const vit = parseInt(document.getElementById('vitalsSlider').value);
       const rag = parseInt(document.getElementById('guidelineSlider').value);
+      const basePrompt = 250;
 
-      document.getElementById('encountersVal').textContent = `${enc} visits`;
-      document.getElementById('vitalsVal').textContent = `${vit} records`;
+      document.getElementById('encountersVal').textContent = `${enc} visit${enc > 1 ? 's' : ''}`;
+      document.getElementById('vitalsVal').textContent = `${vit} record${vit > 1 ? 's' : ''}`;
       document.getElementById('guidelineVal').textContent = `${rag} tokens`;
 
-      const tokTokens = Math.round(50 + (enc * 14) + (vit * 7));
-      const origTokens = Math.round(40 + (enc * 12) + (vit * 5));
-      const rawTokens = Math.round(350 + (enc * 180) + (vit * 110));
+      // Empirical token scaling models:
+      // Tokempic: 50 base + 14 per visit + 7 per vital (compact pipe-delimited)
+      const tokRecord = Math.round(50 + (enc * 14) + (vit * 7));
+      const totalTokUsed = tokRecord + rag + basePrompt;
+      const tokFree = Math.max(0, currentWindowLimit - totalTokUsed);
+      const tokFreePct = Math.max(0, Math.round((tokFree / currentWindowLimit) * 100));
+      const tokUsedPct = Math.min(100, Math.round((totalTokUsed / currentWindowLimit) * 100));
 
-      document.getElementById('simTokTokens').textContent = `~${tokTokens} tok`;
-      document.getElementById('simOrigTokens').textContent = `~${origTokens} tok (Tasks lost!)`;
-      document.getElementById('simRawTokens').textContent = `~${rawTokens.toLocaleString()} tok`;
+      // Raw FHIR JSON: 350 base + 180 per visit + 110 per vital (nested JSON objects)
+      const rawRecord = Math.round(350 + (enc * 180) + (vit * 110));
+      const totalRawUsed = rawRecord + rag + basePrompt;
+      const rawFree = currentWindowLimit - totalRawUsed;
+      const rawFreePct = Math.round((rawFree / currentWindowLimit) * 100);
+      const rawUsedPct = Math.min(100, Math.round((totalRawUsed / currentWindowLimit) * 100));
 
-      const totalRawContext = rawTokens + rag + 250;
-      const statusEl = document.getElementById('simWindowStatus');
-      if (totalRawContext > 4096) {
-        statusEl.innerHTML = `<span class="text-[var(--text-red)] font-bold">⚠ OVERFLOW! Raw exceeds 4k context (${totalRawContext} tok)</span>`;
-      } else if (totalRawContext > 3000) {
-        statusEl.innerHTML = `<span class="text-[var(--text-amber)] font-bold">⚠ Critical Memory Pressure (${Math.round(totalRawContext/4096*100)}%)</span>`;
+      // Update Tokempic Panel
+      document.getElementById('tokFreeTokens').textContent = tokFree.toLocaleString();
+      document.getElementById('tokFreePct').textContent = `${tokFreePct}% Available`;
+      document.getElementById('tokUsedTokens').textContent = totalTokUsed.toLocaleString();
+      document.getElementById('tokUsedPct').textContent = `${tokUsedPct}% used`;
+      document.getElementById('tokRecordCost').textContent = `${tokRecord.toLocaleString()} tok`;
+      document.getElementById('tokRagCost').textContent = `${rag.toLocaleString()} tok`;
+      document.getElementById('tokBar').style.width = `${tokUsedPct}%`;
+
+      // Update Raw FHIR Panel
+      const rawCard = document.getElementById('rawCard');
+      const rawDot = document.getElementById('rawDot');
+      const rawBadge = document.getElementById('rawBadge');
+      const rawFreeTokensEl = document.getElementById('rawFreeTokens');
+      const rawFreeLabelEl = document.getElementById('rawFreeLabel');
+      const rawFreePctEl = document.getElementById('rawFreePct');
+      const rawStatusBox = document.getElementById('rawStatusBox');
+      const rawStatusText = document.getElementById('rawStatusText');
+      const rawBar = document.getElementById('rawBar');
+
+      document.getElementById('rawUsedTokens').textContent = totalRawUsed.toLocaleString();
+      document.getElementById('rawUsedPct').textContent = `${Math.round((totalRawUsed / currentWindowLimit) * 100)}% used`;
+      document.getElementById('rawRecordCost').textContent = `${rawRecord.toLocaleString()} tok`;
+      document.getElementById('rawRagCost').textContent = `${rag.toLocaleString()} tok`;
+
+      if (rawFree < 0) {
+        // Overflow state
+        const overflowAmt = Math.abs(rawFree);
+        rawCard.className = "p-5 rounded-2xl border-2 border-red-500 bg-gradient-to-b from-red-500/15 via-[var(--card)] to-[var(--card)] shadow-lg space-y-4 transition-all";
+        rawDot.className = "w-3 h-3 rounded-full bg-red-500 animate-ping";
+        rawBadge.className = "px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-[var(--text-red)] border border-red-500/40";
+        rawBadge.textContent = "OVERFLOW";
+        rawFreeTokensEl.textContent = `-${overflowAmt.toLocaleString()}`;
+        rawFreeTokensEl.className = "text-3xl md:text-4xl font-black text-[var(--text-red)]";
+        rawFreeLabelEl.textContent = "tokens OVERFLOW";
+        rawFreeLabelEl.className = "text-sm font-semibold text-[var(--text-red)]";
+        rawFreePctEl.textContent = `${Math.abs(rawFreePct)}% EXCEEDED`;
+        rawFreePctEl.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-red-500/20 text-[var(--text-red)] border border-red-500/30 ml-auto";
+        rawBar.style.width = "100%";
+        rawBar.className = "h-full bg-gradient-to-r from-red-600 via-rose-600 to-red-500 rounded-full animate-pulse";
+        rawStatusBox.className = "p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-xs text-[var(--text-red)] flex items-center gap-2";
+        rawStatusText.textContent = `CRITICAL FAILURE (Without Tokempic): Raw FHIR overflows the ${currentWindowLimit.toLocaleString()} token context window by +${overflowAmt.toLocaleString()} tokens! Causes truncation & on-device crash.`;
+      } else if (rawFree < 800) {
+        // Critical pressure
+        rawCard.className = "p-5 rounded-2xl border-2 border-amber-500/60 bg-gradient-to-b from-amber-500/10 via-[var(--card)] to-[var(--card)] shadow-sm space-y-4 transition-all";
+        rawDot.className = "w-3 h-3 rounded-full bg-amber-500";
+        rawBadge.className = "px-2 py-0.5 rounded text-xs font-bold bg-amber-500/20 text-[var(--text-amber)] border border-amber-500/30";
+        rawBadge.textContent = "Critical Pressure";
+        rawFreeTokensEl.textContent = rawFree.toLocaleString();
+        rawFreeTokensEl.className = "text-3xl md:text-4xl font-black text-[var(--text-amber)]";
+        rawFreeLabelEl.textContent = "tokens FREE";
+        rawFreeLabelEl.className = "text-sm font-semibold text-[var(--text-amber)]";
+        rawFreePctEl.textContent = `${rawFreePct}% Available`;
+        rawFreePctEl.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-[var(--text-amber)] border border-amber-500/30 ml-auto";
+        rawBar.style.width = `${rawUsedPct}%`;
+        rawBar.className = "h-full bg-gradient-to-r from-amber-500 to-rose-500 rounded-full transition-all duration-300";
+        rawStatusBox.className = "p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-[var(--text-amber)] flex items-center gap-2";
+        rawStatusText.textContent = "High Risk (Without Tokempic): Minimal headroom remaining. Multi-turn dialogue or additional guideline chunks will trigger immediate truncation.";
       } else {
-        statusEl.innerHTML = `<span class="text-[var(--text-emerald)] font-bold">✓ Safe (${Math.round((tokTokens + rag + 250)/4096*100)}% on Tokempic)</span>`;
+        // Safe but heavier
+        rawCard.className = "p-5 rounded-2xl border-2 border-[var(--border)] bg-[var(--card)] shadow-sm space-y-4 transition-all";
+        rawDot.className = "w-3 h-3 rounded-full bg-blue-500";
+        rawBadge.className = "px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-[var(--text-blue)] border border-blue-500/30";
+        rawBadge.textContent = "Direct JSON";
+        rawFreeTokensEl.textContent = rawFree.toLocaleString();
+        rawFreeTokensEl.className = "text-3xl md:text-4xl font-black text-[var(--foreground)]";
+        rawFreeLabelEl.textContent = "tokens FREE";
+        rawFreeLabelEl.className = "text-sm font-semibold text-[var(--muted-foreground)]";
+        rawFreePctEl.textContent = `${rawFreePct}% Available`;
+        rawFreePctEl.className = "text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--surface-hover)] text-[var(--foreground)] border border-[var(--border)] ml-auto";
+        rawBar.style.width = `${rawUsedPct}%`;
+        rawBar.className = "h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-300";
+        rawStatusBox.className = "p-3 rounded-xl bg-[var(--surface-hover)] border border-[var(--border)] text-xs text-[var(--foreground)] flex items-center gap-2";
+        rawStatusText.textContent = "Currently within limits, but Raw FHIR payload is 6x heavier, wasting device RAM and battery.";
       }
+
+      // Advantage Summary Banner
+      const savedTokens = Math.max(0, rawRecord - tokRecord);
+      const ratio = (rawRecord / tokRecord).toFixed(1);
+      const extraPct = Math.max(0, tokFreePct - Math.max(0, rawFreePct));
+      document.getElementById('tokAdvantageText').textContent = `Tokempic saves ${savedTokens.toLocaleString()} tokens (${ratio}x compression) on this patient history.`;
+      document.getElementById('headroomGainBadge').textContent = `+${extraPct}% Extra Headroom Preserved`;
     }
 
     function copySummary() {
