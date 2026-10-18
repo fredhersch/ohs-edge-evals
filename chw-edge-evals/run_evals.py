@@ -74,6 +74,52 @@ def query_ollama(
     }
 
 
+def query_gemini(
+    model: str,
+    prompt: str,
+    api_key: Optional[str] = None,
+    timeout: int = 60,
+) -> Dict[str, Any]:
+    """Query Gemini API (e.g. gemini-3.8-flash, gemini-4-argon) as LLM judge."""
+    import os
+    key = api_key or os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("GEMINI_API_KEY environment variable is required for Gemini judge.")
+
+    model_clean = model.replace("models/", "")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_clean}:generateContent?key={key}"
+    payload = {
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.0,
+        },
+    }
+
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    start = time.perf_counter()
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    elapsed = time.perf_counter() - start
+
+    content = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    usage = data.get("usageMetadata", {})
+    tokens = usage.get("totalTokenCount", 0)
+
+    return {
+        "content": content,
+        "latency_s": round(elapsed, 3),
+        "tokens": tokens,
+        "tok_per_sec": round(tokens / elapsed, 1) if elapsed else 0.0,
+    }
+
+
 def evaluate_tier1_summarization(
     output_text: str,
     rules: Dict[str, Any],
@@ -161,13 +207,20 @@ def evaluate_tier2_judge(
     )
 
     try:
-        resp = query_ollama(
-            api_base=api_base,
-            model=judge_model,
-            prompt=prompt,
-            temperature=0.0,
-            timeout=180,
-        )
+        if "gemini" in judge_model.lower():
+            resp = query_gemini(
+                model=judge_model,
+                prompt=prompt,
+                timeout=60,
+            )
+        else:
+            resp = query_ollama(
+                api_base=api_base,
+                model=judge_model,
+                prompt=prompt,
+                temperature=0.0,
+                timeout=180,
+            )
         raw_text = resp["content"].strip()
         # Extract json object
         json_match = re.search(r"\{.*\}", raw_text, re.DOTALL)
@@ -359,7 +412,7 @@ def run_benchmark(
 def main():
     parser = argparse.ArgumentParser(description="Run CHW Edge LLM Evaluations.")
     parser.add_argument("--model", type=str, default="gemma2:2b-instruct-q4_K_M", help="Target model to evaluate")
-    parser.add_argument("--judge-model", type=str, default=None, help="Optional LLM-as-a-Judge model for Tier 2")
+    parser.add_argument("--judge-model", type=str, default=None, help="Optional LLM-as-a-Judge model for Tier 2 (Ollama model or gemini-3.8-flash, gemini-4-argon)")
     parser.add_argument("--api-base", type=str, default="http://localhost:11434", help="Ollama server API base URL")
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET, help="Path to eval_cases.json")
     parser.add_argument("--dry-run", action="store_true", help="Run harness mock without calling Ollama")
