@@ -101,3 +101,48 @@ The Tier-2 judge supports any provider via environment variables, CLI flags, or 
 | **Anthropic** | `claude-3-5-sonnet-20241022`, `claude-3-5-haiku` | `--judge-api-key` or `ANTHROPIC_API_KEY` | `https://api.anthropic.com/v1` |
 | **Compatible** | Groq, DeepSeek, OpenRouter, Together | `--judge-api-key` & `--judge-api-base` | Custom (e.g. `https://api.groq.com/openai/v1`) |
 | **Ollama** | `gemma4:latest`, `qwen2.5:14b`, `llama3.3:70b` | None (Local server) | `http://localhost:11434` |
+
+---
+
+## Visual Evaluation Runner & RLHF / DPO Studio
+
+An interactive, zero-dependency visual evaluation dashboard and RLHF preference curation workbench is provided in `visual_eval_studio.py`:
+
+```bash
+# Launch the web studio on http://localhost:8501
+python3 visual_eval_studio.py
+```
+
+### Studio Capabilities
+
+1. **Benchmark Dashboard & Leaderboard:** Side-by-side KPI cards showing Tier-1 pass rate %, summarization pass rate, mini-RAG pass rate, generation throughput (tok/s), and latency across all model evaluations.
+2. **Evaluation Visualizer & Case Explorer:** Search, filter by clinical domain (ANC, Child Health & iCCM, Chronic NCD, Infectious Disease), inspect FHIR source markdown, model outputs, word counts, and individual pass/fail rule assertions.
+3. **Side-by-Side Comparator:** Compare any two candidate models (e.g. Gemma 4 vs Gemma 2 2B) for the exact same patient encounter.
+4. **Live Visual Eval Runner:** Configure target SLM, judge model, and dry-run options; trigger runs from the UI with real-time log output streaming.
+5. **RLHF & DPO Preference Studio:**
+   - Pairwise review (Candidate A vs Candidate B) with clinician preference voting.
+   - Clinical critique tagger (Hallucination, Temporal Trap, Word Count Exceeded, Missing Red Flag, Prescribed Medication).
+   - In-line Gold Demonstration Editor to write ideal clinical summaries.
+   - Auto-Bootstrap RLAIF tool to generate DPO pairs from high-tier vs low-tier models.
+   - 1-Click Export to **Hugging Face TRL DPO format** (`chw-edge-evals/dataset/dpo_preference_data.jsonl`) and **SFT format** (`chw-edge-evals/dataset/sft_clinical_data.jsonl`).
+
+---
+
+## SLM Fine-Tuning Pipeline (Direct Preference Optimization)
+
+Fine-tune on-device SLMs (1B–4B) using the exported clinical preference data:
+
+```bash
+# Validate preference dataset (Dry run)
+python3 fine_tune_slm_dpo.py --dataset chw-edge-evals/dataset/dpo_preference_data.jsonl --dry-run
+
+# Run 4-bit QLoRA DPO training using Hugging Face TRL
+python3 fine_tune_slm_dpo.py \
+  --dataset chw-edge-evals/dataset/dpo_preference_data.jsonl \
+  --model-id google/gemma-2-2b-it \
+  --output-dir ./gemma2_chw_dpo_adapter \
+  --epochs 3 --lr 5e-6 --beta 0.1
+```
+
+For open-source framework comparisons (Argilla, Promptfoo, DeepEval, Phoenix, TRL/Unsloth), see [OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md).
+

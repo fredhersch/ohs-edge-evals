@@ -1,0 +1,237 @@
+{
+  "timestamp": "2026-10-18T11:20:47.821177",
+  "model": "gemma2:2b-instruct-q4_K_M",
+  "metrics": {
+    "token_compression_ratio": 3.1,
+    "char_compression_ratio": 6.0,
+    "latency_slowdown_ratio": 1.4,
+    "accuracy_tokempic_pct": 100,
+    "accuracy_raw_pct": 80
+  },
+  "cases": [
+    {
+      "case_id": "case_01",
+      "title": "Fatima Bello (ANC 32w, BP 148/96, Proteinuria 1+, Pre-Eclampsia)",
+      "tokempic": {
+        "chars": 726,
+        "prompt_tokens": 432,
+        "latency_s": 2.894,
+        "speed_tps": 96.0,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Fatima Bello is a 28-year-old female from Koro Village. She is currently 32 weeks pregnant.\n\n**Recent Vitals & Findings:** \n* Blood pressure was 126/82 mmHg on 2026-09-15, considered normal. \n* Blood pressure was 148/96 mmHg on 2026-10-14, indicating high blood pressure.\n* Urine protein dipstick was 1+ on 2026-10-14, indicating abnormal protein in urine.\n* She reports a frontal headache on 2026-10-14.\n\n**Open Tasks & Due Items:**\n* Urgent referral to the District Hospital for pre-eclampsia workup is overdue. \n* Continue monitoring for symptoms of pre-eclampsia."
+      },
+      "raw_fhir": {
+        "chars": 6449,
+        "prompt_tokens": 2022,
+        "latency_s": 3.715,
+        "speed_tps": 90.6,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient Review: Fatima Bello\n\n**Patient & Context:** Fatima Bello is a 28-year-old female from Koro Village. She is currently 32 weeks pregnant.\n\n**Recent Vitals & Findings:** \n* Blood pressure readings: 126/82 mmHg on 2026-09-15 and 148/96 mmHg on 2026-10-14.\n* Urine protein dipstick: 1+ indicating abnormal levels.\n* Headache reported as present.\n\n**Open Tasks & Due Items:**\n* Refer to District Hospital for pre-eclampsia workup by 2026-10-16.\n* Continue medication regimen of ferrous sulfate 200mg daily and folic acid 5mg daily."
+      }
+    },
+    {
+      "case_id": "case_02",
+      "title": "Halima Yakubu (ANC 24w, Severe Anemia Hb 6.4 g/dL, Pallor)",
+      "tokempic": {
+        "chars": 529,
+        "prompt_tokens": 349,
+        "latency_s": 1.546,
+        "speed_tps": 98.3,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\nHalima Yakubu is a 22-year-old female from Wuro Ward. She is currently 24 weeks pregnant.\n\n**Recent Vitals & Findings:**\n* Hemoglobin: 6.4 g/dL (Critically low (<7.0))\n* Pulse: 104 bpm (Tachycardia)\n* Conjunctival & palmar pallor: Severe\n\n**Open Tasks & Due Items:**\n* Facilitate urgent hospital referral for severe anemia (overdue by 1 day)"
+      },
+      "raw_fhir": {
+        "chars": 3160,
+        "prompt_tokens": 1092,
+        "latency_s": 2.4,
+        "speed_tps": 94.4,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient & Context:\n\nHalima Yakubu is a 22-year-old female from Wuro Ward. She is currently 24 weeks pregnant and experiencing severe anemia.\n\n## Recent Vitals & Findings:\n\n* Hemoglobin level: 6.4 g/dL\n* Heart rate: 104 bpm\n* Palmar and conjunctival pallor: Severe\n* Malaria Pf RDT: Negative\n\n## Open Tasks & Due Items:\n\n* Facilitate urgent hospital referral for severe anemia. Due date: 2026-10-17T12:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_03",
+      "title": "Grace Asante (ANC 30w, Antepartum Vaginal Bleeding)",
+      "tokempic": {
+        "chars": 446,
+        "prompt_tokens": 292,
+        "latency_s": 1.462,
+        "speed_tps": 98.7,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\nGrace Asante is a 30-year-old female, 30 weeks pregnant. She is experiencing active antepartum vaginal bleeding.\n\n**Recent Vitals & Findings:**\nOn 2026-10-18, Grace's fetal heart rate was 138 bpm. She reported moderate bright red, painless vaginal bleeding.\n\n**Open Tasks & Due Items:**\n* An emergency ambulance transfer to an Obstetric Center is requested due to active antepartum vaginal bleeding. This task is due immediately."
+      },
+      "raw_fhir": {
+        "chars": 2332,
+        "prompt_tokens": 825,
+        "latency_s": 1.911,
+        "speed_tps": 96.9,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Grace Asante is a 29-year-old female from New Juaben. She is currently 30 weeks pregnant.\n\n**Recent Vitals & Findings:** \n*  Observation: Vaginal bleeding - Moderate bright red painless.\n*  Observation: Fetal heart rate - 138 bpm.\n\n**Open Tasks & Due Items:** \n*  Emergency ambulance transfer to Obstetric Center requested by 2026-10-18T10:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_04",
+      "title": "Mercy Ofori (ANC 26w, Urine Glucose 3+, BMI 31.4)",
+      "tokempic": {
+        "chars": 420,
+        "prompt_tokens": 301,
+        "latency_s": 1.784,
+        "speed_tps": 98.5,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\nMercy Ofori is a 32-year-old female residing in the Dome Community. She is currently 26 weeks pregnant.\n\n**Recent Vitals & Findings:**\n*  Mercy's BMI is 31.4 kg/m2, indicating obesity.\n*  Her urine glucose dipstick test on 2026-10-15 was 3+, indicating high abnormal glucose levels.\n\n**Open Tasks & Due Items:**\n*  A referral for an Oral Glucose Tolerance Test (OGTT) at the clinic is requested for Mercy. The due date is tomorrow, 2026-10-19."
+      },
+      "raw_fhir": {
+        "chars": 2241,
+        "prompt_tokens": 821,
+        "latency_s": 1.87,
+        "speed_tps": 96.7,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Mercy Ofori is a 23-year-old female from Dome Community. She is currently 26 weeks pregnant.\n\n**Recent Vitals & Findings:** \n*  A urine glucose test was positive (3+).\n*  Her BMI is 31.4 kg/m2.\n\n**Open Tasks & Due Items:**\n*  Refer for an Oral Glucose Tolerance Test (OGTT) at the clinic by 2026-10-19."
+      }
+    },
+    {
+      "case_id": "case_05",
+      "title": "Baby of Amina (PNC Day-3, Omphalitis Cord Pus)",
+      "tokempic": {
+        "chars": 451,
+        "prompt_tokens": 308,
+        "latency_s": 1.546,
+        "speed_tps": 98.5,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\n* Baby Amina is a 3-day-old female infant.\n* The patient's mother, Amina, is the caregiver.\n* The patient is experiencing a cord infection (Omphalitis) and has a pus discharge and periumbilical redness.\n\n**Recent Vitals & Findings:**\n* Temperature: 37.1 C (Normal)\n* Weight: 3.1 kg (Normal)\n\n**Open Tasks & Due Items:**\n* Urgent: Evaluate cord and maternal well-being during a postnatal home visit."
+      },
+      "raw_fhir": {
+        "chars": 2246,
+        "prompt_tokens": 818,
+        "latency_s": 2.141,
+        "speed_tps": 96.5,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Baby of Amina is a female, born on 2026-10-15, residing in Wuro Ward. \n\n**Recent Vitals & Findings:** \n* Body temperature: 37.1 Cel\n* Body weight: 3.1 kg\n* Umbilical cord stump: Pus discharge and periumbilical redness > 1cm\n\n**Open Tasks & Due Items:** \n* Postnatal Day 3 Home Visit to evaluate cord and maternal well-being. Due by 2026-10-18T16:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_06",
+      "title": "Infant of Fati (PNC Day-1 / 18h, Early Jaundice, Weak Suck)",
+      "tokempic": {
+        "chars": 424,
+        "prompt_tokens": 281,
+        "latency_s": 1.318,
+        "speed_tps": 98.7,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\n* Infant Fati is a 2026-10-17 born male.\n* The infant is experiencing neonatal jaundice.\n\n**Recent Vitals & Findings:**\n* Jaundice is severe and affecting the palms, soles, face, and chest.\n* The infant has a weak sucking reflex and appears lethargic.\n\n**Open Tasks & Due Items:**\n* Immediate evaluation for neonatal phototherapy is requested. \n* Due immediately."
+      },
+      "raw_fhir": {
+        "chars": 1905,
+        "prompt_tokens": 708,
+        "latency_s": 2.102,
+        "speed_tps": 96.9,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**  Infant of Fati is a male infant born on 2026-10-17. He is residing in Sabo Zongo.\n\n**Recent Vitals & Findings:**  The patient is experiencing neonatal jaundice onset less than 24 hours.  The patient's observation for jaundice distribution shows yellowing of the palms, soles, face, and chest.  The patient's sucking reflex is weak and lethargic.\n\n**Open Tasks & Due Items:**  Immediate evaluation for neonatal phototherapy is requested by the due date of 2026-10-18T12:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_07",
+      "title": "Kofi Mensah (iCCM 16m, Faltering Weight 8.4kg, Overdue MR2)",
+      "tokempic": {
+        "chars": 496,
+        "prompt_tokens": 359,
+        "latency_s": 1.999,
+        "speed_tps": 97.7,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Kofi Mensah is a 16-year-old male from Danfa Village. He is experiencing growth faltering and mild malnutrition.\n\n**Recent Vitals & Findings:** \n* Kofi's weight has decreased from 8.6 kg on August 10th to 8.4 kg on October 15th. \n* His MUAC (Mid-Upper Arm Circumference) has decreased from 13.2 cm on August 10th to 12.6 cm on October 15th.\n\n**Open Tasks & Due Items:**\n* Administer Measles-Rubella 2 (MR2) vaccine due on September 15th. It is overdue by one month."
+      },
+      "raw_fhir": {
+        "chars": 3250,
+        "prompt_tokens": 1186,
+        "latency_s": 3.038,
+        "speed_tps": 94.3,
+        "pass": false,
+        "fails": [
+          "Hallucination / active trap failure: '25-year-old'"
+        ],
+        "output": "## Patient & Context:\n\nKofi Mensah is a 25-year-old male from Danfa Village. He was born on June 10, 2025. \n\n## Recent Vitals & Findings:\n\n*  Kofi's weight was 8.6 kg on August 10, 2026.\n*  His MUAC was 13.2 cm on August 10, 2026.\n*  His weight was 8.4 kg on October 15, 2026.\n*  His MUAC was 12.6 cm on October 15, 2026.\n\n## Open Tasks & Due Items:\n\n* Administer Measles-Rubella 2 (MR2) vaccine by September 15, 2026."
+      }
+    },
+    {
+      "case_id": "case_08",
+      "title": "Zainab Umaru (iCCM 4y, Severe Pneumonia, RR 46, Chest Indrawing)",
+      "tokempic": {
+        "chars": 474,
+        "prompt_tokens": 315,
+        "latency_s": 1.212,
+        "speed_tps": 98.5,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Zainab Umaru is a 4-year-old female from Sabon Gari. She is currently experiencing severe pneumonia.\n\n**Recent Vitals & Findings:** \n* Respiratory Rate: 46 breaths/min (Fast breathing)\n* Temperature: 38.2 C (Fever)\n\n**Open Tasks & Due Items:**\n* Urgent: Emergency transport to tertiary hospital due."
+      },
+      "raw_fhir": {
+        "chars": 2649,
+        "prompt_tokens": 919,
+        "latency_s": 2.271,
+        "speed_tps": 95.9,
+        "pass": false,
+        "fails": [
+          "Hallucination / active trap failure: '21-year-old'"
+        ],
+        "output": "## Patient & Context:\n\n* Zainab Umaru is a 21-year-old female from Sabon Gari.\n* She is experiencing severe pneumonia and is currently in need of urgent medical attention.\n\n## Recent Vitals & Findings:\n\n* Respiratory rate: 46 breaths per minute.\n* Body temperature: 38.2 degrees Celsius.\n* Chest indrawing is present.\n* Stridor in a calm child is absent.\n\n## Open Tasks & Due Items:\n\n* Emergency transport to a tertiary hospital is required by 2026-10-18T12:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_09",
+      "title": "Samuel Osei (NCD 61y, Hypertension BP 156/94, Amlodipine Gap)",
+      "tokempic": {
+        "chars": 504,
+        "prompt_tokens": 338,
+        "latency_s": 1.828,
+        "speed_tps": 98.0,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Samuel Osei is a 61-year-old male residing in Sunyani Sector 4. He has been diagnosed with both essential hypertension and type 2 diabetes mellitus.\n\n**Recent Vitals & Findings:**  On October 12, 2026, Samuel's blood pressure was 156/94 mmHg and his fasting blood glucose was 8.9 mmol/L. \n\n**Open Tasks & Due Items:** \n*  A high priority task is to facilitate a NCD clinic refill appointment for Samuel. The appointment was requested on October 14, 2026, and is currently overdue by 4 days."
+      },
+      "raw_fhir": {
+        "chars": 3197,
+        "prompt_tokens": 1082,
+        "latency_s": 2.655,
+        "speed_tps": 94.6,
+        "pass": true,
+        "fails": [],
+        "output": "## Patient & Context:\n\nSamuel Osei is a 51-year-old male from Sunyani Sector 4. He is a patient with active hypertension and type 2 diabetes mellitus.\n\n## Recent Vitals & Findings:\n\n* Blood pressure: 156/94 mmHg on 2026-10-12T10:00:00Z.\n* Fasting glucose: 8.9 mmol/L on 2026-10-12T10:00:00Z.\n\n## Open Tasks & Due Items:\n\n* Facilitate NCD clinic refill appointment by 2026-10-14T17:00:00Z."
+      }
+    },
+    {
+      "case_id": "case_10",
+      "title": "Khadija Al-Hassan (NCD 58y, Hypoglycemia 2.8 mmol/L, Shaky/Sweating)",
+      "tokempic": {
+        "chars": 513,
+        "prompt_tokens": 319,
+        "latency_s": 1.645,
+        "speed_tps": 97.8,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:**\n* Khadija Al-Hassan is a 58-year-old female from Tamale South.\n* She is diagnosed with Type 2 diabetes mellitus, which was first diagnosed in 2017.\n\n**Recent Vitals & Findings:**\n* On October 18, 2026, Khadija's blood glucose level was 2.8 mmol/L, indicating hypoglycemia.\n* She presented with symptoms of shakiness, sweating, and confusion.\n\n**Open Tasks & Due Items:**\n* An emergency hypoglycemia management plan is due immediately."
+      },
+      "raw_fhir": {
+        "chars": 2312,
+        "prompt_tokens": 821,
+        "latency_s": 1.852,
+        "speed_tps": 96.4,
+        "pass": true,
+        "fails": [],
+        "output": "**Patient & Context:** Khadija Al-Hassan is a 58-year-old female from Tamale South. She is diagnosed with Type 2 diabetes mellitus.\n\n**Recent Vitals & Findings:**  \n* Blood Glucose: 2.8 mmol/L\n* Symptoms: Shaky, sweating profusely, confused.\n\n**Open Tasks & Due Items:**\n* Emergency hypoglycemia management due by 2026-10-18T10:00:00Z."
+      }
+    }
+  ]
+}
