@@ -56,11 +56,29 @@ An **aCDU** replaces raw paragraphs with a **clinician-certified, self-contained
 
 ---
 
-### 2.2 aCDU vs. FHIRPath (SQL-on-FHIR / Tokempic): How They Compare & Complement Each Other
+### 2.2 Is the aCDU the Safety Floor? (aCDU vs. FHIRPath / OHS Player)
 
-A common architectural question in the Open Health Stack (OHS) ecosystem is: ***"If we already have FHIRPath (and SQL-on-FHIR / Tokempic views or WHO SMART Guideline CQL expressions), why do we also need aCDUs—and how do they work together?"***
+**Yes—principally, the aCDU is the safety floor for the generative model.**
 
-The short answer: **FHIRPath and aCDUs operate on opposite halves of the clinical reasoning equation—and neither can safely condition an Edge SLM without the other.**
+More specifically, if the **OHS Player (FHIRPath / CQL)** is the clinical trigger (*"which protocols apply to this patient?"*), the **aCDU** is the safety-clamped instruction packet that makes it safe to hand those protocols over to a small (`2B–4B`) language model.
+
+It serves as the safety floor in **three specific ways** that standard `FHIRPath` / `PlanDefinition` rules do not:
+
+1. **Explicit "Do Not" Guardrails (`negative_boundaries`):**  
+   Standard CQL/FHIRPath rules are almost entirely positive (*"If fast breathing $\rightarrow$ give oral Amoxicillin"*). They rarely encode explicit prohibitions against folk remedies, out-of-scope procedures, or dangerous drug combinations. The aCDU permanently fuses every positive action with its hard red lines (`STOP: Do NOT...`) so they can never be separated during retrieval.
+2. **Collision Veto Hierarchy (`priority_tier`):**  
+   When two conditions collide (e.g., *Pneumonia* requiring oral tablets + *Convulsions* forbidding anything by mouth), a standard rules engine just fires both alerts. The aCDU establishes a strict safety floor where a **Tier-1 Veto** overrides routine treatments before the SLM writes a single word.
+3. **A Token-Budgeted "Prompt Contract" ($\le 180$ tokens):**  
+   Instead of feeding raw guideline paragraphs or verbose FHIR `PlanDefinition` JSON into an edge model (which dilutes attention on a 2B model), the aCDU distills the exact mandated actions and prohibitions into a compact, pre-audited block that a small model can reliably follow and translate into a clear 3-bullet script for the health worker.
+
+> [!IMPORTANT]
+> **In One Sentence:**  
+> **FHIRPath in the OHS Player** deterministically detects the patient's clinical state, while the **aCDU** acts as the deterministic safety floor and prompt wrapper that guarantees the on-device SLM can summarize, de-conflict, and communicate that state with **zero fatal hallucinations**.
+
+---
+
+### 2.3 Deep-Dive: How FHIRPath (SQL-on-FHIR / Tokempic) & aCDUs Complement Each Other
+
 * **FHIRPath (via SQL-on-FHIR / Tokempic)** is the **Patient State Extractor**: it deterministically queries, cleans, and compresses *what is true about the patient* from raw HL7 FHIR R4 JSON bundles.
 * **The aCDU (Atomic Clinical Decision Unit)** is the **Clinical Protocol & Guardrail Package**: it deterministically defines *what the health worker must do—and must NEVER do* once FHIRPath triggers a clinical state.
 
