@@ -15,8 +15,13 @@ eval_results*.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.db-wal
+*.db-shm
 
 # Virtual environments
 venv/
 .venv/
 env/
+
+# Independent repositories
+phc-evals/
