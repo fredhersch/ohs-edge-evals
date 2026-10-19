@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHW Edge Evals: Hierarchical Contextual RAG vs. aCDU Gatekeeping</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+    }
+    body { background: var(--background); color: var(--foreground); font-family: ui-sans-serif, system-ui, sans-serif; }
+  </style>
+</head>
+<body class="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
+  <header class="border-b border-[var(--border)] pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Initial 10 CHW Edge Cases</span>
+        <h1 class="text-2xl font-bold text-[var(--foreground)]">CHW Edge Evals: Hierarchical Contextual vs. aCDU Gatekeeping</h1>
+      </div>
+      <p class="text-xs text-[var(--muted-foreground)] mt-1">Evaluating MedGemma 4B, Gemma4 2B, and Gemma4 4B on the foundational 10 CHW Maternal &amp; Child Health Scenarios</p>
+    </div>
+    <div class="text-xs text-[var(--muted-foreground)] md:text-right">
+      <div>Benchmark Date: <strong class="text-slate-200">2026-10-19</strong></div>
+      <div>Test Suite: <strong class="text-emerald-400">ohs-edge-evals (Cases 1-10)</strong></div>
+    </div>
+  </header>
+
+  <div class="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-xl">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-900/80 border-b border-[var(--border)] text-xs text-[var(--muted-foreground)] uppercase tracking-wider">
+        <tr>
+          <th class="py-3.5 px-4">Evaluated Model</th>
+          <th class="py-3.5 px-4 text-center">Naive RAG (Baseline)</th>
+          <th class="py-3.5 px-4 text-center bg-blue-500/10 text-blue-300">Hierarchical Contextual RAG</th>
+          <th class="py-3.5 px-4 text-center bg-purple-500/10 text-purple-300">aCDU Gatekeeping (Two-Box)</th>
+          <th class="py-3.5 px-4 text-center">Avg Latency (Hier / aCDU)</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            MedGemma 4B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(medgemma:latest)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">80.0%</td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-blue-500/5">70.0% <span class="text-xs text-emerald-400">(100.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-purple-500/5">70.0% <span class="text-xs text-emerald-400">(100.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">2.52s / 2.46s</td>
+        </tr>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            Gemma4 2B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(gemma4-2b:latest)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">50.0%</td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-blue-500/5">60.0% <span class="text-xs text-emerald-400">(100.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-purple-300 bg-purple-500/5">50.0% <span class="text-xs text-emerald-400">(100.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">2.11s / 1.94s</td>
+        </tr>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            Gemma4 4B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(gemma4:e4b)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">60.0%</td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-blue-500/5">50.0% <span class="text-xs text-emerald-400">(90.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-purple-300 bg-purple-500/5">20.0% <span class="text-xs text-emerald-400">(80.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">8.04s / 7.44s</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

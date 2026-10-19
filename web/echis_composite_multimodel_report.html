@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kenya eCHIS 30-Case Benchmark: Hierarchical Contextual vs. aCDU Gatekeeping</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+    }
+    body { background: var(--background); color: var(--foreground); font-family: ui-sans-serif, system-ui, sans-serif; }
+  </style>
+</head>
+<body class="p-6 md:p-10 max-w-6xl mx-auto space-y-8">
+  <header class="border-b border-[var(--border)] pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Full 30-Case eCHIS Suite</span>
+        <h1 class="text-2xl font-bold text-[var(--foreground)]">Kenya eCHIS: Hierarchical Contextual RAG vs. aCDU Gatekeeping</h1>
+      </div>
+      <p class="text-xs text-[var(--muted-foreground)] mt-1">Multi-Model Evaluation Across 30 Official Kenya MOH eCHIS Scenarios (Levels 1, 2, and 3)</p>
+    </div>
+    <div class="text-xs text-[var(--muted-foreground)] md:text-right">
+      <div>Benchmark Date: <strong class="text-slate-200">2026-10-19</strong></div>
+      <div>Test Suite: <strong class="text-emerald-400">eval_cases_echis.json (30 cases)</strong></div>
+    </div>
+  </header>
+
+  <div class="overflow-x-auto rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-xl">
+    <table class="w-full text-left text-sm">
+      <thead class="bg-slate-900/80 border-b border-[var(--border)] text-xs text-[var(--muted-foreground)] uppercase tracking-wider">
+        <tr>
+          <th class="py-3.5 px-4">Evaluated Model</th>
+          <th class="py-3.5 px-4 text-center">Naive RAG (Baseline)</th>
+          <th class="py-3.5 px-4 text-center bg-blue-500/10 text-blue-300">Hierarchical Contextual RAG</th>
+          <th class="py-3.5 px-4 text-center bg-purple-500/10 text-purple-300">aCDU Gatekeeping (Two-Box)</th>
+          <th class="py-3.5 px-4 text-center">Avg Latency (Hier / aCDU)</th>
+        </tr>
+      </thead>
+      <tbody>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            MedGemma 4B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(medgemma:latest)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">40.0%</td>
+          <td class="py-4 px-4 text-center font-mono text-blue-300 bg-blue-500/5">43.3% <span class="text-xs text-emerald-400">(90.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-purple-500/5">53.3% <span class="text-xs text-emerald-400">(90.0% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">3.04s / 3.44s</td>
+        </tr>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            Gemma4 2B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(gemma4-2b:latest)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">26.7%</td>
+          <td class="py-4 px-4 text-center font-mono text-blue-300 bg-blue-500/5">26.7% <span class="text-xs text-emerald-400">(96.7% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-purple-500/5">53.3% <span class="text-xs text-emerald-400">(93.3% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">2.43s / 2.47s</td>
+        </tr>
+        
+        <tr class="border-b border-[var(--border)] hover:bg-slate-800/40 transition">
+          <td class="py-4 px-4 font-semibold text-[var(--foreground)] flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
+            Gemma4 4B
+            <span class="text-2xs text-[var(--muted-foreground)] font-mono">(gemma4:e4b)</span>
+          </td>
+          <td class="py-4 px-4 text-center font-mono text-slate-400">13.3%</td>
+          <td class="py-4 px-4 text-center font-mono text-emerald-400 font-bold bg-blue-500/5">23.3% <span class="text-xs text-emerald-400">(96.7% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-purple-300 bg-purple-500/5">10.0% <span class="text-xs text-emerald-400">(96.7% Safe)</span></td>
+          <td class="py-4 px-4 text-center font-mono text-xs text-[var(--muted-foreground)]">5.94s / 6.53s</td>
+        </tr>
+        
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

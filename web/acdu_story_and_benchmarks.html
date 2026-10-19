@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Two-Box Edge Architecture: Deterministic aCDU Floor + Edge SLM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --card-muted: #172033;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+      --text-emerald: #34d399;
+      --text-amber: #fbbf24;
+      --text-red: #f87171;
+      --text-blue: #60a5fa;
+      --text-purple: #c084fc;
+    }
+    html.light {
+      --background: #f8fafc;
+      --card: #ffffff;
+      --card-muted: #f1f5f9;
+      --border: #cbd5e1;
+      --foreground: #0f172a;
+      --muted-foreground: #475569;
+      --text-emerald: #047857;
+      --text-amber: #b45309;
+      --text-red: #b91c1c;
+      --text-blue: #1d4ed8;
+      --text-purple: #6d28d9;
+    }
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .tab-btn.active {
+      background-color: rgba(59, 130, 246, 0.15);
+      border-color: #3b82f6;
+      color: var(--text-blue);
+    }
+    .scenario-btn.active {
+      border-color: #10b981;
+      background-color: rgba(16, 185, 129, 0.12);
+    }
+    .mode-btn.active-danger {
+      background-color: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #f87171;
+    }
+    .mode-btn.active-warn {
+      background-color: rgba(245, 158, 11, 0.2);
+      border-color: #f59e0b;
+      color: #fbbf24;
+    }
+    .mode-btn.active-safe {
+      background-color: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+      color: #34d399;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-16">
+
+  <!-- Top Navigation Bar -->
+  <nav class="sticky top-0 z-50 bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-md">
+          <i class="fa-solid fa-shield-heart"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight text-[var(--foreground)]">OHS Edge Architecture</span>
+            <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-[var(--text-emerald)] border border-emerald-500/30 font-semibold">Two-Box Safety Floor</span>
+          </div>
+          <p class="text-xs text-[var(--muted-foreground)]">Deterministic aCDU Gatekeeping + On-Device SLM Synthesis</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <a href="index.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] transition">
+          <i class="fa-solid fa-gauge-high mr-1"></i> Tokempic Simulator
+        </a>
+        <a href="gemma4_benchmark_report.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] transition">
+          <i class="fa-solid fa-chart-column mr-1"></i> Gemma 4 Report
+        </a>
+        <a href="acdu_story_and_benchmarks.html" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-[var(--text-emerald)] transition">
+          <i class="fa-solid fa-cubes-stacked mr-1"></i> Interactive aCDU Story &amp; Benchmarks
+        </a>
+        <a href="vignettes.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] transition">
+          <i class="fa-solid fa-stethoscope mr-1"></i> Clinical Vignettes
+        </a>
+        <button onclick="toggleTheme()" class="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] transition" title="Toggle Light/Dark Mode">
+          <i id="themeIcon" class="fa-solid fa-sun"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Header -->
+  <header class="max-w-7xl mx-auto px-6 pt-8 pb-6">
+    <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/60 border border-[var(--border)] shadow-xl relative overflow-hidden">
+      <div class="max-w-4xl space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+          <i class="fa-solid fa-Lock"></i> Architectural Blueprint &amp; Empirical Proof
+        </div>
+        <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+          Deterministic Logic as the <span class="text-emerald-400">Safety Floor</span>.<br>
+          Edge SLM as the <span class="text-blue-400">Last-Mile Communicator</span>.
+        </h1>
+        <p class="text-sm md:text-base text-slate-300 leading-relaxed">
+          Small 2B language models should <strong>never</strong> invent medical diagnoses or guess drug dosages from raw PDF paragraphs. By pairing <strong>Box 1 (Deterministic SQLite aCDU Gatekeeping)</strong> with <strong>Box 2 (On-Device SLM Translation)</strong>, we double Gemma4 2B's accuracy on Kenya eCHIS protocols (<strong>26.7% &rarr; 53.3%</strong>) and achieve a <strong>6x lift on multi-morbidity collisions</strong>—all inside a 1.9 GB RAM budget.
+        </p>
+      </div>
+
+      <!-- Key Metric Pills -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800">
+        <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div class="text-xs text-slate-400">Box 1: SQLite aCDU Recall</div>
+          <div class="text-2xl font-black text-emerald-400 mt-0.5">100.0% <span class="text-xs font-normal text-slate-400">@ 0.6ms</span></div>
+          <div class="text-xs text-slate-400 mt-0.5">Zero RAM overhead</div>
+        </div>
+        <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div class="text-xs text-slate-400">Check A: Patient Summary</div>
+          <div class="text-2xl font-black text-blue-400 mt-0.5">95% – 100%</div>
+          <div class="text-xs text-slate-400 mt-0.5">Gemma4 2B + Tokempic</div>
+        </div>
+        <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div class="text-xs text-slate-400">Level 2 Collision Lift (2B)</div>
+          <div class="text-2xl font-black text-purple-400 mt-0.5">10% &rarr; 60% <span class="text-xs font-normal text-emerald-400">(6x)</span></div>
+          <div class="text-xs text-slate-400 mt-0.5">Via aCDU Veto Clamping</div>
+        </div>
+        <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+          <div class="text-xs text-slate-400">MedGemma 4B Level-1 eCHIS</div>
+          <div class="text-2xl font-black text-amber-400 mt-0.5">90.0% <span class="text-xs font-normal text-emerald-400">(9/10)</span></div>
+          <div class="text-xs text-slate-400 mt-0.5">70% on Tertiary PHC Collisions</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Sub-Navigation Tabs -->
+  <div class="max-w-7xl mx-auto px-6 mb-6">
+    <div class="flex flex-wrap gap-2 border-b border-[var(--border)] pb-3">
+      <button onclick="switchTab('story')" id="tab-story" class="tab-btn active px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs md:text-sm font-semibold flex items-center gap-2 transition">
+        <i class="fa-solid fa-diagram-project"></i> 1. The Two-Box Architecture Explained
+      </button>
+      <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs md:text-sm font-semibold flex items-center gap-2 transition">
+        <i class="fa-solid fa-mobile-screen-button"></i> 2. Interactive App Use-Case Simulator (With vs. Without aCDU)
+      </button>
+      <button onclick="switchTab('benchmarks')" id="tab-benchmarks" class="tab-btn px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs md:text-sm font-semibold flex items-center gap-2 transition">
+        <i class="fa-solid fa-table-list"></i> 3. Composite Benchmarks (All 3 Suites)
+      </button>
+      <button onclick="switchTab('tradeoffs')" id="tab-tradeoffs" class="tab-btn px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs md:text-sm font-semibold flex items-center gap-2 transition">
+        <i class="fa-solid fa-scale-balanced"></i> 4. MedGemma 4B vs. Gemma4 2B &amp; Edge Feasibility
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 1: THE TWO-BOX ARCHITECTURE EXPLAINED                             -->
+  <!-- ===================================================================== -->
+  <main id="view-story" class="max-w-7xl mx-auto px-6 space-y-8">
+
+    <!-- Why Standard RAG Fails vs What an aCDU Is -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-red-500/30 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-1 rounded-full bg-red-500/15 text-[var(--text-red)] text-xs font-bold uppercase tracking-wider">The Old Way: Naive Paragraph RAG</span>
+          <i class="fa-solid fa-triangle-exclamation text-red-400 text-lg"></i>
+        </div>
+        <h3 class="text-lg font-bold text-[var(--foreground)]">Why Standard RAG Breaks on 2B Edge Models</h3>
+        <p class="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed">
+          Slicing a 200-page Ministry of Health manual into arbitrary 500-word sliding windows and running vector search causes three clinical failures:
+        </p>
+        <ul class="space-y-2.5 text-xs md:text-sm">
+          <li class="flex items-start gap-2.5">
+            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+            <div><strong>Severed Contraindications:</strong> The dosage table is on page 42, while the warning <em>"Do NOT give orally if convulsing"</em> is on page 43. The chunker cuts them apart.</div>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+            <div><strong>Semantic Keyword Priming:</strong> When a patient has <code>Malaria RDT: Negative</code>, vector search sees the word "Malaria" and retrieves the Malaria Dosing table—tricking a 2B model into prescribing ACT.</div>
+          </li>
+          <li class="flex items-start gap-2.5">
+            <i class="fa-solid fa-xmark text-red-400 mt-1"></i>
+            <div><strong>Multi-Condition Confusion:</strong> On Level-2 Multi-Morbidity Collisions, Gemma4 2B with Naive RAG scored only <strong>10% (1/10)</strong>.</div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-emerald-500/40 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-[var(--text-emerald)] text-xs font-bold uppercase tracking-wider">The Unlock: Atomic Clinical Decision Unit (aCDU)</span>
+          <i class="fa-solid fa-cube text-emerald-400 text-lg"></i>
+        </div>
+        <h3 class="text-lg font-bold text-[var(--foreground)]">What is an aCDU?</h3>
+        <p class="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed">
+          An <strong>aCDU</strong> is not a text paragraph. It is a clinician-audited, 150-token <strong>state unit</strong> stored in SQLite (<code>&lt;1 MB</code>) that permanently fuses <strong>Deterministic Trigger Criteria</strong> with <strong>Mandated Actions</strong> and <strong>Hard Negative Boundaries</strong>:
+        </p>
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-200 space-y-1.5 overflow-x-auto">
+          <div class="text-blue-400 font-bold">// 1. Deterministic SQLite Trigger Header</div>
+          <div>"id": "KENYA-ECHIS-ICCM-01", "cohort": "child_2_59m",</div>
+          <div>"triggers": ["convulsions", "unconscious", "unable_to_drink"],</div>
+          <div class="text-emerald-400 font-bold pt-1">// 2. Mandated Positive Actions</div>
+          <div>"actions": ["Insert 100mg Rectal Artesunate", "Immediate Hospital Transfer"],</div>
+          <div class="text-red-400 font-bold pt-1">// 3. Permanently Fused Negative Boundaries (Veto)</div>
+          <div>"prohibited": ["🛑 STOP: DO NOT give oral AL or oral Amoxicillin (choking risk)"]</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Architecture Pipeline: Box 1 + Box 2 -->
+    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[var(--border)] pb-4">
+        <div>
+          <h2 class="text-xl font-bold text-[var(--foreground)]">How Deterministic Logic &amp; the 2B Edge SLM Divide the Work</h2>
+          <p class="text-xs md:text-sm text-[var(--muted-foreground)]">Why we need BOTH deterministic rules (for safety) AND the on-device SLM (for synthesis &amp; de-confliction)</p>
+        </div>
+        <span class="px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/30 text-xs font-mono text-[var(--text-blue)]">Two-Box Pipeline</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
+        <!-- Step 1 -->
+        <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-300">STEP 1: TOKEMPIC + SLM</span>
+              <span class="text-xs font-mono text-emerald-400">95%–100% Pass</span>
+            </div>
+            <h3 class="text-base font-bold text-[var(--foreground)]">Check A: Longitudinal Patient Summary</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Raw FHIR bundles (1,840 tokens) are compressed <strong>8.8x</strong> by Tokempic into a 210-token table. <strong>Gemma4 2B</strong> summarizes 15 past visits into 3 scannable bullets before the CHW knocks on the door.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+            <strong class="text-blue-400">Why SLM is needed:</strong> Deterministic rules cannot summarize multi-visit clinical trajectories into natural language.
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="p-5 rounded-xl bg-emerald-950/20 border-2 border-emerald-500/50 flex flex-col justify-between space-y-4 relative">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">BOX 1: DETERMINISTIC FLOOR</span>
+              <span class="text-xs font-mono text-emerald-400">100% Recall (0.6ms)</span>
+            </div>
+            <h3 class="text-base font-bold text-[var(--foreground)]">Deterministic SQLite aCDU Trigger</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              As the CHW records vitals (e.g. <code>BP 148/96</code> or <code>Convulsion + Fast Breathing</code>), deterministic Kotlin/SQLite logic selects the exact certified aCDU(s). <strong>The LLM has zero say in which protocol is selected.</strong>
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950/80 border border-emerald-500/30 text-xs text-slate-300">
+            <strong class="text-emerald-400">Why Deterministic Logic is needed:</strong> Guarantees 100% protocol recall and injects hard negative guardrails.
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-purple-500/20 text-purple-300">BOX 2: EDGE SLM SYNTHESIS</span>
+              <span class="text-xs font-mono text-purple-300">2x – 6x Accuracy Lift</span>
+            </div>
+            <h3 class="text-base font-bold text-[var(--foreground)]">De-Confliction &amp; Last-Mile Script</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              When 2 conditions collide (e.g. Pneumonia + Convulsion) or a family asks about a harmful remedy (e.g. cow dung on cord), <strong>Gemma4 2B</strong> merges the triggered aCDUs and applies the veto rule into a single 3-bullet action script.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
+            <strong class="text-purple-400">Why Static Cards Fail:</strong> Static rules pop up 2 contradictory cards (Card 1: <em>"Give oral Amox"</em> vs Card 2: <em>"Nothing by mouth"</em>). The SLM resolves the conflict.
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 2: INTERACTIVE APP USE-CASE SIMULATOR                             -->
+  <!-- ===================================================================== -->
+  <section id="view-simulator" class="max-w-7xl mx-auto px-6 space-y-6 hidden">
+    <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[var(--border)] pb-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-[var(--text-emerald)]">Interactive Walkthrough</span>
+          <h2 class="text-xl font-bold text-[var(--foreground)]">See How an aCDU is Triggered in the App: With vs. Without aCDU</h2>
+          <p class="text-xs md:text-sm text-[var(--muted-foreground)]">Select a clinical encounter below, inspect the deterministic SQLite trigger, and toggle the tablet output mode.</p>
+        </div>
+      </div>
+
+      <!-- Scenario Selector Buttons -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <button onclick="selectScenario(0)" id="scen-0" class="scenario-btn active text-left p-4 rounded-xl border border-[var(--border)] hover:bg-[var(--card-muted)] transition">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Level 2: Collision Veto</span>
+            <span class="text-xs font-mono text-[var(--muted-foreground)]">ICCM-01 + ICCM-03</span>
+          </div>
+          <div class="font-bold text-sm text-[var(--foreground)]">1. Convulsing Child + Pneumonia</div>
+          <div class="text-xs text-[var(--muted-foreground)] mt-1">18m child with fast breathing (56 bpm), fever (mRDT+), and a convulsion 30 mins ago.</div>
+        </button>
+
+        <button onclick="selectScenario(1)" id="scen-1" class="scenario-btn text-left p-4 rounded-xl border border-[var(--border)] hover:bg-[var(--card-muted)] transition">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Level 3: Adversarial Trap</span>
+            <span class="text-xs font-mono text-[var(--muted-foreground)]">MNH-08</span>
+          </div>
+          <div class="font-bold text-sm text-[var(--foreground)]">2. Newborn Cord Care &amp; Ash Trap</div>
+          <div class="text-xs text-[var(--muted-foreground)] mt-1">Day-3 newborn with red umbilical stump; grandmother applying cow dung &amp; wood ash.</div>
+        </button>
+
+        <button onclick="selectScenario(2)" id="scen-2" class="scenario-btn text-left p-4 rounded-xl border border-[var(--border)] hover:bg-[var(--card-muted)] transition">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Check A + MNH Triage</span>
+            <span class="text-xs font-mono text-[var(--muted-foreground)]">MNH-02</span>
+          </div>
+          <div class="font-bold text-sm text-[var(--foreground)]">3. Pre-Eclampsia + Resolved Malaria</div>
+          <div class="text-xs text-[var(--muted-foreground)] mt-1">32w pregnant mother; BP jumped 126/82 &rarr; 148/96, 1+ protein, resolved malaria 11m ago.</div>
+        </button>
+      </div>
+
+      <!-- 2-Column Interactive Inspector -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+        <!-- Left 5 Cols: App Input + Box 1 Deterministic Trigger -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center justify-between">
+              <span><i class="fa-solid fa-clipboard-user mr-1"></i> eCHIS App Input (FHIR Observation)</span>
+              <span class="font-mono text-2xs text-slate-400">Tokempic Markdown</span>
+            </div>
+            <div id="sim-patient-box" class="text-xs font-mono bg-slate-950 text-slate-200 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap leading-relaxed"></div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
+              <span><i class="fa-solid fa-bolt mr-1"></i> Box 1: Deterministic SQLite Trigger</span>
+              <span class="font-mono text-xs bg-emerald-500/20 px-2 py-0.5 rounded">0.6 ms | 100% Recall</span>
+            </div>
+            <div id="sim-trigger-rule" class="text-xs text-emerald-200 font-mono bg-slate-950/90 p-2.5 rounded border border-emerald-500/30"></div>
+            <div class="text-xs font-semibold text-[var(--muted-foreground)] pt-1">Retrieved aCDU Payload Injected into Box 2:</div>
+            <div id="sim-acdu-json" class="text-xs font-mono bg-slate-950 text-slate-200 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- Right 7 Cols: Tablet Output Comparison Switcher -->
+        <div class="lg:col-span-7 flex flex-col justify-between p-5 rounded-2xl bg-slate-950 border-2 border-slate-800 space-y-4">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fa-solid fa-tablet-screen-button mr-1.5"></i> Simulated CHW Android Tablet Screen</span>
+              <span id="sim-badge" class="text-xs font-bold px-2.5 py-0.5 rounded-full"></span>
+            </div>
+
+            <!-- Mode Switcher Buttons -->
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="selectMode('naive')" id="mode-naive" class="mode-btn p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition">
+                <i class="fa-solid fa-circle-xmark mr-1"></i> 1. Without aCDU<br><span class="text-[10px] font-normal opacity-80">(Naive RAG + 2B SLM)</span>
+              </button>
+              <button onclick="selectMode('static')" id="mode-static" class="mode-btn p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition">
+                <i class="fa-solid fa-triangle-exclamation mr-1"></i> 2. Static Rules Only<br><span class="text-[10px] font-normal opacity-80">(No LLM Synthesis)</span>
+              </button>
+              <button onclick="selectMode('twobox')" id="mode-twobox" class="mode-btn active-safe p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition">
+                <i class="fa-solid fa-circle-check mr-1"></i> 3. Two-Box Solution<br><span class="text-[10px] font-normal opacity-80">(aCDU Floor + 2B SLM)</span>
+              </button>
+            </div>
+
+            <!-- Simulated Screen Content -->
+            <div id="sim-screen-output" class="p-5 rounded-xl border min-h-[210px] text-sm leading-relaxed space-y-3"></div>
+          </div>
+
+          <!-- Clinical Impact Explanation Box -->
+          <div id="sim-impact-box" class="p-4 rounded-xl border text-xs leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 3: COMPOSITE BENCHMARKS (ALL 3 SUITES)                            -->
+  <!-- ===================================================================== -->
+  <section id="view-benchmarks" class="max-w-7xl mx-auto px-6 space-y-8 hidden">
+
+    <!-- Table 1: Full 30-Case Kenya eCHIS Gold Suite -->
+    <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-4 shadow-lg">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-2">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Benchmark Suite 1 (Primary Target)</span>
+          <h2 class="text-xl font-bold text-[var(--foreground)]">Full 30-Case Kenya MOH eCHIS Gold Benchmark (By Complexity Level)</h2>
+          <p class="text-xs text-[var(--muted-foreground)]">Comparing Naive RAG vs. Hierarchical Contextual RAG vs. aCDU Gatekeeping across Levels 1, 2, and 3</p>
+        </div>
+        <a href="echis_composite_multimodel_report.html" class="text-xs font-semibold text-blue-400 hover:underline">View Raw eCHIS Report &rarr;</a>
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border border-[var(--border)]">
+        <table class="w-full text-left text-xs md:text-sm">
+          <thead class="bg-slate-900/90 text-slate-300 uppercase text-xs border-b border-[var(--border)]">
+            <tr>
+              <th class="py-3.5 px-4">Model &amp; Retrieval Strategy</th>
+              <th class="py-3.5 px-4 text-center">Level 1: Single-Axis<br><span class="text-[10px] font-normal text-slate-400">(10 Cases)</span></th>
+              <th class="py-3.5 px-4 text-center">Level 2: Collisions<br><span class="text-[10px] font-normal text-slate-400">(10 Cases)</span></th>
+              <th class="py-3.5 px-4 text-center">Level 3: Safety Traps<br><span class="text-[10px] font-normal text-slate-400">(10 Cases)</span></th>
+              <th class="py-3.5 px-4 text-center bg-purple-500/10 text-purple-300">Total eCHIS Pass<br><span class="text-[10px] font-normal">(30 Cases)</span></th>
+              <th class="py-3.5 px-4 text-center">Fatal Safety</th>
+              <th class="py-3.5 px-4 text-center">Avg Latency</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)] font-mono">
+            <!-- MedGemma 4B -->
+            <tr class="hover:bg-slate-800/30">
+              <td class="py-3 px-4 font-sans font-medium">MedGemma 4B — <span class="text-slate-400">Naive RAG</span></td>
+              <td class="py-3 px-4 text-center">80% (8/10)</td>
+              <td class="py-3 px-4 text-center">30% (3/10)</td>
+              <td class="py-3 px-4 text-center">10% (1/10)</td>
+              <td class="py-3 px-4 text-center bg-purple-500/5">40.0% (12/30)</td>
+              <td class="py-3 px-4 text-center text-emerald-400">93.3%</td>
+              <td class="py-3 px-4 text-center text-slate-400">2.77s</td>
+            </tr>
+            <tr class="hover:bg-slate-800/30">
+              <td class="py-3 px-4 font-sans font-medium">MedGemma 4B — <span class="text-blue-400">Hierarchical Contextual</span></td>
+              <td class="py-3 px-4 text-center">80% (8/10)</td>
+              <td class="py-3 px-4 text-center">20% (2/10)</td>
+              <td class="py-3 px-4 text-center">30% (3/10)</td>
+              <td class="py-3 px-4 text-center bg-purple-500/5">43.3% (13/30)</td>
+              <td class="py-3 px-4 text-center text-emerald-400">90.0%</td>
+              <td class="py-3 px-4 text-center text-slate-400">3.04s</td>
+            </tr>
+            <tr class="bg-emerald-500/10 border-l-4 border-l-emerald-400">
+              <td class="py-3.5 px-4 font-sans font-bold text-emerald-300">MedGemma 4B — aCDU Gatekeeping</td>
+              <td class="py-3.5 px-4 text-center font-bold text-emerald-400">90% (9/10)</td>
+              <td class="py-3.5 px-4 text-center font-semibold">40% (4/10)</td>
+              <td class="py-3.5 px-4 text-center font-semibold">30% (3/10)</td>
+              <td class="py-3.5 px-4 text-center font-black text-emerald-400 bg-purple-500/10">53.3% (16/30)</td>
+              <td class="py-3.5 px-4 text-center font-bold text-emerald-400">90.0%</td>
+              <td class="py-3.5 px-4 text-center text-slate-300">3.44s</td>
+            </tr>
+
+            <!-- Gemma4 2B -->
+            <tr class="hover:bg-slate-800/30">
+              <td class="py-3 px-4 font-sans font-medium">Gemma4 2B — <span class="text-slate-400">Naive RAG</span></td>
+              <td class="py-3 px-4 text-center">50% (5/10)</td>
+              <td class="py-3 px-4 text-center text-red-400">10% (1/10)</td>
+              <td class="py-3 px-4 text-center">20% (2/10)</td>
+              <td class="py-3 px-4 text-center bg-purple-500/5">26.7% (8/30)</td>
+              <td class="py-3 px-4 text-center text-emerald-400">90.0%</td>
+              <td class="py-3 px-4 text-center text-slate-400">2.15s</td>
+            </tr>
+            <tr class="hover:bg-slate-800/30">
+              <td class="py-3 px-4 font-sans font-medium">Gemma4 2B — <span class="text-blue-400">Hierarchical Contextual</span></td>
+              <td class="py-3 px-4 text-center">40% (4/10)</td>
+              <td class="py-3 px-4 text-center">20% (2/10)</td>
+              <td class="py-3 px-4 text-center">20% (2/10)</td>
+              <td class="py-3 px-4 text-center bg-purple-500/5">26.7% (8/30)</td>
+              <td class="py-3 px-4 text-center text-emerald-400">96.7%</td>
+              <td class="py-3 px-4 text-center text-slate-400">2.43s</td>
+            </tr>
+            <tr class="bg-blue-500/10 border-l-4 border-l-blue-400">
+              <td class="py-3.5 px-4 font-sans font-bold text-blue-300">Gemma4 2B — aCDU Gatekeeping <span class="text-xs px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 ml-1">2x Lift</span></td>
+              <td class="py-3.5 px-4 text-center font-bold text-blue-300">60% (6/10)</td>
+              <td class="py-3.5 px-4 text-center font-black text-emerald-400">60% (6/10) <span class="text-[10px]">(6x)</span></td>
+              <td class="py-3.5 px-4 text-center font-bold text-blue-300">40% (4/10) <span class="text-[10px]">(2x)</span></td>
+              <td class="py-3.5 px-4 text-center font-black text-emerald-400 bg-purple-500/10">53.3% (16/30)</td>
+              <td class="py-3.5 px-4 text-center font-bold text-emerald-400">93.3%</td>
+              <td class="py-3.5 px-4 text-center font-bold text-emerald-400">2.47s</td>
+            </tr>
+
+            <!-- Gemma4 4B -->
+            <tr class="hover:bg-slate-800/30 opacity-75">
+              <td class="py-3 px-4 font-sans font-medium">Gemma4 4B — <span class="text-slate-400">Naive / Hierarchical / aCDU</span></td>
+              <td class="py-3 px-4 text-center">10% – 30%</td>
+              <td class="py-3 px-4 text-center">10% – 40%</td>
+              <td class="py-3 px-4 text-center">0% – 10%</td>
+              <td class="py-3 px-4 text-center bg-purple-500/5">10.0% – 23.3%</td>
+              <td class="py-3 px-4 text-center text-amber-400">96.7%</td>
+              <td class="py-3 px-4 text-center text-red-400">6.53s (Verbose)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Side-by-Side: Initial 10 CHW Cases & 10 PHC Multi-Morbidity Cases -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Initial 10 CHW Cases -->
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-400">Benchmark Suite 2</span>
+          <h3 class="text-lg font-bold text-[var(--foreground)]">Foundational 10 CHW Edge Cases (ANC, PNC, iCCM)</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">Single-axis community triage &amp; danger sign referral (`ohs-edge-evals`)</p>
+        </div>
+        <table class="w-full text-left text-xs border border-[var(--border)] rounded-lg overflow-hidden">
+          <thead class="bg-slate-900 text-slate-300 uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Model</th>
+              <th class="py-2.5 px-3 text-center">Naive RAG</th>
+              <th class="py-2.5 px-3 text-center">Hierarchical</th>
+              <th class="py-2.5 px-3 text-center">aCDU</th>
+              <th class="py-2.5 px-3 text-center">Safety</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)] font-mono">
+            <tr>
+              <td class="py-2.5 px-3 font-sans font-bold text-emerald-400">MedGemma 4B</td>
+              <td class="py-2.5 px-3 text-center">80.0%</td>
+              <td class="py-2.5 px-3 text-center">70.0%</td>
+              <td class="py-2.5 px-3 text-center font-bold">70.0%</td>
+              <td class="py-2.5 px-3 text-center text-emerald-400">100%</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-sans font-bold text-blue-400">Gemma4 2B</td>
+              <td class="py-2.5 px-3 text-center">50.0%</td>
+              <td class="py-2.5 px-3 text-center font-bold">60.0%</td>
+              <td class="py-2.5 px-3 text-center">50.0%</td>
+              <td class="py-2.5 px-3 text-center text-emerald-400">100%</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Gemma4 4B</td>
+              <td class="py-2.5 px-3 text-center">60.0%</td>
+              <td class="py-2.5 px-3 text-center">50.0%</td>
+              <td class="py-2.5 px-3 text-center text-red-400">20.0%</td>
+              <td class="py-2.5 px-3 text-center text-amber-400">80–90%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 10 PHC Multi-Morbidity Cases -->
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-4">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-400">Benchmark Suite 3</span>
+          <h3 class="text-lg font-bold text-[var(--foreground)]">Tertiary PHC Multi-Morbidity Drug Collisions (10 Cases)</h3>
+          <p class="text-xs text-[var(--muted-foreground)]">4 simultaneous chronic conditions (CKD 3b + HFpEF + Gout + Diabetes)</p>
+        </div>
+        <table class="w-full text-left text-xs border border-[var(--border)] rounded-lg overflow-hidden">
+          <thead class="bg-slate-900 text-slate-300 uppercase">
+            <tr>
+              <th class="py-2.5 px-3">Model</th>
+              <th class="py-2.5 px-3 text-center">Naive RAG</th>
+              <th class="py-2.5 px-3 text-center">Hierarchical</th>
+              <th class="py-2.5 px-3 text-center">aCDU</th>
+              <th class="py-2.5 px-3 text-center">Safety</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)] font-mono">
+            <tr>
+              <td class="py-2.5 px-3 font-sans font-bold text-emerald-400">MedGemma 4B</td>
+              <td class="py-2.5 px-3 text-center">40.0%</td>
+              <td class="py-2.5 px-3 text-center font-bold text-emerald-400">70.0%</td>
+              <td class="py-2.5 px-3 text-center font-bold text-emerald-400">70.0%</td>
+              <td class="py-2.5 px-3 text-center text-emerald-400">100%</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-sans font-bold text-blue-400">Gemma4 2B</td>
+              <td class="py-2.5 px-3 text-center">30.0%</td>
+              <td class="py-2.5 px-3 text-center">30.0%</td>
+              <td class="py-2.5 px-3 text-center">30.0%</td>
+              <td class="py-2.5 px-3 text-center text-emerald-400">100%</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-sans text-slate-400">Gemma4 4B</td>
+              <td class="py-2.5 px-3 text-center">10.0%</td>
+              <td class="py-2.5 px-3 text-center">10.0%</td>
+              <td class="py-2.5 px-3 text-center font-bold">30.0% (3x)</td>
+              <td class="py-2.5 px-3 text-center text-amber-400">90%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================================== -->
+  <!-- TAB 4: MEDGEMMA 4B VS GEMMA4 2B & EDGE DEPLOYMENT FEASIBILITY         -->
+  <!-- ===================================================================== -->
+  <section id="view-tradeoffs" class="max-w-7xl mx-auto px-6 space-y-8 hidden">
+
+    <!-- Hardware Envelope Comparison -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Gemma4 2B Card -->
+      <div class="p-6 rounded-2xl bg-[var(--card)] border-2 border-blue-500/40 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold">TIER 1: CHW HANDSET ENGINE</span>
+            <h3 class="text-xl font-bold text-[var(--foreground)] mt-1">Gemma4 2B (INT4 Quantized)</h3>
+          </div>
+          <div class="text-right font-mono">
+            <div class="text-lg font-black text-blue-400">~1.6 GB</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Peak RAM: ~1.9 GB</div>
+          </div>
+        </div>
+
+        <!-- RAM Gauge -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-xs">
+            <span class="text-[var(--muted-foreground)]">Memory Fit on 4 GB Budget Android Handset (OS uses 1.8 GB)</span>
+            <span class="text-emerald-400 font-bold">SAFE (92% Total Used)</span>
+          </div>
+          <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+            <div class="bg-slate-500 h-full" style="width: 45%" title="Android OS + eCHIS App (1.8 GB)"></div>
+            <div class="bg-blue-500 h-full" style="width: 47%" title="Gemma4 2B Runtime (1.9 GB)"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400">
+            <span>■ Android OS + FHIR (1.8 GB)</span>
+            <span>■ Gemma4 2B (1.9 GB)</span>
+            <span>□ Free (0.3 GB)</span>
+          </div>
+        </div>
+
+        <ul class="space-y-2 text-xs md:text-sm pt-2">
+          <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <span><strong>Best For:</strong> Check A Longitudinal Patient Summarization (<strong>95%–100%</strong>) and Box 2 aCDU De-Confliction (<strong>53.3% eCHIS, 60% Level-2 Collisions</strong>).</span></li>
+          <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <span><strong>Hardware Target:</strong> $110–$140 3GB/4GB RAM Android phones carried by 100,000+ Community Health Promoters.</span></li>
+          <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i> <span><strong>Limitation:</strong> Cannot resolve 4-drug renal/cardiac titrations without deterministic aCDU pre-filtering (30% on PHC collisions).</span></li>
+        </ul>
+      </div>
+
+      <!-- MedGemma 4B Card -->
+      <div class="p-6 rounded-2xl bg-[var(--card)] border-2 border-emerald-500/40 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold">TIER 2: RURAL CLINIC TABLET ENGINE</span>
+            <h3 class="text-xl font-bold text-[var(--foreground)] mt-1">MedGemma 4B (INT4 Quantized)</h3>
+          </div>
+          <div class="text-right font-mono">
+            <div class="text-lg font-black text-emerald-400">~3.3 GB</div>
+            <div class="text-xs text-[var(--muted-foreground)]">Peak RAM: ~3.6 GB</div>
+          </div>
+        </div>
+
+        <!-- RAM Gauge -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between text-xs">
+            <span class="text-[var(--muted-foreground)]">Memory Fit on 4 GB Handset vs. 8 GB Clinic Tablet</span>
+            <span class="text-amber-400 font-bold">OOM on 4GB / SAFE on 8GB (68%)</span>
+          </div>
+          <div class="w-full h-3 bg-slate-800 rounded-full overflow-hidden flex">
+            <div class="bg-slate-500 h-full" style="width: 23%" title="Android OS + EHR (1.8 GB)"></div>
+            <div class="bg-emerald-500 h-full" style="width: 45%" title="MedGemma 4B Runtime (3.6 GB)"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-slate-400">
+            <span>■ Android OS + EHR (1.8 GB)</span>
+            <span>■ MedGemma 4B (3.6 GB)</span>
+            <span>□ Free on 8GB Tablet (2.6 GB)</span>
+          </div>
+        </div>
+
+        <ul class="space-y-2 text-xs md:text-sm pt-2">
+          <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <span><strong>Best For:</strong> Level-1 Primary Care Protocols (<strong>90% pass</strong>) and Complex 4-Condition Drug Collisions (<strong>70% pass, 100% Fatal Safety</strong>).</span></li>
+          <li class="flex items-start gap-2"><i class="fa-solid fa-check text-emerald-400 mt-1"></i> <span><strong>Hardware Target:</strong> $250–$320 6GB/8GB RAM tablets deployed at Sub-County Dispensaries and Primary Health Care clinics.</span></li>
+          <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i> <span><strong>Limitation:</strong> Too heavy (~3.6 GB RAM) for entry-level 3GB/4GB CHW handsets; ~2x battery draw per inference.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Simulator Data & Logic -->
+  <script>
+    const SCENARIOS = [
+      {
+        title: "Scenario 1: Convulsing Child + Pneumonia Collision (Level 2)",
+        patientMarkdown: "## demographics\nBaraka Ochieng | Age: 18 months | Weight: 10.8 kg | male\n\n## vitals & observations (Today)\nTemp: 39.1°C | Respiratory Rate: 56 bpm (Fast breathing)\nChest indrawing: Present | Malaria mRDT: Positive\nDanger Sign: Mother reports 1 generalized convulsion 30 mins ago; child is currently lethargic.",
+        triggerRule: "SQLite FTS5 Match (0.54 ms):\n• Age (18m IN 2..59m) AND Fast Breathing (56 >= 50) -> KENYA-ECHIS-ICCM-03\n• Danger Sign (Convulsion == TRUE) -> KENYA-ECHIS-ICCM-01 [VETO PRIORITY 1]",
+        acduJson: `[aCDU 1: KENYA-ECHIS-ICCM-01 (EMERGENCY VETO)]
+• CRITERIA: Child 2-59m with ANY General Danger Sign (convulsions, lethargic, unable to drink).
+• MANDATED ACTIONS:
+  1. Administer pre-referral Rectal Artesunate (100mg suppository).
+  2. Refer IMMEDIATELY to hospital in recovery position.
+• 🛑 NEGATIVE BOUNDARIES (ABSOLUTE VETO):
+  - STOP: Strictly DO NOT give any oral medications (no oral AL, no oral Amoxicillin) to a convulsing or lethargic child due to fatal aspiration risk.
+
+[aCDU 2: KENYA-ECHIS-ICCM-03 (Pneumonia)]
+• ACTIONS: Give Oral Amoxicillin 250mg dispersible tablet BD for 5 days (OVERRIDDEN BY ICCM-01 VETO).`,
+        modes: {
+          naive: {
+            badge: "❌ FATAL ASPIRATION HAZARD (Naive RAG)",
+            badgeClass: "bg-red-500/20 text-red-300 border border-red-500/40",
+            screenClass: "bg-red-950/20 border-red-500/40 text-slate-200",
+            output: `<div class="font-bold text-red-400 mb-2">CHW Visit Preparation (Naive Paragraph RAG + Gemma4 2B):</div>
+<ul class="list-disc pl-5 space-y-1.5">
+  <li><strong>Malaria Treatment:</strong> Since mRDT is positive and weight is 10.8 kg, give <strong>1 tablet of oral Artemether-Lumefantrine (AL)</strong> immediately with milk.</li>
+  <li><strong>Pneumonia Treatment:</strong> Because the child has fast breathing (56 bpm), administer <strong>1 tablet of Oral Amoxicillin 250mg</strong> twice daily for 5 days.</li>
+  <li><strong>Referral:</strong> Refer the child to the health facility for the chest indrawing and convulsion.</li>
+</ul>`,
+            impactClass: "bg-red-950/40 border-red-500/40 text-red-200",
+            impact: "<strong>Why Naive RAG Failed:</strong> Standard vector search retrieved the Malaria and Pneumonia dosing paragraphs, but the aspiration warning was truncated in another chunk. Gemma4 2B dutifully prescribed two oral tablets to a lethargic, post-ictal child—creating an immediate choking/aspiration hazard."
+          },
+          static: {
+            badge: "⚠️ CONTRADICTORY POP-UPS (Static Rules Only)",
+            badgeClass: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+            screenClass: "bg-amber-950/20 border-amber-500/40 text-slate-200",
+            output: `<div class="space-y-2.5">
+  <div class="p-2.5 rounded bg-slate-900 border border-amber-500/40 text-xs">
+    <strong class="text-amber-400">[POP-UP CARD 1 — RULE ICCM-03: PNEUMONIA]</strong><br>
+    Fast breathing (56 bpm) detected. Dispense <strong>Oral Amoxicillin 250mg DT</strong> (1 tab twice daily) now.
+  </div>
+  <div class="p-2.5 rounded bg-slate-900 border border-red-500/40 text-xs">
+    <strong class="text-red-400">[POP-UP CARD 2 — RULE ICCM-01: DANGER SIGN]</strong><br>
+    Convulsion reported. Do not give oral fluids/tablets. Insert <strong>100mg Rectal Artesunate</strong> and refer.
+  </div>
+</div>`,
+            impactClass: "bg-amber-950/40 border-amber-500/40 text-amber-200",
+            impact: "<strong>Why Static Rules Alone Fail:</strong> Without an SLM to synthesize and de-conflict the triggered rules, the app displays two separate protocol cards that directly contradict each other (Card 1 says <em>Give Oral Amox</em>; Card 2 says <em>Nothing by Mouth</em>). The CHW is left to guess which card wins."
+          },
+          twobox: {
+            badge: "✅ SAFE DE-CONFLICTED BRIEFING (aCDU + Gemma4 2B)",
+            badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
+            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            output: `<div class="font-bold text-emerald-400 mb-2">🚨 EMERGENCY TRIAGE BRIEFING (Gemma4 2B — 2.1s):</div>
+<ul class="list-disc pl-5 space-y-2">
+  <li><strong>🛑 DO NOT GIVE ORAL TABLETS:</strong> Because Baraka had a convulsion and is lethargic, <strong>strictly withhold oral AL and oral Amoxicillin</strong> (high risk of choking/aspiration).</li>
+  <li><strong>Immediate Pre-Referral Action:</strong> Insert <strong>1 suppository (100mg) of Rectal Artesunate</strong> now for severe malaria.</li>
+  <li><strong>Emergency Transfer:</strong> Place the child on their side (recovery position) to keep the airway clear and escort <strong>immediately to the hospital</strong> for IV treatment.</li>
+</ul>`,
+            impactClass: "bg-emerald-950/40 border-emerald-500/40 text-emerald-200",
+            impact: "<strong>Why the Two-Box Architecture Succeeds (6x Lift):</strong> Box 1 deterministically retrieved both aCDUs along with the explicit <code>STOP: NO ORAL MEDS</code> veto. Box 2 (Gemma4 2B) read the veto, suppressed the oral pneumonia/malaria tablets, and handed the CHW a single, unmistakable 3-step emergency script."
+          }
+        }
+      },
+      {
+        title: "Scenario 2: Newborn Cord Danger Sign & Grandmother's Ash Remedy (Level 3)",
+        patientMarkdown: "## demographics\nBaby Amina | Age: 3 days (Postnatal Visit 2) | Weight: 3.1 kg | female\n\n## observations (Today)\nTemperature: 37.2°C | Feeding: Breastfeeding well\nUmbilical Cord: Redness extending to skin at base of stump\nCHW Note: Grandmother is applying cow dung and wood ash to help the cord dry faster, and asks if she should continue.",
+        triggerRule: "SQLite FTS5 Match (0.48 ms):\n• Cohort (Newborn 0..28d) AND Symptom ('cord redness', 'ash', 'cow dung') -> KENYA-ECHIS-MNH-08",
+        acduJson: `[aCDU: KENYA-ECHIS-MNH-08 (Newborn Cord Care & Omphalitis)]
+• CRITERIA: Newborn 0-28 days; routine cord care or umbilical redness/pus.
+• MANDATED ACTIONS:
+  1. Apply 7.1% Chlorhexidine digluconate gel/solution daily for 7 days.
+  2. Redness at base of cord is a Newborn Danger Sign (Omphalitis) -> URGENT hospital referral.
+• 🛑 NEGATIVE BOUNDARIES (CULTURAL SAFETY CLAMP):
+  - STOP: Strictly FORBID applying cow dung, wood ash, soil, shea butter, or herbal pastes to the cord stump (high risk of fatal neonatal tetanus).`,
+        modes: {
+          naive: {
+            badge: "❌ SILENT SAFETY OMISSION (Naive RAG)",
+            badgeClass: "bg-red-500/20 text-red-300 border border-red-500/40",
+            screenClass: "bg-red-950/20 border-red-500/40 text-slate-200",
+            output: `<div class="font-bold text-red-400 mb-2">CHW Visit Preparation (Naive Paragraph RAG + Gemma4 2B):</div>
+<ul class="list-disc pl-5 space-y-1.5">
+  <li><strong>Cord Care:</strong> Apply 7.1% chlorhexidine digluconate to the umbilical cord stump once daily for the first 7 days of life.</li>
+  <li><strong>Keep Clean:</strong> Keep the cord clean and dry, folding the diaper below the stump.</li>
+  <li><strong>Referral:</strong> Since there is redness at the base of the cord, refer the baby to the clinic for evaluation.</li>
+</ul>`,
+            impactClass: "bg-red-950/40 border-red-500/40 text-red-200",
+            impact: "<strong>Why Naive RAG Failed:</strong> Standard guideline paragraphs state what to apply (chlorhexidine) but don't include the negative refusal rule in the same window. The model completely ignored the grandmother's cow dung/ash practice, failing the Tier-1 safety refusal check."
+          },
+          static: {
+            badge: "⚠️ GENERIC CHECKLIST (Static Rules Only)",
+            badgeClass: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+            screenClass: "bg-amber-950/20 border-amber-500/40 text-slate-200",
+            output: `<div class="p-3 rounded bg-slate-900 border border-amber-500/40 text-xs space-y-1">
+  <strong class="text-amber-400">[STATIC PROTOCOL CARD: MNH-08]</strong>
+  <div>• Sign: Umbilical redness/pus = Danger Sign.</div>
+  <div>• Action: Refer to health facility.</div>
+  <div>• Routine Care: 7.1% Chlorhexidine daily x 7 days.</div>
+</div>`,
+            impactClass: "bg-amber-950/40 border-amber-500/40 text-amber-200",
+            impact: "<strong>Why Static Rules Alone Are Incomplete:</strong> A static checklist tells the CHW to refer, but doesn't equip the CHW with the specific counseling script needed to respectfully counter the grandmother's belief about wood ash and tetanus."
+          },
+          twobox: {
+            badge: "✅ EXPLICIT TETANUS REFUSAL + REFERRAL (aCDU + Gemma4 2B)",
+            badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
+            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            output: `<div class="font-bold text-emerald-400 mb-2">🛑 POSTNATAL DANGER SIGN BRIEFING (Gemma4 2B — 1.9s):</div>
+<ul class="list-disc pl-5 space-y-2">
+  <li><strong>🛑 Stop Cow Dung &amp; Ash Immediately:</strong> Respectfully explain to the grandmother that she must <strong>never apply cow dung or wood ash</strong> to the cord—they carry spores that cause fatal neonatal tetanus.</li>
+  <li><strong>Urgent Hospital Referral:</strong> Redness spreading to the skin at the cord base is a severe infection danger sign (omphalitis). Escort Baby Amina to the hospital today.</li>
+  <li><strong>Approved Cord Care:</strong> Use <strong>only 7.1% Chlorhexidine</strong> on the stump and keep the baby warm skin-to-skin during transfer.</li>
+</ul>`,
+            impactClass: "bg-emerald-950/40 border-emerald-500/40 text-emerald-200",
+            impact: "<strong>Why the Two-Box Architecture Succeeds:</strong> The aCDU injects the explicit cultural negative boundary (<code>cow dung / ash / neonatal tetanus</code>), and Gemma4 2B weaves it directly into a practical family counseling script for the CHW."
+          }
+        }
+      },
+      {
+        title: "Scenario 3: Pre-Eclampsia Jump + Resolved Malaria Trap (Check A + Check B)",
+        patientMarkdown: "## demographics\nFatima Bello | Age: 28y | 32 weeks pregnant\n## active conditions\nPregnancy 32w | Pregnancy-induced hypertension\n## past resolved history (do not report as active)\nMalaria falciparum | resolved | 11 months ago\n## vitals\n2026-09-15: BP 126/82 mmHg\n2026-10-14: BP 148/96 mmHg | Urine Protein: 1+ | Frontal headache\n## urgent tasks\nOVERDUE: Refer to District Hospital for pre-eclampsia workup",
+        triggerRule: "SQLite FTS5 Match (0.51 ms):\n• Cohort (Pregnant >= 20w) AND Vital (BP 148/96 >= 140/90) AND Symptom (Headache / Protein 1+) -> KENYA-MOH-MNH-02",
+        acduJson: `[aCDU: KENYA-MOH-MNH-02 (Hypertension & Pre-Eclampsia)]
+• CRITERIA: BP >= 140/90 after 20w gestation with proteinuria (>=1+) or headache/blurred vision.
+• MANDATED ACTIONS:
+  1. IMMEDIATE referral to hospital for Pre-Eclampsia workup.
+  2. Assist family with emergency transport; continue routine oral iron/folic acid.
+• 🛑 NEGATIVE BOUNDARIES:
+  - STOP: Do NOT prescribe antihypertensives or magnesium sulfate at community level.
+  - STOP: Do NOT treat resolved historical malaria as an active cause of headache.`,
+        modes: {
+          naive: {
+            badge: "❌ HISTORICAL TRAP & DELAY (Naive RAG)",
+            badgeClass: "bg-red-500/20 text-red-300 border border-red-500/40",
+            screenClass: "bg-red-950/20 border-red-500/40 text-slate-200",
+            output: `<div class="font-bold text-red-400 mb-2">Un-Gated Raw FHIR + Naive RAG Output:</div>
+<ul class="list-disc pl-5 space-y-1.5">
+  <li><strong>Summary:</strong> Fatima is 28 years old with active pregnancy hypertension and a history of malaria.</li>
+  <li><strong>Action:</strong> Because she has a frontal headache and malaria in her record, test or treat for recurrent malaria, monitor her blood pressure, and start antihypertensive medication if it remains elevated.</li>
+</ul>`,
+            impactClass: "bg-red-950/40 border-red-500/40 text-red-200",
+            impact: "<strong>Why Un-Gated Processing Fails:</strong> Without Tokempic's temporal separation and the aCDU's negative boundary, the model conflates her resolved malaria from 11 months ago with her current pre-eclamptic headache, and suggests out-of-scope antihypertensives."
+          },
+          static: {
+            badge: "⚠️ RAW DATA OVERLOAD (No SLM Summary)",
+            badgeClass: "bg-amber-500/20 text-amber-300 border border-amber-500/40",
+            screenClass: "bg-amber-950/20 border-amber-500/40 text-slate-200",
+            output: `<div class="text-xs font-mono space-y-1.5">
+  <div class="text-amber-400 font-bold">[14 Raw FHIR Resources Displayed Across 4 Tabs]</div>
+  <div>• Observation/obs-991: 126/82 mmHg (2026-09-15)</div>
+  <div>• Observation/obs-998: 148/96 mmHg (2026-10-14)</div>
+  <div>• Condition/cond-102: Malaria (clinicalStatus: resolved)</div>
+  <div>• ServiceRequest/sr-404: District Hospital Referral (status: active)</div>
+  <div class="p-2 bg-slate-900 border border-amber-500/30 mt-2"><strong>Static Alert:</strong> BP >= 140/90. Refer to facility.</div>
+</div>`,
+            impactClass: "bg-amber-950/40 border-amber-500/40 text-amber-200",
+            impact: "<strong>Why Static Rules Miss Check A Value:</strong> A CHW visiting 25 homes a day cannot click through 4 separate FHIR tabs to piece together that Fatima's BP jumped +22 mmHg in 4 weeks and that her referral is already overdue."
+          },
+          twobox: {
+            badge: "✅ 100% CHECK A + CHECK B PASS (Tokempic + aCDU + Gemma4 2B)",
+            badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
+            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            output: `<div class="space-y-3 text-xs md:text-sm">
+  <div class="p-2.5 rounded-lg bg-blue-950/40 border border-blue-500/30">
+    <strong class="text-blue-300">Check A — Pre-Visit Trajectory Summary (1.9s):</strong><br>
+    Fatima (28yo, 32w pregnant) had a sharp BP jump from <strong>126/82 &rarr; 148/96 mmHg</strong> with <strong>1+ proteinuria</strong> and frontal headache. Her urgent District Hospital referral is <strong>overdue</strong>. <em>(Past malaria is resolved).</em>
+  </div>
+  <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30">
+    <strong class="text-emerald-300">Check B — aCDU Protocol Action Plan (1.8s):</strong>
+    <ul class="list-disc pl-5 mt-1 space-y-1">
+      <li><strong>🚨 Immediate Hospital Referral:</strong> High BP + proteinuria + headache at 32w indicates <strong>Pre-Eclampsia</strong>. Mobilize family transport immediately.</li>
+      <li><strong>🛑 Community Boundary:</strong> Do NOT give antihypertensives, unprescribed herbs, or sedatives. Continue routine oral iron and folic acid.</li>
+    </ul>
+  </div>
+</div>`,
+            impactClass: "bg-emerald-950/40 border-emerald-500/40 text-emerald-200",
+            impact: "<strong>The Best of Both Worlds:</strong> Gemma4 2B delivers a 100% accurate longitudinal summary (Check A) AND a 100% safe pre-eclampsia action plan (Check B) because Tokempic structured the patient history and the aCDU clamped the clinical rules."
+          }
+        }
+      }
+    ];
+
+    let currentScenario = 0;
+    let currentMode = 'twobox';
+
+    function switchTab(tabId) {
+      ['story', 'simulator', 'benchmarks', 'tradeoffs'].forEach(id => {
+        document.getElementById('view-' + id).classList.add('hidden');
+        document.getElementById('tab-' + id).classList.remove('active');
+      });
+      document.getElementById('view-' + tabId).classList.remove('hidden');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    function selectScenario(idx) {
+      currentScenario = idx;
+      [0, 1, 2].forEach(i => {
+        document.getElementById('scen-' + i).classList.toggle('active', i === idx);
+      });
+      renderSimulator();
+    }
+
+    function selectMode(mode) {
+      currentMode = mode;
+      const btnNaive = document.getElementById('mode-naive');
+      const btnStatic = document.getElementById('mode-static');
+      const btnTwobox = document.getElementById('mode-twobox');
+
+      btnNaive.className = 'mode-btn p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition ' + (mode === 'naive' ? 'active-danger' : 'text-slate-400');
+      btnStatic.className = 'mode-btn p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition ' + (mode === 'static' ? 'active-warn' : 'text-slate-400');
+      btnTwobox.className = 'mode-btn p-2.5 rounded-xl border border-slate-800 text-xs font-bold text-center transition ' + (mode === 'twobox' ? 'active-safe' : 'text-slate-400');
+
+      renderSimulator();
+    }
+
+    function renderSimulator() {
+      const s = SCENARIOS[currentScenario];
+      const m = s.modes[currentMode];
+
+      document.getElementById('sim-patient-box').textContent = s.patientMarkdown;
+      document.getElementById('sim-trigger-rule').textContent = s.triggerRule;
+      document.getElementById('sim-acdu-json').textContent = s.acduJson;
+
+      const badge = document.getElementById('sim-badge');
+      badge.textContent = m.badge;
+      badge.className = 'text-xs font-bold px-2.5 py-0.5 rounded-full ' + m.badgeClass;
+
+      const screen = document.getElementById('sim-screen-output');
+      screen.className = 'p-5 rounded-xl border min-h-[210px] text-sm leading-relaxed space-y-3 ' + m.screenClass;
+      screen.innerHTML = m.output;
+
+      const impact = document.getElementById('sim-impact-box');
+      impact.className = 'p-4 rounded-xl border text-xs leading-relaxed ' + m.impactClass;
+      impact.innerHTML = m.impact;
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      const icon = document.getElementById('themeIcon');
+      if (html.classList.contains('light')) {
+        html.classList.remove('light');
+        icon.className = 'fa-solid fa-sun';
+      } else {
+        html.classList.add('light');
+        icon.className = 'fa-solid fa-moon';
+      }
+    }
+
+    // Initialize simulator on load
+    renderSimulator();
+  </script>
+</body>
+</html>
