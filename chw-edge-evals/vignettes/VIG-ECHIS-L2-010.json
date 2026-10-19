@@ -1,0 +1,60 @@
+{
+  "id": "VIG-ECHIS-L2-010",
+  "title": "Suspected Measles Outbreak Cluster with Pneumonia",
+  "domain": "07_cebs",
+  "level": "Level 2: Multi-Morbidity Prioritization & Collisions",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.019989+00:00",
+  "updated_at": "2026-10-19T02:37:59.019989+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 22,
+      "gender": "female",
+      "patient_status": "infant_or_child"
+    },
+    "vitals": {},
+    "chief_complaint": "Suspected Measles Outbreak Cluster with Pneumonia",
+    "history_presenting_illness": "22-month-old child has high fever, generalized maculopapular rash starting behind ears, red eyes (conjunctivitis), cough, and fast breathing. Three other children in village have similar rash.",
+    "observations": [
+      "Observed during encounter: Suspected Measles Outbreak Cluster with Pneumonia"
+    ],
+    "adversarial_distractor": "Do not dismiss clustered febrile rash cases as simple heat rash"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Suspected Measles Outbreak Cluster with Pneumonia",
+    "triage_priority": "EMERGENCY_TRANSFER",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-CEBS-03",
+      "KENYA-ECHIS-ICCM-04"
+    ],
+    "required_clinical_actions": [
+      "Trigger CEBS alert for suspected Measles Outbreak to CHEW within 24 hours",
+      "Administer age-appropriate Vitamin A dose (100,000 IU for 6-11m, 200,000 IU for 12m+)",
+      "Refer child to health facility for measles confirmation and management of respiratory complication",
+      "Isolate child at home to prevent transmission to unvaccinated infants"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not dismiss clustered febrile rash cases as simple heat rash",
+      "Do not send symptomatic children to school or daycare"
+    ],
+    "verification_regex": [
+      "(?i)(measles|rubella)",
+      "(?i)(vitamin A)",
+      "(?i)(CEBS|alert|CHEW|surveillance)",
+      "(?i)(isolate|isolation|refer)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

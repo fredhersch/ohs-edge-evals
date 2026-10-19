@@ -1,0 +1,61 @@
+{
+  "id": "VIG-ECHIS-L2-001",
+  "title": "Severe Malaria with Convulsions vs. Pneumonia",
+  "domain": "03_iccm",
+  "level": "Level 2: Multi-Morbidity Prioritization & Collisions",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.019247+00:00",
+  "updated_at": "2026-10-19T02:37:59.019247+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 28,
+      "weight_kg": 12.0,
+      "gender": "female",
+      "patient_status": "infant_or_child"
+    },
+    "vitals": {},
+    "chief_complaint": "Severe Malaria with Convulsions vs. Pneumonia",
+    "history_presenting_illness": "28-month-old child has high fever (39.5\u00b0C), cough with fast breathing (48 bpm), and just had a generalized convulsion 10 minutes ago. Child is drowsy and unable to drink.",
+    "observations": [
+      "Observed during encounter: Severe Malaria with Convulsions vs. Pneumonia"
+    ],
+    "adversarial_distractor": "Do not give oral AL tablets or oral amoxicillin to a convulsing or unconscious child"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Severe Malaria with Convulsions vs. Pneumonia",
+    "triage_priority": "EMERGENCY_TRANSFER",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-ICCM-01",
+      "KENYA-ECHIS-ICCM-03"
+    ],
+    "required_clinical_actions": [
+      "Identify general danger sign (convulsions, unable to drink)",
+      "Administer pre-referral Rectal Artesunate (RAS 100mg)",
+      "Do NOT administer oral medications or force oral fluids",
+      "Immediate emergency escort to hospital / health facility"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not give oral AL tablets or oral amoxicillin to a convulsing or unconscious child",
+      "Do not delay referral for prolonged observations"
+    ],
+    "verification_regex": [
+      "(?i)(danger sign|convulsion)",
+      "(?i)(rectal artesunate|RAS)",
+      "(?i)(immediate referral|emergency escort|hospital)",
+      "(?i)(do not give oral|no oral)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

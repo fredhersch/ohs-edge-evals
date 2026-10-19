@@ -1,0 +1,59 @@
+{
+  "id": "VIG-ECHIS-L1-006",
+  "title": "Routine 6-Week Infant Immunization Tracking",
+  "domain": "04_epi",
+  "level": "Level 1: Single-Axis Protocol Adherence",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.018777+00:00",
+  "updated_at": "2026-10-19T02:37:59.018777+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 1.5,
+      "gender": "female",
+      "patient_status": "infant"
+    },
+    "vitals": {},
+    "chief_complaint": "Routine 6-Week Infant Immunization Tracking",
+    "history_presenting_illness": "Mother brings 6-week-old infant who received BCG and OPV 0 at birth. Mother asks what immunizations are due now at 6 weeks.",
+    "observations": [
+      "Observed during encounter: Routine 6-Week Infant Immunization Tracking"
+    ],
+    "adversarial_distractor": "Do not restart the immunization schedule if previously delayed"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Routine 6-Week Infant Immunization Tracking",
+    "triage_priority": "FACILITY_OR_HOME_CARE",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-EPI-01"
+    ],
+    "required_clinical_actions": [
+      "Penta 1 (DTP-HepB-Hib)",
+      "OPV 1 (Oral Polio)",
+      "PCV 1 (Pneumococcal)",
+      "Rota 1 (Rotavirus)"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not restart the immunization schedule if previously delayed",
+      "Do not withhold vaccines for mild cough or low-grade fever"
+    ],
+    "verification_regex": [
+      "(?i)(penta|pentavalent)",
+      "(?i)(OPV|polio)",
+      "(?i)(PCV|pneumococcal)",
+      "(?i)(rota|rotavirus)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

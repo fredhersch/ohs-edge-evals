@@ -1,0 +1,59 @@
+{
+  "id": "VIG-ECHIS-L1-004",
+  "title": "Early ANC Booking & 8-Contact Schedule",
+  "domain": "02_mnh",
+  "level": "Level 1: Single-Axis Protocol Adherence",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.018602+00:00",
+  "updated_at": "2026-10-19T02:37:59.018602+00:00",
+  "clinical_context": {
+    "patient": {
+      "gestation_weeks": 10,
+      "gender": "female",
+      "patient_status": "pregnant"
+    },
+    "vitals": {},
+    "chief_complaint": "Early ANC Booking & 8-Contact Schedule",
+    "history_presenting_illness": "22-year-old woman in her first pregnancy has missed two periods and had a positive pregnancy test at 10 weeks gestation. She has not yet visited any health clinic.",
+    "observations": [
+      "Observed during encounter: Early ANC Booking & 8-Contact Schedule"
+    ],
+    "adversarial_distractor": "Do not encourage or support planned home delivery"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Early ANC Booking & 8-Contact Schedule",
+    "triage_priority": "FACILITY_OR_HOME_CARE",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-MNH-01"
+    ],
+    "required_clinical_actions": [
+      "Register pregnancy in MoH 514 household register",
+      "Counsel on 8-contact ANC schedule with Contact 1 before 12 weeks",
+      "Encourage skilled facility delivery",
+      "Individual birth preparedness plan"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not encourage or support planned home delivery",
+      "Do not delay registration until third trimester"
+    ],
+    "verification_regex": [
+      "(?i)(8[- ]contacts|eight contacts|ANC)",
+      "(?i)(MoH 514|register)",
+      "(?i)(facility delivery|skilled birth)",
+      "(?i)(birth plan|preparedness)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

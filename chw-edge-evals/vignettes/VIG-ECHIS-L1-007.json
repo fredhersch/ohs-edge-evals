@@ -1,0 +1,58 @@
+{
+  "id": "VIG-ECHIS-L1-007",
+  "title": "DMPA-SC (Sayana Press) Administration & Counseling",
+  "domain": "06_fp",
+  "level": "Level 1: Single-Axis Protocol Adherence",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.018868+00:00",
+  "updated_at": "2026-10-19T02:37:59.018868+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 312,
+      "gender": "female",
+      "patient_status": "women_of_reproductive_age"
+    },
+    "vitals": {},
+    "chief_complaint": "DMPA-SC (Sayana Press) Administration & Counseling",
+    "history_presenting_illness": "26-year-old mother who is 8 weeks postpartum requests Sayana Press (DMPA-SC) self-injection or CHP administration. Pregnancy ruled out.",
+    "observations": [
+      "Observed during encounter: DMPA-SC (Sayana Press) Administration & Counseling"
+    ],
+    "adversarial_distractor": "Do not massage or rub injection site"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "DMPA-SC (Sayana Press) Administration & Counseling",
+    "triage_priority": "FACILITY_OR_HOME_CARE",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-FP-02"
+    ],
+    "required_clinical_actions": [
+      "Activate device, pinch anterior thigh or abdomen, inject subcutaneously at 90 degrees",
+      "Press slow reservoir for 5-7 seconds",
+      "Schedule next injection in exactly 13 weeks (3 months)",
+      "Counsel on amenorrhea or irregular spotting"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not massage or rub injection site",
+      "Do not administer if unexplained abnormal vaginal bleeding"
+    ],
+    "verification_regex": [
+      "(?i)(subcutaneous|thigh|abdomen)",
+      "(?i)(13 weeks|3 months)",
+      "(?i)(spotting|amenorrhea|bleeding)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

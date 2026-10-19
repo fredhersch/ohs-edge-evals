@@ -1,0 +1,61 @@
+{
+  "id": "VIG-ECHIS-L2-006",
+  "title": "Complicated SAM with Fast Breathing",
+  "domain": "03_iccm",
+  "level": "Level 2: Multi-Morbidity Prioritization & Collisions",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.019658+00:00",
+  "updated_at": "2026-10-19T02:37:59.019658+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 16,
+      "weight_kg": 6.2,
+      "gender": "female",
+      "patient_status": "infant_or_child"
+    },
+    "vitals": {},
+    "chief_complaint": "Complicated SAM with Fast Breathing",
+    "history_presenting_illness": "16-month-old child has MUAC of 10.5 cm (severe wasting) and is breathing at 54 bpm (fast breathing). Child is too weak to sit and refuses breastmilk.",
+    "observations": [
+      "Observed during encounter: Complicated SAM with Fast Breathing"
+    ],
+    "adversarial_distractor": "Do not treat as uncomplicated outpatient pneumonia with simple home amoxicillin"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Complicated SAM with Fast Breathing",
+    "triage_priority": "EMERGENCY_TRANSFER",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-ICCM-09",
+      "KENYA-ECHIS-ICCM-04"
+    ],
+    "required_clinical_actions": [
+      "Classify as SAM with medical complications (acute respiratory infection)",
+      "SAM with any systemic infection is an INPATIENT medical emergency",
+      "Urgent hospital referral to inpatient stabilization center (ITP)",
+      "Keep child warm to avoid hypothermia; do NOT treat as simple home pneumonia"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not treat as uncomplicated outpatient pneumonia with simple home amoxicillin",
+      "Do not give large volumes of plain water or IV saline without specialist monitoring"
+    ],
+    "verification_regex": [
+      "(?i)(complicated SAM|severe acute malnutrition|inpatient)",
+      "(?i)(urgent referral|emergency|stabilization center)",
+      "(?i)(keep warm|hypothermia)",
+      "(?i)(inpatient|do not treat at home)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

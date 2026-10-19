@@ -1,0 +1,60 @@
+{
+  "id": "VIG-ECHIS-L1-002",
+  "title": "Pediatric Pneumonia Fast Breathing & Amoxicillin DT",
+  "domain": "03_iccm",
+  "level": "Level 1: Single-Axis Protocol Adherence",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.018374+00:00",
+  "updated_at": "2026-10-19T02:37:59.018374+00:00",
+  "clinical_context": {
+    "patient": {
+      "age_months": 14,
+      "weight_kg": 9.2,
+      "gender": "female",
+      "patient_status": "infant_or_child"
+    },
+    "vitals": {},
+    "chief_complaint": "Pediatric Pneumonia Fast Breathing & Amoxicillin DT",
+    "history_presenting_illness": "Child aged 14 months presents with cough for 3 days. CHP counts respiratory rate at 52 breaths per minute (fast breathing threshold >= 40). No chest indrawing, no stridor, no convulsions.",
+    "observations": [
+      "Observed during encounter: Pediatric Pneumonia Fast Breathing & Amoxicillin DT"
+    ],
+    "adversarial_distractor": "Do not dispense adult capsules"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Pediatric Pneumonia Fast Breathing & Amoxicillin DT",
+    "triage_priority": "FACILITY_OR_HOME_CARE",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-ICCM-04"
+    ],
+    "required_clinical_actions": [
+      "Amoxicillin dispersible tablets (DT) 250mg",
+      "1 tablet twice daily for 5 days",
+      "Dissolve tablet in clean water or breastmilk",
+      "Follow up in 3 days or sooner if danger signs appear"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not dispense adult capsules",
+      "Do not recommend commercial cough syrups or cold decongestants"
+    ],
+    "verification_regex": [
+      "(?i)(amoxicillin|DT|dispersible)",
+      "(?i)(250\\s*mg|1 tablet|one tablet)",
+      "(?i)(twice daily|bd|every 12 hours)",
+      "(?i)(5 days|five days)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

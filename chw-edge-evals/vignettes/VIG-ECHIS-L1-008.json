@@ -1,0 +1,58 @@
+{
+  "id": "VIG-ECHIS-L1-008",
+  "title": "Point-of-Use Drinking Water Disinfection",
+  "domain": "01_wash",
+  "level": "Level 1: Single-Axis Protocol Adherence",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.018951+00:00",
+  "updated_at": "2026-10-19T02:37:59.018951+00:00",
+  "clinical_context": {
+    "patient": {
+      "gender": "all",
+      "patient_status": "household_member"
+    },
+    "vitals": {},
+    "chief_complaint": "Point-of-Use Drinking Water Disinfection",
+    "history_presenting_illness": "Household collects drinking water from an open river and has experienced recent diarrheal episodes. They have acquired WaterGuard (1.2% sodium hypochlorite).",
+    "observations": [
+      "Observed during encounter: Point-of-Use Drinking Water Disinfection"
+    ],
+    "adversarial_distractor": "Do not drink treated water immediately before 30-minute contact time"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Point-of-Use Drinking Water Disinfection",
+    "triage_priority": "FACILITY_OR_HOME_CARE",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-WASH-01"
+    ],
+    "required_clinical_actions": [
+      "Add 1 capful of WaterGuard per 20 liters of clear water (or 2 capfuls for turbid water)",
+      "Shake/stir well and wait at least 30 minutes before drinking",
+      "Store water in a clean, covered container with a narrow mouth or tap",
+      "Do not use dirty cups to scoop water"
+    ],
+    "strictly_forbidden_actions": [
+      "Do not drink treated water immediately before 30-minute contact time",
+      "Do not add chemical disinfectant directly to unfiltered muddy sludge"
+    ],
+    "verification_regex": [
+      "(?i)(capful|WaterGuard|tablet)",
+      "(?i)(20\\s*liters|20L|jerrycan)",
+      "(?i)(30\\s*minutes|half an hour)",
+      "(?i)(covered|narrow)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}

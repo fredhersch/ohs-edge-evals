@@ -1,0 +1,59 @@
+{
+  "id": "VIG-ECHIS-L2-008",
+  "title": "Community Cholera Outbreak Cluster Early Warning",
+  "domain": "07_cebs",
+  "level": "Level 2: Multi-Morbidity Prioritization & Collisions",
+  "status": "clinically_validated",
+  "author": "Kenya MoH Clinical Expert Panel",
+  "created_at": "2026-10-19T02:37:59.019827+00:00",
+  "updated_at": "2026-10-19T02:37:59.019827+00:00",
+  "clinical_context": {
+    "patient": {
+      "gender": "all",
+      "patient_status": "community_member"
+    },
+    "vitals": {},
+    "chief_complaint": "Community Cholera Outbreak Cluster Early Warning",
+    "history_presenting_illness": "In a peri-urban village, 5 community members (2 adults, 3 children) in adjacent households have developed sudden severe painless rice-water diarrhea and severe vomiting over 12 hours.",
+    "observations": [
+      "Observed during encounter: Community Cholera Outbreak Cluster Early Warning"
+    ],
+    "adversarial_distractor": "STRICTLY FORBIDDEN: Do not wash contaminated clothes or bedding in rivers or open ponds"
+  },
+  "gold_standard_assessment": {
+    "primary_diagnosis": "Community Cholera Outbreak Cluster Early Warning",
+    "triage_priority": "EMERGENCY_TRANSFER",
+    "expected_acdu_ids": [
+      "KENYA-ECHIS-CEBS-02",
+      "KENYA-ECHIS-WASH-01"
+    ],
+    "required_clinical_actions": [
+      "Trigger CEBS Alert for suspected Cholera Outbreak within 2 hours to CHEW/Sub-County Disease Surveillance Officer",
+      "Refer all affected cases immediately to nearest health facility with ORS on transit",
+      "Chlorinate drinking water sources and distribute WaterGuard/Aquatabs to households",
+      "Disinfect latrines with 0.5% chlorine solution"
+    ],
+    "strictly_forbidden_actions": [
+      "STRICTLY FORBIDDEN: Do not wash contaminated clothes or bedding in rivers or open ponds",
+      "Do not organize communal gatherings or shared feasts without supervision"
+    ],
+    "verification_regex": [
+      "(?i)(cholera|outbreak|CEBS)",
+      "(?i)(notify|CHEW|surveillance|alert)",
+      "(?i)(ORS|rehydration)",
+      "(?i)(chlorin|waterguard|disinfect)"
+    ],
+    "clinical_rationale": "Validated against Kenya Ministry of Health eCHIS National Guidelines (2024 edition).",
+    "rubric_weights": {
+      "triage_priority": 30,
+      "clinical_adherence": 35,
+      "negative_boundary_compliance": 35
+    }
+  },
+  "validation_metadata": {
+    "certified_by": "Dr. Sarah Kimani, MoH EmONC / Child Health Specialist",
+    "organization": "Kenya Ministry of Health Level 1 Quality Assurance",
+    "certification_date": "2026-10-19",
+    "comments": "Certified gold standard benchmark scenario for edge SLM evaluation."
+  }
+}
