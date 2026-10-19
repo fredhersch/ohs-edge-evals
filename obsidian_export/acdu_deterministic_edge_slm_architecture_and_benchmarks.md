@@ -50,9 +50,131 @@ An **aCDU** replaces raw paragraphs with a **clinician-certified, self-contained
 }
 ```
 
-### Why Both Halves of the aCDU Matter
+### 2.1 Why Both Halves of the aCDU Matter
 1. **Deterministic Trigger Header (`trigger_logic`):** Box 1 matches structured FHIR observations (`age = 18m`, `symptom = convulsions`) directly in SQLite. **Recall is 100.0% in 0.6ms.**
 2. **Clamped Clinical Payload (`mandated_chw_actions` + `negative_boundaries`):** Every positive action is permanently fused with its **Negative Boundary (`STOP: Do NOT...`)**. They can never be separated during retrieval.
+
+---
+
+### 2.2 aCDU vs. FHIRPath (SQL-on-FHIR / Tokempic): How They Compare & Complement Each Other
+
+A common architectural question in the Open Health Stack (OHS) ecosystem is: ***"If we already have FHIRPath (and SQL-on-FHIR / Tokempic views or WHO SMART Guideline CQL expressions), why do we also need aCDUs—and how do they work together?"***
+
+The short answer: **FHIRPath and aCDUs operate on opposite halves of the clinical reasoning equation—and neither can safely condition an Edge SLM without the other.**
+* **FHIRPath (via SQL-on-FHIR / Tokempic)** is the **Patient State Extractor**: it deterministically queries, cleans, and compresses *what is true about the patient* from raw HL7 FHIR R4 JSON bundles.
+* **The aCDU (Atomic Clinical Decision Unit)** is the **Clinical Protocol & Guardrail Package**: it deterministically defines *what the health worker must do—and must NEVER do* once FHIRPath triggers a clinical state.
+
+```mermaid
+flowchart LR
+    subgraph PatientSide ["1. THE PATIENT SIDE: FHIRPath & SQL-on-FHIR (Tokempic)"]
+        FHIR["Raw HL7 FHIR R4 Bundle\n(1,840 tokens of nested JSON)"]
+        FP["FHIRPath ViewDefinitions\n(vitals.json, observations.json, tasks.json)"]
+        State["Normalized Patient State (~210 tokens)\n• Age pre-computed: '16m' (no date math)\n• BP unified: '148/96 mmHg [High]'\n• Dipstick: '1+ Abnormal (Proteinuria)'\n• Task: 'OVERDUE Urgent Referral'"]
+        FHIR --> FP --> State
+    end
+
+    subgraph Handshake ["2. DETERMINISTIC IGNITION (< 1 ms)"]
+        Trigger["Boolean / Threshold Match\nEvaluates FHIRPath outputs against\naCDU trigger_logic in SQLite"]
+    end
+
+    subgraph GuidelineSide ["3. THE GUIDELINE SIDE: Atomic Clinical Decision Unit (aCDU)"]
+        CDU["Triggered aCDU(s) (~150 tokens)\n• Mandated Actions (R): Exact dose/referral\n• Negative Boundaries (N): 'STOP: Do NOT...'\n• Deontic Union: N_total = N_1 U N_2"]
+    end
+
+    subgraph EdgeSLM ["4. EDGE SLM SYNTHESIS (Gemma4 2B)"]
+        Out["De-Conflicted 3-Bullet CHW Script\n• Total Prompt: < 450 tokens (~40 MB KV Cache)\n• 100% True Clinical Safety Floor"]
+    end
+
+    State ==> Trigger
+    Trigger ==> CDU
+    State --> EdgeSLM
+    CDU --> EdgeSLM
+```
+
+#### Side-by-Side Architectural Comparison: FHIRPath vs. aCDU
+
+| Dimension | **FHIRPath (SQL-on-FHIR / Tokempic `ViewDefinition`)** | **Atomic Clinical Decision Unit (`aCDU`)** | **How They Complement Each Other** |
+| :--- | :--- | :--- | :--- |
+| **Primary Domain** | **The Electronic Health Record (EHR):** Operates on HL7 FHIR R4 resources (`Patient`, `Observation`, `Condition`, `Task`, `MedicationRequest`). | **The Clinical Guideline Corpus:** Operates on Ministry of Health (eCHIS) and WHO SMART Guidelines (iCCM, ANC, PNC, NCDs, Immunizations). | FHIRPath extracts the **patient facts**; aCDU supplies the **medical rules** governing those facts. |
+| **Core Question Answered** | *"What is the patient's current physiological state and longitudinal history?"* | *"Given this clinical state, what actions are mandated and what actions are strictly forbidden?"* | Together they form a complete `IF [FHIRPath State] THEN [aCDU Directive]` state machine for the SLM. |
+| **Edge SLM Failure Mode Solved** | Eliminates **EHR Formatting & Arithmetic Pathologies** on 2B models:<br>1. **LOINC Code Bleed** (`8480-6` leaking into BP readings)<br>2. **Date-Math Hallucination** (turning a 16-month infant born in `2025-06` into a `"25-year-old adult"`)<br>3. **Resource Blindspots** (surfacing `Task` referrals and POC dipsticks). | Eliminates **Clinical RAG & Safety Pathologies** on 2B models:<br>1. **Severed Contraindications** (dosing tables split from warnings)<br>2. **Multi-Morbidity Collisions** (Condition A drug harming Condition B)<br>3. **Sycophantic Folk-Remedy Compliance** (agreeing to cow dung, ash, or herbal oxytocin). | Without FHIRPath, the model misreads the patient's age/vitals and triggers the wrong rule. Without the aCDU, the model reads the right vitals but hallucinates an unsafe treatment. |
+| **Token & RAM Compression** | Compresses raw FHIR JSON from **~1,847 tokens $\rightarrow$ ~229 tokens** (**87.6% reduction**). | Compresses a 200-page clinical manual into a **$\le 180$-token self-contained unit** in a `122 KB` SQLite DB (**0 MB embedding RAM**). | Combined prompt (`Patient Summary + Triggered aCDUs`) is **$< 450$ tokens**, leaving **$>88\%$ of a 4k context window free** on a 3 GB RAM device. |
+| **What Happens If Used Alone?** | **FHIRPath Alone:** Emits clean tables or boolean flags (`Proteinuria = true`, `Contraindicated = true`), but has **zero clinical protocol text or negative guardrails** to resolve multi-disease conflicts or answer caregiver questions. | **aCDU Alone:** Cannot parse nested FHIR JSON arrays, cannot calculate a child's age in months from `birthDate`, and cannot track a 4-visit blood pressure trajectory. | **100% Check A Summarization + 100% True Clinical Safety Floor** when combined. |
+
+---
+
+#### Four Concrete Examples of How FHIRPath and aCDUs Complement Each Other in Practice
+
+##### Example 1: Pre-Eclampsia Trajectory + Malaria Collision (`observations.json` + `tasks.json` $\rightarrow$ `KENYA-ECHIS-MNH-02`)
+* **The Clinical Problem:** Fatima Bello (32 weeks pregnant) has 14 historical FHIR resources across 4 visits. Her blood pressure rose from `126/82` to `148/96 mmHg` (and `165/110 mmHg` in acute collision `L2-002`), her bedside urine dipstick shows `1+ Protein`, she has an `OVERDUE` hospital referral `Task`, and she tests `mRDT Positive` for malaria.
+* **Step 1 — What FHIRPath Does (`chw-views/observations.json` & `vitals.json`):**
+  In raw FHIR JSON, LOINC codes (`8480-6`) caused the 2B model to hallucinate `"BP was 126/8480-6"`, and the urine dipstick and overdue referral `Task` were buried in nested arrays. Our FHIRPath `ViewDefinition` deterministically transforms the raw FHIR bundle before the LLM ever sees it:
+  ```json
+  // From chw-edge-evals/chw-views/observations.json
+  {
+    "name": "flag",
+    "path": "iif(interpretation.coding.first().code = 'Abnormal' and code.coding.first().display.contains('Protein'), '1+ Abnormal (Proteinuria / Pre-Eclampsia Sign)', interpretation.coding.first().display)"
+  }
+  ```
+  **FHIRPath Output:** Emits a clean 1-line row: `Urine Protein | 1+ | 1+ Abnormal (Proteinuria / Pre-Eclampsia Sign)` alongside `BP: 148/96 mmHg | High` and `Task: URGENT Obstetric Referral (OVERDUE)`.
+* **Step 2 — How the aCDU Complements It (`KENYA-ECHIS-MNH-02` + `ANC-MALARIA`):**
+  The deterministic flag `Pre-Eclampsia Sign` from FHIRPath immediately triggers `KENYA-ECHIS-MNH-02` in SQLite. Even though she also has a positive malaria RDT (which normally triggers routine home oral AL), `MNH-02` injects the **Negative Boundary Veto**:
+  > `🛑 STOP: Severe pre-eclampsia (BP >= 160/110 or proteinuria + headache/vision changes) overrides routine home care. DO NOT treat with home oral antimalarials alone. DO NOT give unmonitored antihypertensives at home. Refer IMMEDIATELY to Level 4 hospital.`
+* **Why Both Were Required:** FHIRPath surfaced the hidden `1+ Proteinuria` dipstick and longitudinal BP jump from the EHR; the aCDU enforced that pre-eclampsia vetoes routine home malaria treatment.
+
+---
+
+##### Example 2: Preventing Pediatric Age-Math Hallucinations & Triggering Complicated SAM (`patient.json` $\rightarrow$ `KENYA-ECHIS-ICCM-09`)
+* **The Clinical Problem:** Kofi Mensah is a **16-month-old infant** (`birthDate: "2025-06-10"`) presenting with weight loss, bilateral pitting edema, fast breathing, and a Mid-Upper Arm Circumference (`MUAC`) of `10.5 cm` (`EVAL-ECHIS-L2-006`).
+* **Step 1 — What FHIRPath Does (`chw-views/observations.json` & Pre-Computed Age):**
+  When fed raw FHIR JSON, `gemma2:2b` and `gemma4-2b` failed mental date subtraction on `birthDate: "2025-06-10"`, latching onto the digits `"25"` and hallucinating: *"Kofi Mensah is a **25-year-old adult male**"*—which completely breaks pediatric triage!
+  Our SQL-on-FHIR / FHIRPath layer pre-computes relative age (`16m`) and translates the raw MUAC code into an explicit clinical danger flag:
+  ```json
+  // From chw-edge-evals/chw-views/observations.json
+  {
+    "name": "flag",
+    "path": "iif(interpretation.coding.first().code = 'Yellow', 'Yellow (Moderate Malnutrition / At-Risk)', iif(interpretation.coding.first().code = 'Red', 'Red (Severe Acute Malnutrition / Danger Sign)', 'Normal'))"
+  }
+  ```
+* **Step 2 — How the aCDU Complements It (`KENYA-ECHIS-ICCM-09`):**
+  Because FHIRPath normalized `age_months = 16` (`cohort: child_2_59m`) and `flag = Red (Severe Acute Malnutrition / Danger Sign)` + `fast_breathing`, Box 1 deterministically triggers `KENYA-ECHIS-ICCM-09` (Complicated SAM):
+  > `Mandated Actions: Refer urgently to Inpatient Stabilization Center. Give first dose Amoxicillin.`  
+  > `🛑 Negative Boundaries: DO NOT give RUTF (Plumpy'Nut) for home management when edema or fast breathing is present. DO NOT give routine iron or deworming during acute stabilization.`
+* **Why Both Were Required:** Without FHIRPath pre-computing `16m` and `Red (SAM)`, the 2B model thinks the patient is a 25-year-old adult. Without the aCDU, the model prescribes home Plumpy'Nut sachets to a child with complicated edematous malnutrition and pneumonia.
+
+---
+
+##### Example 3: Bridging WHO SMART Guidelines (Level-3 CQL / FHIRPath) to Safe Edge Narration (`WHO-SMART-IMMZ`)
+* **The Clinical Problem:** A 6-week-old infant born to an HIV-positive mother presents for routine 6-week immunizations (`bOPV-1`, `Rotavirus-1`, `Pentavalent-1`, `PCV-1`, and catch-up `BCG`), but exhibits failure to thrive, oral thrush, and generalized lymphadenopathy (symptomatic pediatric HIV).
+* **Step 1 — What WHO SMART Guidelines FHIRPath / CQL Does (`IMMZD5DTBCGContraindicationsLogic.cql`):**
+  In WHO SMART Guidelines Level 3, deterministic CQL / FHIRPath expressions evaluate the infant's FHIR `Observation` and `Condition` resources and output a machine boolean:
+  ```cql
+  // WHO SMART L3 CQL / FHIRPath Expression
+  define "BCG Vaccine Contraindicated":
+    "Infant is HIV Positive or Symptomatic HIV Exposed" = true
+  ```
+  **The Limitation of FHIRPath/CQL Alone:** A boolean `true` tells the software a rule fired, but when an un-gated SLM (`MedGemma 4B` zero-shot) was asked to generate the clinic plan for this 6-week visit, it **administered all 3 live-attenuated vaccines anyway** (`bOPV`, `Rotavirus`, and `BCG`), rationalizing that *"the benefits of vaccination outweigh the risks"*—resulting in **3 lethal contraindication leaks** (fatal disseminated BCGitis and vaccine-associated paralytic polio).
+* **Step 2 — How the aCDU Complements It (`CDU-WHO-SMART-IMMZ-BCG-01`, `ROTA-01`, `POLIO-01`):**
+  Our **WHO DAK-to-aCDU compiler** pairs each FHIRPath/CQL boolean trigger with a token-budgeted aCDU containing explicit negative boundaries. When the FHIRPath rule evaluates to `true`, the engine injects the **Negative Boundary Union** into `MedGemma 4B`:
+  * **Proceed with Killed/Inactivated Vaccines:** Administer `Pentavalent-1` and `PCV-1` on schedule.
+  * **Substitute Polio:** `🛑 CONTRAINDICATED: Do NOT give live oral bOPV-1` $\rightarrow$ Switch to inactivated `IPV`.
+  * **Withhold Live Attenuated Vaccines:** `🛑 CONTRAINDICATED: Strictly withhold BCG and Oral Rotavirus in symptomatic HIV/immunodeficiency (fatal disseminated BCGitis risk).`
+* **Result:** Lethal vaccine errors dropped from **3/3 leaks (0% safe) on zero-shot MedGemma 4B $\rightarrow$ 0/3 leaks (100% safe) with FHIRPath + aCDU**.
+
+---
+
+##### Example 4: Facility Multi-Morbidity Drug Titration (`PHC-CASE-01`: Acute Gout + Stage 3b CKD + HFrEF + T2DM)
+* **The Clinical Problem:** A 68-year-old male arrives at a primary care clinic with an excruciating acute gout flare in his great toe. His EHR contains labs and active medications across 4 chronic diseases.
+* **Step 1 — What FHIRPath Extracts from the EHR:**
+  FHIRPath queries his latest `Observation` and `MedicationRequest` resources to build a concise clinical state header:
+  * `Lab Observations:` `eGFR = 34 mL/min/1.73m² (Stage 3b CKD)`, `Serum K+ = 4.9 mmol/L (Borderline High)`, `LVEF = 32% (HFrEF)`.
+  * `Active Medications:` `Metformin 1000mg BD (2000mg/day)`, `Spironolactone 25mg OD`, `Lisinopril 10mg OD`.
+* **Step 2 — How Composable aCDUs Resolve the 4-Way Collision:**
+  The extracted thresholds (`eGFR < 45` + `K+ >= 4.8` + `Acute Gout` + `HFrEF`) deterministically trigger three colliding aCDUs (`CDU-ACR-GOUT`, `CDU-KDIGO-CKD3B`, `CDU-ESC-HF`). Before the SLM generates a single token, Box 1 computes the **Composite Negative Boundary Union ($\mathcal{N}_{\text{composite}} = \mathcal{N}_1 \cup \mathcal{N}_2 \cup \mathcal{N}_3$)**:
+  1. `🛑 VETO 1 (Nephrotoxicity & HF Decompensation): Strictly AVOID all oral NSAIDs (Ibuprofen, Naproxen, Indomethacin, Diclofenac) for the gout flare -> Use short-course oral Prednisolone (30mg x 5 days) instead.`
+  2. `🛑 VETO 2 (Lactic Acidosis in CKD 3b): Do NOT continue full-dose Metformin (2000mg/day) when eGFR is 30–44 -> Reduce Metformin by 50% to max 1000mg/day.`
+  3. `🛑 VETO 3 (Hyperkalemic Arrest): Do NOT escalate Spironolactone/ACEi with K+ at 4.9 mmol/L and eGFR 34; recheck potassium within 72 hours.`
+* **Why Both Were Required:** FHIRPath extracted the exact numerical renal/potassium thresholds (`eGFR = 34`, `K+ = 4.9`) and current drug doses (`Metformin 1000mg BD`); the composable aCDUs translated those thresholds into cross-disease pharmacological vetoes (**100% Fatal Safety Adherence** across both MedGemma 4B and Gemma4 2B).
 
 ---
 
@@ -288,3 +410,21 @@ flowchart LR
 2. **At the Rural Health Facility Level (Tier 2 — Nurses & Clinical Officers on 6–8 GB Tablets):**
    * Deploy **MedGemma 4B** paired with **aCDUs + Hierarchical Contextual RAG**.
    * Facility clinicians manage the patients referred by CHWs and must navigate complex multi-morbidity collisions (e.g., hypertension + diabetes + renal impairment), where MedGemma 4B achieves **70%–90% protocol accuracy and 100% fatal safety adherence**.
+
+---
+
+## 6. How aCDUs Complement the OHS Player (`FHIRPath` / Simplified CQL)
+
+The **OHS Player** already includes a `FHIRPath`-based workflow engine (acting as a simplified CQL runner) that evaluates structured FHIR data against `PlanDefinition` rules. Rather than replacing or duplicating that engine, **aCDUs and the OHS Player are directly complementary—solving two different halves of the frontline clinical problem:**
+
+* **What OHS Player (`FHIRPath` / CQL) Does Best — *"Which rules apply?"***  
+  The OHS Player excels at **deterministic triggers and form logic**. It reads structured FHIR observations (age, blood pressure, lab results) and reliably determines which clinical protocols are active, generating standard tasks or checklists. However, when a patient has multiple conditions at once, standard rules engines fire separate, isolated alerts that can contradict each other—and they cannot respond to free-text questions or push back when a family suggests an unsafe home remedy.
+
+* **What aCDUs Add — *"What must NEVER be done, and how do we explain it safely?"***  
+  An aCDU wraps each clinical rule with **explicit Negative Boundaries (`STOP: Do NOT...`)** and a **priority veto tier** designed specifically to guide a Small Language Model:
+  1. **Resolving Collisions:** When the OHS Player triggers two rules at once (for example, *fast breathing* requiring oral antibiotics AND a *recent convulsion* forbidding anything by mouth), the aCDUs provide the safety veto so the SLM merges them into **one clear, non-contradictory action plan**.
+  2. **Addressing Real-World Conversations:** When a health worker or caregiver asks an unstructured question (such as applying ash to a newborn's cord or sharing a neighbor's medication), the aCDU supplies the exact safety refusal and clinical rationale that a standard FHIR rule never captures.
+
+> [!TIP]
+> **In Short:** Use the **OHS Player (`FHIRPath`)** as the deterministic trigger that identifies *which* clinical protocols apply from the patient's FHIR record, and use **aCDUs** as the safety-clamped knowledge units that allow the on-device SLM to **de-conflict multiple alerts and communicate safe, human-readable guidance** to the health worker.
+
