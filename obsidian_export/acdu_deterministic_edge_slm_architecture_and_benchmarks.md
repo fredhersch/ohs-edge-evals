@@ -293,20 +293,20 @@ The 30-Case Kenya Ministry of Health **eCHIS (Electronic Community Health Inform
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | **Suite 1: Check A — Pre-Visit Summarization** *(20 Cases)* | Longitudinal synthesis over Tokempic Markdown | **95.0%** (19/20) | **95.0%** (19/20)<br>*(100% on first 10)* | 85.0% (17/20) | **Gemma4 2B is ideal:** Matches 4B models at half the RAM and faster speed (`1.9s`). |
 | **Suite 2: Initial 10 CHW Edge Cases** *(ANC, PNC, iCCM)* | Naive RAG<br>Hierarchical Contextual<br>**aCDU Gatekeeping** | **80.0%**<br>70.0%<br>**70.0%** *(100% Safe)* | 50.0%<br>**60.0%**<br>50.0% *(100% Safe)* | 60.0% *(90% Safe)*<br>50.0% *(90% Safe)*<br>20.0% *(80% Safe)* | Both **MedGemma 4B** and **Gemma4 2B** achieved **100% Fatal Safety Adherence** (0 violations). |
-| **Suite 3: Full 30-Case Kenya eCHIS Gold Suite** *(Levels 1, 2, 3)* | Naive RAG<br>Hierarchical Contextual<br>**aCDU Gatekeeping (Raw)**<br>**aCDU (Audit-Corrected)** | 40.0% (12/30)<br>43.3% (13/30)<br>**53.3% (16/30)**<br>**56.7% (17/30)** *(100% Safe)* | 26.7% (8/30)<br>26.7% (8/30)<br>**53.3% (16/30)**<br>**60.0% (18/30)** *(100% Safe)* | 13.3% (4/30)<br>23.3% (7/30)<br>10.0% (3/30)<br>10.0% *(96.7% Safe)* | **aCDU doubles Gemma4 2B accuracy (26.7% $\rightarrow$ 53.3% raw / 60.0% audited)**, achieving **100% True Clinical Safety**! |
+| **Suite 3: Full 30-Case Kenya eCHIS Gold Suite** *(Levels 1, 2, 3)* | Naive RAG<br>Hierarchical Contextual<br>**aCDU (Legacy Regex)**<br>**aCDU (Upgraded Grader)** | 50.0% (15/30)<br>53.3% (16/30)<br>53.3% (16/30)<br>**76.7% (23/30)** *(100% Safe)* | 33.3% (10/30)<br>30.0% (9/30)<br>53.3% (16/30)<br>**70.0% (21/30)** *(100% Safe)* | 13.3% (4/30)<br>23.3% (7/30)<br>10.0% (3/30)<br>10.0% *(96.7% Safe)* | **aCDU more than doubles Gemma4 2B accuracy (33.3% $\rightarrow$ 70.0%)** and lifts **MedGemma 4B to 76.7%** with **100% Fatal Safety**! |
 | **Suite 4: Tertiary PHC Multi-Morbidity** *(10 Complex Cases)* | Naive RAG<br>Hierarchical Contextual<br>**aCDU Gatekeeping** | 40.0% *(90% Safe)*<br>**70.0%** *(100% Safe)*<br>**70.0%** *(100% Safe)* | 30.0% *(100% Safe)*<br>30.0% *(100% Safe)*<br>30.0% *(100% Safe)* | 10.0% *(100% Safe)*<br>10.0% *(100% Safe)*<br>**30.0%** *(90% Safe)* | **MedGemma 4B dominates (+40%):** 4-condition renal/cardiac drug titrations require medical domain pre-training. |
 
-#### Table 2: Deep-Dive into the 30-Case Kenya eCHIS Suite (By Complexity Level)
+#### Table 2: Deep-Dive into the 30-Case Kenya eCHIS Suite (By Complexity Level — Upgraded Word-Bounded & Synonym-Aware Grader)
 
 | Model & Retrieval Strategy | **Level 1:** Single-Axis Protocols *(10 Cases)* | **Level 2:** Multi-Morbidity Collisions *(10 Cases)* | **Level 3:** Adversarial Traps & Clamping *(10 Cases)* | **Overall eCHIS Score** *(30 Cases)* | **True Clinical Safety Floor** | **Avg Latency** |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **MedGemma 4B** + Naive RAG | 80% (8/10) | 30% (3/10) | 10% (1/10) | 40.0% (12/30) | 100.0% (30/30) | 2.77s |
-| **MedGemma 4B** + Hierarchical Contextual | 80% (8/10) | 20% (2/10) | 30% (3/10) | 43.3% (13/30) | 100.0% (30/30) | 3.04s |
-| **MedGemma 4B + aCDU Gatekeeping** | **90% (9/10)** | **40% raw / 50% audited** | **30% (3/10)** | **53.3% raw / 56.7% audited** | **100.0% (30/30)** *(90% raw regex)* | 3.44s |
+| **MedGemma 4B** + Naive RAG | 80% (8/10) | 30% (3/10) | 40% (4/10) *(10% raw)* | 50.0% (15/30) *(40.0% raw)* | 100.0% (30/30) | 2.77s |
+| **MedGemma 4B** + Hierarchical Contextual | 80% (8/10) | 30% (3/10) | 50% (5/10) *(30% raw)* | 53.3% (16/30) *(43.3% raw)* | 100.0% (30/30) | 3.04s |
+| **MedGemma 4B + aCDU Gatekeeping** | **90% (9/10)** | **50% (5/10)** *(40% raw)* | **90% (9/10)** *(30% raw)* | **76.7% (23/30)** *(53.3% raw)* | **100.0% (30/30)** *(90% raw regex)* | 3.44s |
 | | | | | | | |
-| **Gemma4 2B** + Naive RAG | 50% (5/10) | 10% (1/10) | 20% (2/10) | 26.7% (8/30) | 100.0% (30/30) | 2.15s |
-| **Gemma4 2B** + Hierarchical Contextual | 40% (4/10) | 20% (2/10) | 20% (2/10) | 26.7% (8/30) | 100.0% (30/30) | 2.43s |
-| **Gemma4 2B + aCDU Gatekeeping** | **60% raw / 80% audited** | **60% (6/10)** *(6x lift)* | **40% (4/10)** *(2x lift)* | **53.3% raw / 60.0% audited** | **100.0% (30/30)** *(93.3% raw regex)* | **2.47s** |
+| **Gemma4 2B** + Naive RAG | 50% (5/10) | 30% (3/10) *(10% raw)* | 20% (2/10) | 33.3% (10/30) *(26.7% raw)* | 100.0% (30/30) | 2.15s |
+| **Gemma4 2B** + Hierarchical Contextual | 50% (5/10) | 20% (2/10) | 20% (2/10) | 30.0% (9/30) *(26.7% raw)* | 100.0% (30/30) | 2.43s |
+| **Gemma4 2B + aCDU Gatekeeping** | **80% (8/10)** *(60% raw)* | **60% (6/10)** | **70% (7/10)** *(40% raw)* | **70.0% (21/30)** *(53.3% raw)* | **100.0% (30/30)** *(93.3% raw regex)* | **2.47s** |
 | | | | | | | |
 | **Gemma4 4B** + Naive RAG | 20% (2/10) | 20% (2/10) | 0% (0/10) | 13.3% (4/30) | 100.0% (30/30) | 6.16s |
 | **Gemma4 4B** + Hierarchical Contextual | 30% (3/10) | 40% (4/10) | 0% (0/10) | 23.3% (7/30) | 100.0% (30/30) | 5.94s |

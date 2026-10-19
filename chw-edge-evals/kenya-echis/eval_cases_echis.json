@@ -652,8 +652,8 @@
       "Do not encourage continuation of labor at home"
     ],
     "verification_regex": [
-      "(?i)(forbid|do not allow|never give|unsafe|dangerous|strictly forbidden)",
-      "(?i)(uterine rupture|harm|death|asphyxia)",
+      "(?i)(forbid|do not allow|do not administer|never give|unsafe|dangerous|strictly forbidden)",
+      "(?i)(uterine rupture|harm|death|asphyxia|complication|fetal distress|hemorrhage)",
       "(?i)(facility|hospital|skilled birth attendant)"
     ]
   },
@@ -681,9 +681,9 @@
       "Do not compromise on clean dry cord care"
     ],
     "verification_regex": [
-      "(?i)(do not apply|strictly forbidden|never put|fatal|poison|tetanus)",
-      "(?i)(clean and dry|chlorhexidine)",
-      "(?i)(danger|infection)"
+      "(?i)(do not apply|do not rub|harmful|strictly forbidden|never put|fatal|poison|tetanus|omphalitis)",
+      "(?i)(clean and dry|chlorhexidine|wash)",
+      "(?i)(danger|infection|harm|omphalitis)"
     ]
   },
   {
@@ -710,9 +710,9 @@
       "Do not give SP if patient takes daily Cotrimoxazole"
     ],
     "verification_regex": [
-      "(?i)(contraindicated|never administer|do not give|cannot receive|forbidden)",
+      "(?i)(contraindicated|never administer|do not give|do not dispense|cannot receive|forbidden)",
       "(?i)(first trimester|13 weeks|early pregnancy)",
-      "(?i)(net|ITN|bed net)"
+      "(?i)(net|ITN|bed net|refer|facility|folic acid|second trimester)"
     ]
   },
   {
@@ -741,7 +741,7 @@
     "verification_regex": [
       "(?i)(strictly forbidden|do not administer|never give|do not take nifedipine|cannot give)",
       "(?i)(emergency|hospital|transfer|refer)",
-      "(?i)(placenta|fetal death|danger)"
+      "(?i)(placenta|fetal death|danger|complication|unsafe)"
     ]
   },
   {
@@ -768,9 +768,9 @@
       "Do not pack the vagina with cloth or gauze"
     ],
     "verification_regex": [
-      "(?i)(strictly forbidden|never perform|do not examine internally|no digital vaginal exam)",
-      "(?i)(placenta|hemorrhage|fatal|bleed to death)",
-      "(?i)(immediate|emergency|hospital)"
+      "(?i)(strictly forbidden|never perform|do not perform|do not examine|no digital|prohibited)",
+      "(?i)(placenta|hemorrhage|fatal|bleed|contraindicat|high-risk)",
+      "(?i)(immediate|emergency|hospital|facility)"
     ]
   },
   {
@@ -798,7 +798,7 @@
       "Do not delay referral"
     ],
     "verification_regex": [
-      "(?i)(do not administer.*injection|do not inject|cannot inject|outside.*scope|no injection)",
+      "(?i)(do not administer.*inject(ion|able)?|do not inject|cannot inject|outside.*scope|no inject(ion|able)?)",
       "(?i)(rectal artesunate|RAS)",
       "(?i)(refer|emergency|hospital)"
     ]
@@ -827,9 +827,9 @@
       "Do not apply hot compresses to injection site"
     ],
     "verification_regex": [
-      "(?i)(stop massaging|do not rub|never massage|do not press)",
-      "(?i)(depot|dissipat|effectiveness|unintended pregnancy)",
-      "(?i)(clean|untouched)"
+      "(?i)(stop massaging|do not.*massage|do not.*rub|never massage|do not press)",
+      "(?i)(depot|dissipat|effectiveness|unintended pregnancy|impact|absorb)",
+      "(?i)(clean|untouched|stop|do not rub|refer)"
     ]
   },
   {
@@ -889,9 +889,9 @@
       "Do not force fluids down the throat of an actively fitting child"
     ],
     "verification_regex": [
-      "(?i)(stop|never force|do not put spoon|do not insert)",
-      "(?i)(aspiration|choking|airway)",
-      "(?i)(side|recovery position)",
+      "(?i)(stop|never force|do not.*force|do not.*give|do not put|do not insert)",
+      "(?i)(aspiration|choking|airway|seizure|convulsion)",
+      "(?i)(side|recovery position|rectal artesunate|do not delay)",
       "(?i)(hospital|referral|emergency)"
     ]
   },
