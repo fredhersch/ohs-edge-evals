@@ -416,6 +416,113 @@
 
         </div>
 
+        <!-- Visual Diagram: The 3 Execution Paradigms -->
+        <div class="p-5 rounded-xl border border-[var(--border)] bg-[var(--card)] space-y-4 shadow-sm">
+          <div class="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2.5">
+            <span class="text-xs font-bold text-[var(--foreground)] uppercase tracking-wider flex items-center gap-2">
+              <i class="fa-solid fa-network-wired text-purple-400"></i>
+              Visual Comparative Execution Architecture
+            </span>
+            <span class="text-[11px] text-[var(--muted-foreground)] font-mono">From Unassisted Trap to Two-Box Guarantee</span>
+          </div>
+
+          <div class="space-y-3.5">
+            
+            <!-- Lane 1: Check A -->
+            <div class="p-3.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5 min-w-[170px]">
+                <div class="w-6 h-6 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">A</div>
+                <div>
+                  <div class="font-bold text-[var(--foreground)]">Check A Flow</div>
+                  <div class="text-[10px] text-emerald-400 font-semibold">Summarization</div>
+                </div>
+              </div>
+              <div class="flex-1 flex flex-wrap md:flex-nowrap items-center gap-2">
+                <div class="px-2.5 py-1.5 rounded bg-[var(--card-muted)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--foreground-secondary)] flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-table-cells text-blue-400 text-[10px]"></i>
+                  <span>Tokempic SQL Table</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-blue-500/10 border border-blue-500/30 text-[var(--text-blue)] font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-brain text-xs"></i>
+                  <span>Gemma 4 2B (Narrator)</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-emerald-500/15 border border-emerald-500/40 text-[var(--text-emerald)] font-bold flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-circle-check text-xs"></i>
+                  <span>95.0% Empathetic Brief</span>
+                </div>
+              </div>
+              <span class="badge badge-emerald shrink-0">High Competence</span>
+            </div>
+
+            <!-- Lane 2: Check B Raw -->
+            <div class="p-3.5 rounded-lg border border-amber-500/20 bg-amber-500/5 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5 min-w-[170px]">
+                <div class="w-6 h-6 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-[10px]">B</div>
+                <div>
+                  <div class="font-bold text-[var(--foreground)]">Check B (Raw Mini-RAG)</div>
+                  <div class="text-[10px] text-amber-400 font-semibold">Unassisted Generation</div>
+                </div>
+              </div>
+              <div class="flex-1 flex flex-wrap md:flex-nowrap items-center gap-2">
+                <div class="px-2.5 py-1.5 rounded bg-[var(--card-muted)] border border-[var(--border-subtle)] font-mono text-[11px] text-[var(--foreground-secondary)] flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-file-lines text-amber-400 text-[10px]"></i>
+                  <span>Fuzzy PDF Text Chunks</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-amber-500/10 border border-amber-500/30 text-[var(--text-amber)] font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-circle-question text-xs"></i>
+                  <span>Unguided Gemma 4 2B</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-red-500/15 border border-red-500/40 text-[var(--text-red)] font-bold flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-circle-xmark text-xs"></i>
+                  <span>35.0% Pass (65% Traps Failed)</span>
+                </div>
+              </div>
+              <span class="badge badge-red shrink-0">Lethal Hallucinations</span>
+            </div>
+
+            <!-- Lane 3: Two-Box aCDU Solution -->
+            <div class="p-3.5 rounded-lg border border-purple-500/30 bg-purple-500/10 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5 min-w-[170px]">
+                <div class="w-6 h-6 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px]">
+                  <i class="fa-solid fa-star text-[10px]"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-[var(--foreground)]">Two-Box aCDU Architecture</div>
+                  <div class="text-[10px] text-purple-400 font-semibold">"Best of Both Worlds"</div>
+                </div>
+              </div>
+              <div class="flex-1 flex flex-wrap md:flex-nowrap items-center gap-2">
+                <div class="flex flex-col gap-1 min-w-[140px]">
+                  <div class="px-2 py-1 rounded bg-blue-600/20 border border-blue-500/40 text-blue-300 font-mono text-[10px] flex items-center gap-1">
+                    <i class="fa-solid fa-shield text-[9px]"></i>
+                    <span>Box 1: aCDU Gatekeeper</span>
+                  </div>
+                  <div class="px-2 py-1 rounded bg-[var(--card-muted)] border border-[var(--border-subtle)] text-[var(--muted-foreground)] font-mono text-[10px] flex items-center gap-1">
+                    <i class="fa-solid fa-table text-[9px]"></i>
+                    <span>Tokempic State</span>
+                  </div>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-purple-600/20 border border-purple-500/50 text-purple-200 font-semibold flex items-center gap-1.5 whitespace-nowrap">
+                  <i class="fa-solid fa-microchip text-xs text-purple-400"></i>
+                  <span>Box 2: Gemma 4 2B (Narrator)</span>
+                </div>
+                <i class="fa-solid fa-arrow-right text-[var(--muted-foreground)] hidden md:inline text-xs"></i>
+                <div class="px-2.5 py-1.5 rounded bg-emerald-500/20 border border-emerald-500/50 text-[var(--text-emerald)] font-bold flex items-center gap-1.5 whitespace-nowrap shadow-sm">
+                  <i class="fa-solid fa-shield-halved text-xs"></i>
+                  <span>100% Clamped | 80% eCHIS Pass</span>
+                </div>
+              </div>
+              <span class="badge badge-purple shrink-0">Production Safe</span>
+            </div>
+
+          </div>
+        </div>
+
         <!-- Explanatory Callout Banner -->
         <div class="p-3.5 rounded-xl bg-[var(--card)] border border-[var(--border)] flex items-start space-x-3 text-xs">
           <i class="fa-solid fa-circle-info text-blue-400 mt-0.5 text-sm"></i>
