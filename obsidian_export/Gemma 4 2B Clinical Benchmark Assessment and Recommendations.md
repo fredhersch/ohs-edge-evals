@@ -46,6 +46,43 @@ pie title Sources of Clinical Edge Performance Improvements
 
 ---
 
+## 2.1 The Core Discovery: Check A (95%) vs. Check B (35%) — The "Best of Both Worlds"
+
+The benchmark results reveal a striking cognitive contrast in Gemma 4 2B:
+- **Check A (Patient Chart Summarization): 95.0% Pass Rate (19/20)**  
+  Gemma 4 2B is extraordinarily proficient at ingesting Tokempic-compressed EHR tables, synthesizing longitudinal maternal/pediatric timelines, extracting vitals, and producing an empathetic pre-visit briefing. This is an open-ended linguistic task where pure LLM capabilities shine.
+- **Check B (Raw Protocol Preparation): 35.0% Pass Rate (7/20)**  
+  When evaluated with *raw unassisted Mini-RAG* (standard free-text paragraph retrieval), the model drops to a 35% pass rate. Left to its own devices without structural guardrails, a 2-billion parameter model cannot reliably enforce negative clinical boundaries. Under community prompt pressure, it acts as an "agreeable assistant"—validating dangerous folk remedies (kerosene, battery acid, herbal oxytocics) or failing to trigger urgent hospital referrals.
+
+```mermaid
+flowchart LR
+    subgraph CheckA ["Check A: 95.0% Pass"]
+        direction TB
+        EHR["Tokempic FHIR Table"] --> LLM_A["Gemma 4 2B (Generative)"]
+        LLM_A --> Brief["Empathetic Clinical Briefing<br/>(95% Pass Rate)"]
+    end
+
+    subgraph CheckB_Raw ["Check B Raw: 35.0% Pass"]
+        direction TB
+        TextChunks["Unstructured PDF Text"] --> LLM_B["Unguided Gemma 4 2B"]
+        LLM_B --> Fail["Hallucination & Trap Failure<br/>(65% Hazard Breach)"]
+    end
+
+    subgraph TheUnlock ["The aCDU Solution: Best of Both Worlds"]
+        direction TB
+        aCDU["Box 1: aCDU Gatekeeper<br/>(0 MB RAM, <0.6ms)"] --> Clamp["Strict Negative Clamps & Referrals"]
+        Clamp --> LLM_C["Box 2: Gemma 4 2B (Narrator)"]
+        LLM_C --> SafeOut["100% Clamped, 80% eCHIS Pass<br/>(Empathetic + Safe)"]
+    end
+```
+
+> [!TIP]
+> **The Architectural Solution ("Best of Both Worlds"):**  
+> We do NOT attempt to solve Check B by training the 2B model to memorize complex rules. Instead, the **Two-Box aCDU Architecture** delegates deterministic rule matching and negative boundary clamping to **Box 1 (aCDU Gatekeeper)**, which executes in 0 MB of GPU memory in <0.6ms. We then feed those bounded constraints to **Box 2 (Gemma 4 2B)**, leveraging its proven **95% Check A summarization fluency** to narrate the guidance with empathy and local cultural clarity.  
+> This directly delivers the **best of both worlds**: the communicative power and local language fluency of the LLM without the dangerous unreliability of unassisted generation.
+
+---
+
 ## 3. Deep-Dive Audit: The 6 Empirical Regressions in Gemma 4 2B
 
 In benchmark run [`RUN-20261019-112412-gemma4-2b:latest.json`](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/chw-edge-evals/benchmark_runs/RUN-20261019-112412-gemma4-2b:latest.json), Gemma 4 2B achieved **24/30 (80.0%)** overall pass rate with **100% negative boundary compliance**. A forensic audit of the 6 failed cases reveals that **5 of the 6 failures were artifacts of process/evaluation mechanics rather than clinical safety failures**:
