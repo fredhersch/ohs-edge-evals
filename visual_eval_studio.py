@@ -314,6 +314,17 @@ class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(content)
             else:
                 self.send_error_response(404, "vignettes.html not found")
+        elif path in ("/gemma4_benchmark_report.html", "/gemma4-report", "/report"):
+            report_file = WORKSPACE_DIR / "web" / "gemma4_benchmark_report.html"
+            if report_file.exists():
+                content = report_file.read_bytes()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+            else:
+                self.send_error_response(404, "gemma4_benchmark_report.html not found")
         elif path == "/api/vignettes":
             if vignette_engine:
                 params = urllib.parse.parse_qs(parsed.query)
