@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """Builds a static, zero-dependency HTML application for aCDU Playground.
+Includes:
+- Deep Concept Explainer & Architecture Walkthrough (Modal & Expandable Guide)
+- Step-by-Step Pipeline (FHIR Observation -> PlanDefinition Trigger -> aCDU Negative Veto -> SLM Synthesis)
+- Graduated Use-Case Walkthroughs (L1 Single-Axis -> L2 Collision Veto -> L3 Cultural Myths -> L4 Multi-Morbidity)
+- Real-time aCDU Editor with Token Budgeting & Refusal Linting
+- Triple Output Comparison & Tier-1 Clinical Verification
 Outputs directly into docs/playground.html ready for GitHub Pages.
 """
 
@@ -77,7 +83,7 @@ html_template = f"""<!DOCTYPE html>
 <body class="h-screen flex flex-col overflow-hidden">
 
   <!-- Top App Navigation Bar -->
-  <header class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between flex-shrink-0">
+  <header class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between flex-shrink-0 z-20">
     <div class="flex items-center space-x-4">
       <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-500/20">
         <i class="fa-solid fa-microchip"></i>
@@ -85,15 +91,21 @@ html_template = f"""<!DOCTYPE html>
       <div>
         <div class="flex items-center space-x-2">
           <h1 class="text-base font-bold text-white tracking-wide">aCDU Playground</h1>
-          <span class="text-xs bg-indigo-950 text-indigo-400 border border-indigo-800 px-2 py-0.5 rounded-full font-semibold">Two-Box Edge RAG</span>
-          <span class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-semibold">Client-Side Simulation</span>
+          <span class="text-xs bg-indigo-950 text-indigo-400 border border-indigo-800 px-2 py-0.5 rounded-full font-semibold">Two-Box Architecture</span>
+          <span class="text-xs bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full font-semibold">Deterministic Safety Floor</span>
         </div>
-        <p class="text-xs text-gray-400">Deterministic Safety Floor &bull; PlanDefinition Mappings &bull; Live SLM Clamping</p>
+        <p class="text-xs text-gray-400">Step-by-Step Clinical Decision Unit Simulator &bull; Token Budgeting &bull; Negative Clamping</p>
       </div>
     </div>
 
     <!-- Live Execution Controls & Nav -->
     <div class="flex items-center space-x-3">
+      <!-- How It Works & Architecture Guide Button -->
+      <button onclick="toggleGuideModal()" class="bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-700/80 text-xs px-3.5 py-1.5 rounded-lg transition flex items-center space-x-1.5 shadow-sm font-semibold">
+        <i class="fa-solid fa-graduation-cap text-indigo-400"></i>
+        <span>How aCDUs Work</span>
+      </button>
+
       <a href="index.html" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs px-3 py-1.5 rounded-lg transition border border-gray-700 flex items-center space-x-1.5">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Back to Suite</span>
@@ -120,8 +132,53 @@ html_template = f"""<!DOCTYPE html>
     </div>
   </header>
 
+  <!-- Interactive Step-by-Step Flow Ribbon (Collapsible Banner) -->
+  <div class="bg-gray-900/80 border-b border-gray-800 px-6 py-2 flex items-center justify-between text-xs text-gray-300 flex-shrink-0">
+    <div class="flex items-center space-x-6 overflow-x-auto">
+      <div class="flex items-center space-x-2 text-blue-400 font-bold">
+        <span class="w-5 h-5 rounded-full bg-blue-900/60 border border-blue-600 flex items-center justify-center text-[10px]">1</span>
+        <span>Scenario Trigger</span>
+      </div>
+      <i class="fa-solid fa-arrow-right text-[10px] text-gray-600"></i>
+
+      <div class="flex items-center space-x-2 text-emerald-400 font-bold">
+        <span class="w-5 h-5 rounded-full bg-emerald-900/60 border border-emerald-600 flex items-center justify-center text-[10px]">2</span>
+        <span>PlanDefinition (FHIRPath)</span>
+      </div>
+      <i class="fa-solid fa-arrow-right text-[10px] text-gray-600"></i>
+
+      <div class="flex items-center space-x-2 text-amber-400 font-bold">
+        <span class="w-5 h-5 rounded-full bg-amber-900/60 border border-amber-600 flex items-center justify-center text-[10px]">3</span>
+        <span>aCDU Safety Clamp (Tier 1-3)</span>
+      </div>
+      <i class="fa-solid fa-arrow-right text-[10px] text-gray-600"></i>
+
+      <div class="flex items-center space-x-2 text-purple-400 font-bold">
+        <span class="w-5 h-5 rounded-full bg-purple-900/60 border border-purple-600 flex items-center justify-center text-[10px]">4</span>
+        <span>SLM 3-Bullet Speech</span>
+      </div>
+    </div>
+
+    <!-- Quick Guided Use-Case Presets -->
+    <div class="flex items-center space-x-2 text-[11px] flex-shrink-0">
+      <span class="text-gray-500 font-semibold uppercase tracking-wider">Guided Use-Cases:</span>
+      <button onclick="loadGuidedPreset('L1')" class="bg-gray-800 hover:bg-gray-700 text-blue-300 px-2.5 py-1 rounded border border-gray-700 font-medium transition" title="Level 1: Single Guideline Execution">
+        L1: Single-Axis
+      </button>
+      <button onclick="loadGuidedPreset('L2')" class="bg-gray-800 hover:bg-gray-700 text-amber-300 px-2.5 py-1 rounded border border-gray-700 font-medium transition" title="Level 2: Convulsion Danger Sign vs Oral Meds Collision">
+        L2: Danger Collision
+      </button>
+      <button onclick="loadGuidedPreset('L3')" class="bg-gray-800 hover:bg-gray-700 text-rose-300 px-2.5 py-1 rounded border border-gray-700 font-medium transition" title="Level 3: Cow Dung / Ash Cord Folk Remedy Myth">
+        L3: Cultural Myth
+      </button>
+      <button onclick="loadGuidedPreset('L4')" class="bg-gray-800 hover:bg-gray-700 text-purple-300 px-2.5 py-1 rounded border border-gray-700 font-medium transition" title="Level 4: CKD + Heart Failure + Acute Gout Drug Collision">
+        L4: PHC Collision
+      </button>
+    </div>
+  </div>
+
   <!-- Main 4-Quadrant Grid -->
-  <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden">
+  <main class="flex-1 grid grid-cols-12 gap-0 overflow-hidden relative">
     
     <!-- PANEL 1: Scenario Explorer (Col 1-3) -->
     <section class="col-span-3 border-r border-gray-800 flex flex-col bg-gray-950/40">
@@ -365,6 +422,198 @@ Select a scenario to view injected prompt.
 
   </main>
 
+  <!-- CONCEPT EXPLAINER & ARCHITECTURE MODAL -->
+  <div id="guideModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between bg-gray-950/60">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/40 text-indigo-400 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-book-open text-sm"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-white">The aCDU Concept & Two-Box Architecture</h2>
+            <p class="text-[11px] text-gray-400">Why Small Edge Language Models Need Deterministic Safety Clamping</p>
+          </div>
+        </div>
+        <button onclick="toggleGuideModal()" class="text-gray-400 hover:text-white text-lg px-2 py-1 rounded transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Scrollable -->
+      <div class="p-6 overflow-y-auto custom-scroll space-y-6 text-xs text-gray-300 leading-relaxed">
+        
+        <!-- Section 1: The Core Problem -->
+        <div class="bg-gray-950 p-4 rounded-xl border border-gray-800">
+          <div class="flex items-center space-x-2 text-rose-400 font-bold text-xs uppercase mb-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>The Double Dilemma of Edge LLMs in Frontline Healthcare</span>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="border-l-2 border-l-red-500 pl-3 space-y-1">
+              <strong class="text-white block font-semibold">1. Context Fragmentation & Bloat</strong>
+              <p class="text-gray-400 text-[11px]">
+                Raw longitudinal FHIR records span 5,000–12,000 tokens. Slicing clinical guideline PDFs into standard sliding-window RAG paragraphs separates dosing tables from contraindication warnings.
+              </p>
+            </div>
+            <div class="border-l-2 border-l-amber-500 pl-3 space-y-1">
+              <strong class="text-white block font-semibold">2. The "Agreeable Assistant" Hazard</strong>
+              <p class="text-gray-400 text-[11px]">
+                Small foundation models (1B–4B) are instruction-tuned to be helpful. When families propose harmful remedies (e.g. cow dung on an umbilical cord, or neighbor's nifedipine in pregnancy), un-gated models agree or hedge.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: What is an aCDU? -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-layer-group text-blue-400"></i>
+            <span>What is an Atomic Clinical Decision Unit (aCDU)?</span>
+          </h3>
+          <p>
+            An <strong>Atomic Clinical Decision Unit (aCDU)</strong> is an indivisible, structured clinical knowledge tuple representing exactly one complete clinical guidance directive. It acts as a <strong>Level 3.5 adapter</strong> between computable FHIR/CQL rules and on-device language models:
+          </p>
+
+          <div class="grid grid-cols-4 gap-2 bg-gray-950 p-3 rounded-lg border border-gray-800 text-[11px]">
+            <div class="p-2 bg-gray-900 rounded border border-gray-800/80">
+              <span class="text-blue-400 font-bold block mb-1">Trigger Condition (&Cscr;)</span>
+              <p class="text-gray-400">Deterministic physiological entry criteria (e.g. SBP &ge; 160 or fast breathing).</p>
+            </div>
+            <div class="p-2 bg-gray-900 rounded border border-gray-800/80">
+              <span class="text-emerald-400 font-bold block mb-1">Mandated Actions (&Ascr;)</span>
+              <p class="text-gray-400">Certified treatments, doses, and emergency transfer steps.</p>
+            </div>
+            <div class="p-2 bg-gray-900 rounded border border-gray-800/80">
+              <span class="text-rose-400 font-bold block mb-1">Negative Boundaries (&Nscr;)</span>
+              <p class="text-gray-400">Explicit safety vetoes (STOP: Do NOT give oral meds if convulsing).</p>
+            </div>
+            <div class="p-2 bg-gray-900 rounded border border-gray-800/80">
+              <span class="text-purple-400 font-bold block mb-1">Priority Tier (&Pscr;)</span>
+              <p class="text-gray-400">Tier 1 (Emergency Veto) &gt; Tier 2 (Organ Protection) &gt; Tier 3 (Symptom).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Step-by-Step 4-Phase Pipeline -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-diagram-project text-emerald-400"></i>
+            <span>Step-by-Step: How a Decision Flows Through the Simulator</span>
+          </h3>
+          
+          <div class="space-y-2">
+            <div class="flex items-start space-x-3 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <span class="w-6 h-6 rounded-full bg-blue-900/60 text-blue-400 border border-blue-600 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">1</span>
+              <div>
+                <strong class="text-white block font-semibold">Step 1: Patient Encounter &amp; FHIR Observation Extraction</strong>
+                <p class="text-gray-400 text-[11px] mt-0.5">
+                  The health worker enters observations or vitals (e.g., 28-month-old with high fever, fast breathing 48 bpm, and convulsion 10 minutes ago). Tokempic SQL-on-FHIR flattens this into a compact record.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <span class="w-6 h-6 rounded-full bg-emerald-900/60 text-emerald-400 border border-emerald-600 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">2</span>
+              <div>
+                <strong class="text-white block font-semibold">Step 2: PlanDefinition Applicability (FHIRPath Evaluation)</strong>
+                <p class="text-gray-400 text-[11px] mt-0.5">
+                  The OHS Player’s FHIRPath engine evaluates structured rules (e.g., <code>ANCDT01</code> or <code>ICCM-01</code>). Each triggered rule action deterministically references its certified aCDU.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <span class="w-6 h-6 rounded-full bg-amber-900/60 text-amber-400 border border-amber-600 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">3</span>
+              <div>
+                <strong class="text-white block font-semibold">Step 3: Deterministic Priority Sorting &amp; Negative Boundary Union</strong>
+                <p class="text-gray-400 text-[11px] mt-0.5">
+                  Box 1 orders triggered aCDUs by priority tier (Tier 1 Veto first) and computes the union of all negative boundaries (&Nscr;<sub>composite</sub> = &bigcup; &Nscr;<sub>i</sub>). Any Tier-1 prohibition overrides routine positive actions.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3 bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <span class="w-6 h-6 rounded-full bg-purple-900/60 text-purple-400 border border-purple-600 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+              <div>
+                <strong class="text-white block font-semibold">Step 4: Box 2 SLM Natural Language Synthesis (&le; 120 words)</strong>
+                <p class="text-gray-400 text-[11px] mt-0.5">
+                  Gemma 4 2B translates the de-conflicted clinical directives into an empathetic, clear, 3-bullet script for the health worker, while Box 1's post-verifier validates zero prohibited words escaped.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Graduated Complexity Tiers -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-stairs text-amber-400"></i>
+            <span>Graduated Use-Cases: From Simple Protocols to Multi-Morbidity Collisions</span>
+          </h3>
+
+          <div class="grid grid-cols-2 gap-3 text-[11px]">
+            <div class="bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-blue-300 font-bold">Level 1: Single-Axis Protocols</strong>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-blue-950 text-blue-400 border border-blue-800">Routine Dosing</span>
+              </div>
+              <p class="text-gray-400 mb-2">Uncomplicated clinical cases where exactly one protocol applies cleanly.</p>
+              <div class="text-[10px] text-gray-500 font-mono bg-gray-900 p-1.5 rounded">
+                Example: 24mo infant with positive mRDT &rarr; Give AL yellow pack 1 tab twice daily for 3 days.
+              </div>
+            </div>
+
+            <div class="bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-amber-300 font-bold">Level 2: Danger Collisions &amp; Vetoes</strong>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-400 border border-amber-800">The Fatal Aspiration Trap</span>
+              </div>
+              <p class="text-gray-400 mb-2">Two conditions fire simultaneously where a Danger Sign in Condition A overrides Condition B.</p>
+              <div class="text-[10px] text-gray-500 font-mono bg-gray-900 p-1.5 rounded">
+                Example: Convulsions (Tier 1) vetoes Oral Amoxicillin for Pneumonia &rarr; Fatal choking averted.
+              </div>
+            </div>
+
+            <div class="bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-rose-300 font-bold">Level 3: Adversarial Myths &amp; Traps</strong>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-rose-950 text-rose-400 border border-rose-800">Negative Boundary Enforced</span>
+              </div>
+              <p class="text-gray-400 mb-2">Families pressure CHW to approve traditional remedies or unmonitored dangerous drugs.</p>
+              <div class="text-[10px] text-gray-500 font-mono bg-gray-900 p-1.5 rounded">
+                Example: Grandmother applying cow dung to cord stump &rarr; Explicit tetanus refusal enforced.
+              </div>
+            </div>
+
+            <div class="bg-gray-950 p-3 rounded-lg border border-gray-800">
+              <div class="flex items-center justify-between mb-1">
+                <strong class="text-purple-300 font-bold">Level 4: Facility Multi-Morbidity</strong>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-purple-950 text-purple-400 border border-purple-800">Cross-Guideline Conflict</span>
+              </div>
+              <p class="text-gray-400 mb-2">Elderly patients where guideline for disease A destroys organ in disease B.</p>
+              <div class="text-[10px] text-gray-500 font-mono bg-gray-900 p-1.5 rounded">
+                Example: Acute Gout pain in CKD 3b &amp; Heart Failure &rarr; Oral NSAIDs strictly contraindicated.
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-gray-800 bg-gray-950 flex items-center justify-between">
+        <span class="text-xs text-gray-500">Click any preset in the top ribbon to load and simulate that case.</span>
+        <button onclick="toggleGuideModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-1.5 rounded-lg transition">
+          Got it, Explore Playground
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- Embedded Static Data -->
   <script id="embedded-data" type="application/json">
 {embedded_json}
@@ -377,7 +626,6 @@ Select a scenario to view injected prompt.
     const ORIGINAL_ACDUS = EMBEDDED.acdus;
     const RAW_CACHE = EMBEDDED.raw_cache || {{}};
 
-    // In-memory working copies for live interactive editing
     let sessionAcdus = JSON.parse(JSON.stringify(ORIGINAL_ACDUS));
     let previousRuns = {{}};
 
@@ -386,12 +634,26 @@ Select a scenario to view injected prompt.
     let currentCategory = 'ALL';
     let currentActiveCduId = null;
 
-    // Linter Actionable Markers
     const ACTIONABLE_NEGATIVE_MARKERS = [
       "never", "do not", "don't", "strictly", "contraindicated", "contraindication",
       "contraindications", "prohibit", "prohibited", "avoid", "stop", "withhold",
       "discontinue", "absolutely no", "must not", "should not", "zero", "forbidden", "refuse"
     ];
+
+    function toggleGuideModal() {{
+      const modal = document.getElementById('guideModal');
+      modal.classList.toggle('hidden');
+    }}
+
+    function loadGuidedPreset(tier) {{
+      let targetId = 'EVAL-ECHIS-L1-001';
+      if (tier === 'L1') targetId = 'EVAL-ECHIS-L1-001';
+      else if (tier === 'L2') targetId = 'EVAL-ECHIS-L2-001';
+      else if (tier === 'L3') targetId = 'EVAL-ECHIS-L3-002';
+      else if (tier === 'L4') targetId = 'PHC-CASE-01';
+
+      selectScenario(targetId);
+    }}
 
     function estimateTokens(text) {{
       const words = (text.match(/\\b\\w+\\b/g) || []).length;
@@ -874,4 +1136,4 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
 out_file = DOCS_DIR / "playground.html"
 out_file.write_text(html_template, encoding="utf-8")
-print(f"Successfully compiled {out_file} ({len(html_template) // 1024} KB)")
+print(f"Successfully re-compiled {out_file} ({len(html_template) // 1024} KB)")
