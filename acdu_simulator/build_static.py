@@ -196,47 +196,195 @@ html_template = f"""<!DOCTYPE html>
   <section id="concept-guide" class="max-w-7xl mx-auto px-6 py-6 w-full space-y-6">
     
     <!-- Title and Overview Banner -->
-    <div class="theme-card rounded-2xl p-6 border shadow-sm space-y-3">
+    <div class="theme-card rounded-2xl p-6 border shadow-sm space-y-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <span class="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-500 border border-sky-500/30 flex items-center justify-center font-bold text-sm">
             <i class="fa-solid fa-book-open"></i>
           </span>
           <div>
-            <h2 class="text-lg font-bold tracking-tight">The Atomic Clinical Decision Unit (aCDU) Concept</h2>
-            <p class="text-xs theme-text-muted">A domain-specific chunking & safety architecture for offline Small Language Models (1B–4B)</p>
+            <h2 class="text-lg font-bold tracking-tight">The aCDU &amp; Tokempic Architecture</h2>
+            <p class="text-xs theme-text-muted">Strict Separation of Powers: Deterministic Decision Logic vs. Context Compression vs. Language Synthesis</p>
           </div>
         </div>
         <span class="text-xs px-2.5 py-1 rounded-full font-semibold border bg-indigo-500/10 text-indigo-400 border-indigo-500/30">
-          Level 3.5 LLM Adapter
+          Level 3.5 Edge CDS Adapter
         </span>
       </div>
 
       <p class="text-xs text-slate-300 leading-relaxed font-sans">
-        Deploying Small Language Models directly onto frontline Android devices presents a paradox: small models excel at summarizing longitudinal patient history, but fail catastrophically when performing open-ended reasoning over unstructured guideline text (sliding-window RAG). Slicing PDFs separates dosages from their contraindications, and models are trained to be agreeable—validating harmful remedies when pressured by patients.
+        Deploying Small Language Models (1B–4B class) on frontline Android devices requires a <strong>strict separation of concerns</strong>. Small models are catastrophic at open-ended clinical reasoning over raw text or complex JSON, but excel at natural language communication and narrative empathy. Our architecture divides clinical execution into deterministic rule evaluation (FHIRPath), deterministic context compression (Tokempic), constrained language synthesis (SLM), and deterministic safety verification (Regex Gate).
       </p>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-        <div class="theme-card-muted p-4 rounded-xl border">
-          <div class="flex items-center space-x-2 text-rose-400 font-bold text-xs uppercase mb-1">
-            <i class="fa-solid fa-triangle-exclamation"></i>
-            <span>Why Unconstrained SLMs Fail (The 2 Traps)</span>
+      <!-- 4 Pillars Comparison Matrix -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-1">
+        <!-- Pillar 1 -->
+        <div class="theme-card-muted p-3.5 rounded-xl border border-emerald-500/30 bg-emerald-500/5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Layer 1: Rule Decision</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-emerald-500/20 text-emerald-300">100% Deterministic</span>
+            </div>
+            <strong class="text-xs block mb-1 text-white">FHIRPath &amp; PlanDefinition</strong>
+            <p class="text-[11px] theme-text-muted leading-relaxed">
+              Evaluates structured criteria (<code class="text-emerald-300 font-mono text-[10px]">BP &ge; 140/90</code>) directly on FHIR resources to trigger certified <strong>aCDU codes</strong>.
+            </p>
           </div>
-          <ul class="text-xs theme-text-muted space-y-1.5 list-disc pl-4">
-            <li><strong>Context Fragmentation:</strong> 5,000–12,000 token FHIR bundles overwhelm on-device memory; sliding windows cut warnings away from treatments.</li>
-            <li><strong>The "Agreeable Assistant" Trap:</strong> Models agree to fatal compromises (e.g., cow dung on cords, home nifedipine in pregnancy).</li>
-          </ul>
+          <div class="mt-2.5 pt-2 border-t theme-border text-[10px] text-emerald-400 font-semibold">
+            Decides WHAT must be done (0% LLM)
+          </div>
         </div>
 
-        <div class="theme-card-muted p-4 rounded-xl border">
-          <div class="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase mb-1">
-            <i class="fa-solid fa-shield-halved"></i>
-            <span>The Two-Box Solution</span>
+        <!-- Pillar 2 -->
+        <div class="theme-card-muted p-3.5 rounded-xl border border-sky-500/30 bg-sky-500/5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">Layer 2: Context Compression</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-sky-500/20 text-sky-300">100% Deterministic</span>
+            </div>
+            <strong class="text-xs block mb-1 text-white">Tokempic (SQL-on-FHIR)</strong>
+            <p class="text-[11px] theme-text-muted leading-relaxed">
+              Pre-computes age (<code class="text-sky-300 font-mono text-[10px]">16m, 32wks</code>), unifies vitals (<code class="text-sky-300 font-mono text-[10px]">148/96 mmHg</code>), eliminates LOINC code bleed, and compresses 1,000+ tok to <strong>~320 tok</strong>.
+            </p>
           </div>
-          <ul class="text-xs theme-text-muted space-y-1.5 list-disc pl-4">
-            <li><strong>Box 1 (Deterministic Safety Floor):</strong> SQLite / FHIRPath evaluates patient criteria in 0.6ms (0 MB RAM) to fetch pre-audited aCDUs.</li>
-            <li><strong>Box 2 (Edge SLM Communicator):</strong> Translates pre-clamped rules into an empathetic, culturally tailored 3-bullet script (&le; 120 words).</li>
-          </ul>
+          <div class="mt-2.5 pt-2 border-t theme-border text-[10px] text-sky-400 font-semibold">
+            Provides WHO &amp; WHAT happened
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="theme-card-muted p-3.5 rounded-xl border border-purple-500/30 bg-purple-500/5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400">Layer 3: Briefing &amp; Empathy</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-purple-500/20 text-purple-300">Constrained Probabilistic</span>
+            </div>
+            <strong class="text-xs block mb-1 text-white">Edge SLM (Gemma 2B)</strong>
+            <p class="text-[11px] theme-text-muted leading-relaxed">
+              Merges Tokempic patient facts with triggered aCDU rules. Generates an empathetic 3-bullet CHW briefing and resolves multi-guideline collisions.
+            </p>
+          </div>
+          <div class="mt-2.5 pt-2 border-t theme-border text-[10px] text-purple-400 font-semibold">
+            Generates HOW to communicate
+          </div>
+        </div>
+
+        <!-- Pillar 4 -->
+        <div class="theme-card-muted p-3.5 rounded-xl border border-amber-500/30 bg-amber-500/5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Layer 4: Safety Gate</span>
+              <span class="text-[9px] px-1.5 py-0.2 rounded font-mono font-bold bg-amber-500/20 text-amber-300">100% Deterministic</span>
+            </div>
+            <strong class="text-xs block mb-1 text-white">Regex &amp; Boundary Linter</strong>
+            <p class="text-[11px] theme-text-muted leading-relaxed">
+              Scans generated text for negative boundary violations (e.g., verifying oral meds were refused during convulsion) before screen display.
+            </p>
+          </div>
+          <div class="mt-2.5 pt-2 border-t theme-border text-[10px] text-amber-400 font-semibold">
+            Zero-harm veto floor
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Architecture Pipeline Diagram -->
+    <div class="theme-card rounded-2xl p-6 border shadow-sm space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold text-xs">
+            <i class="fa-solid fa-network-wired"></i>
+          </span>
+          <h3 class="text-sm font-bold tracking-tight">Decoupled Knowledge Pipeline: Dual-Track Processing</h3>
+        </div>
+        <span class="text-[11px] theme-text-muted">No clinical diagnostic reasoning is delegated to the SLM</span>
+      </div>
+
+      <!-- Flow Chart Visualizer -->
+      <div class="bg-slate-950/40 p-4 rounded-xl border theme-border space-y-3 font-sans">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+          
+          <!-- Source Data -->
+          <div class="md:col-span-3 theme-card-muted p-3 rounded-lg border theme-border">
+            <div class="flex items-center space-x-1.5 text-xs font-bold text-slate-300 mb-1">
+              <i class="fa-solid fa-database text-sky-400"></i>
+              <span>Patient FHIR Store</span>
+            </div>
+            <p class="text-[10px] theme-text-muted">SQLite / Android Room: Observation, Condition, Encounter, Task</p>
+          </div>
+
+          <!-- Branch Arrows -->
+          <div class="md:col-span-1 flex flex-col items-center justify-center text-slate-500 text-xs space-y-2">
+            <i class="fa-solid fa-arrow-right hidden md:block text-sky-400"></i>
+            <i class="fa-solid fa-arrow-down md:hidden text-sky-400"></i>
+          </div>
+
+          <!-- Dual Paths (Cols 4-8) -->
+          <div class="md:col-span-4 space-y-2">
+            <!-- Path A: Logic -->
+            <div class="p-2.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold text-emerald-400 block uppercase">Track A: Decision Logic</span>
+                <span class="text-xs font-semibold text-slate-200">FHIRPath &amp; PlanDefinition</span>
+                <span class="text-[10px] text-emerald-300 block font-mono">&rarr; Returns aCDU Code (Rule ID)</span>
+              </div>
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-scale-balanced"></i></span>
+            </div>
+
+            <!-- Path B: Context -->
+            <div class="p-2.5 rounded-lg border border-sky-500/30 bg-sky-500/10 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] font-bold text-sky-400 block uppercase">Track B: Context Compression</span>
+                <span class="text-xs font-semibold text-slate-200">Tokempic (SQL-on-FHIR)</span>
+                <span class="text-[10px] text-sky-300 block font-mono">&rarr; Pre-computed Age + Vitals (~320 tok)</span>
+              </div>
+              <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-compress"></i></span>
+            </div>
+          </div>
+
+          <!-- Convergence Arrow -->
+          <div class="md:col-span-1 flex flex-col items-center justify-center text-slate-500 text-xs">
+            <i class="fa-solid fa-arrow-right hidden md:block text-purple-400"></i>
+            <i class="fa-solid fa-arrow-down md:hidden text-purple-400"></i>
+          </div>
+
+          <!-- SLM & Gate (Cols 10-12) -->
+          <div class="md:col-span-3 space-y-2">
+            <div class="p-2.5 rounded-lg border border-purple-500/30 bg-purple-500/10">
+              <span class="text-[10px] font-bold text-purple-400 block uppercase">Synthesis &amp; Safety Gate</span>
+              <span class="text-xs font-semibold text-slate-200">Edge SLM + Regex Verifier</span>
+              <p class="text-[10px] theme-text-muted mt-0.5">Generates grounded CHW script; zero boundary violations</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- FAQ Callout: Why is Tokempic Needed If FHIRPath Already Selected the Rule? -->
+      <div class="border theme-border theme-card-muted rounded-xl p-4 space-y-3">
+        <div class="flex items-center space-x-2 text-sky-400 font-bold text-xs uppercase">
+          <i class="fa-solid fa-circle-question"></i>
+          <span>Architecture Deep Dive: Why Tokempic If FHIRPath Already Chose the Rule?</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs theme-text-muted leading-relaxed">
+          <div class="theme-card p-3 rounded-lg border theme-border space-y-1">
+            <strong class="text-slate-200 block text-xs">1. Rule Codes Are Not Briefings</strong>
+            <p class="text-[11px]">
+              FHIRPath emits <code class="text-sky-300 font-mono text-[10px]">ACDU-ANC-PREECLAMPSIA-DANGER</code>. A frontline health worker facing an anxious family cannot use an alert code; they need an empathetic, patient-tailored counseling script explaining <em>why</em> immediate hospital transfer is vital.
+            </p>
+          </div>
+          <div class="theme-card p-3 rounded-lg border theme-border space-y-1">
+            <strong class="text-slate-200 block text-xs">2. Cures 3 Edge SLM Failure Modes</strong>
+            <p class="text-[11px]">
+              Feeding raw FHIR to a 2B SLM causes date-math hallucinations (confusing a 16m infant for a 25-year-old), LOINC code bleed (<code class="text-rose-300 font-mono text-[10px]">126/8480-6</code>), and token bloat (&gt;1,000 tok). Tokempic deterministically cures all three.
+            </p>
+          </div>
+          <div class="theme-card p-3 rounded-lg border theme-border space-y-1">
+            <strong class="text-slate-200 block text-xs">3. Resolves Multi-Guideline Collisions</strong>
+            <p class="text-[11px]">
+              When multi-morbidity triggers 3 disjoint aCDUs (e.g., malaria + convulsion + hypertension), the deterministic engine provides 3 discrete rule blocks. The SLM translates them into a single, cohesive, prioritized action plan.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -247,7 +395,7 @@ html_template = f"""<!DOCTYPE html>
         <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center font-bold text-xs">
           <i class="fa-solid fa-diagram-project"></i>
         </span>
-        <h3 class="text-sm font-bold tracking-tight">Step-by-Step: How Clinical Knowledge Flows Through the Architecture</h3>
+        <h3 class="text-sm font-bold tracking-tight">Step-by-Step Execution Sequence on Edge Devices</h3>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -255,16 +403,16 @@ html_template = f"""<!DOCTYPE html>
         <div class="theme-card-muted p-3.5 rounded-xl border flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center font-bold text-xs">1</span>
-              <span class="text-[10px] font-mono theme-text-muted">Tokempic</span>
+              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs">1</span>
+              <span class="text-[10px] font-mono text-emerald-400 font-bold">FHIRPath Trigger</span>
             </div>
-            <strong class="text-xs block mb-1">Observation Input</strong>
+            <strong class="text-xs block mb-1">Evaluate Decision Rules</strong>
             <p class="text-[11px] theme-text-muted leading-relaxed">
-              CHW inputs vital signs &amp; symptoms. Tokempic SQL-on-FHIR flattens raw FHIR JSON into compact structured tables (88% token reduction).
+              OHS Clinical Reasoning engine evaluates PlanDefinition criteria over patient observations (<code class="text-emerald-300 font-mono text-[10px]">%obs.dangerSign = true</code>). Returns certified aCDU codes.
             </p>
           </div>
-          <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border">
-            Fast breathing + Convulsion
+          <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border text-emerald-400">
+            Triggers aCDU Codes (0% SLM)
           </div>
         </div>
 
@@ -272,16 +420,16 @@ html_template = f"""<!DOCTYPE html>
         <div class="theme-card-muted p-3.5 rounded-xl border flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-2">
-              <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center font-bold text-xs">2</span>
-              <span class="text-[10px] font-mono theme-text-muted">PlanDefinition</span>
+              <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center font-bold text-xs">2</span>
+              <span class="text-[10px] font-mono text-sky-400 font-bold">Tokempic SQL-on-FHIR</span>
             </div>
-            <strong class="text-xs block mb-1">FHIRPath Trigger</strong>
+            <strong class="text-xs block mb-1">Compress Patient Context</strong>
             <p class="text-[11px] theme-text-muted leading-relaxed">
-              The OHS Player evaluates clinical expressions (e.g., <code>ANCDT01</code>) against patient observations. Every triggered rule references a certified aCDU.
+              Pre-computes patient age, cleans vitals (<code class="text-sky-300 font-mono text-[10px]">148/96 mmHg</code>), extracts active referral tasks, and compresses raw JSON to ~320 tokens.
             </p>
           </div>
-          <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border text-emerald-400">
-            %obs.dangerSign = true
+          <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border text-sky-400">
+            Grounds Narrative (~320 tok)
           </div>
         </div>
 
@@ -290,11 +438,11 @@ html_template = f"""<!DOCTYPE html>
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center font-bold text-xs">3</span>
-              <span class="text-[10px] font-mono theme-text-muted">Safety Floor</span>
+              <span class="text-[10px] font-mono text-amber-400 font-bold">Priority Safety Floor</span>
             </div>
-            <strong class="text-xs block mb-1">Priority Veto &amp; Clamp</strong>
+            <strong class="text-xs block mb-1">Sort Tiers &amp; Compute Vetoes</strong>
             <p class="text-[11px] theme-text-muted leading-relaxed">
-              Box 1 sorts triggered units by tier (Tier 1 Veto first) and computes the Negative Boundary Union (&Nscr;<sub>composite</sub> = &bigcup;&Nscr;<sub>i</sub>). Any Tier-1 prohibition overrides routine positive actions.
+              Sorts aCDUs by priority tier (Tier 1 Veto first) and computes composite Negative Boundaries (&Nscr;<sub>composite</sub> = &bigcup;&Nscr;<sub>i</sub>). Prohibitions veto routine treatments.
             </p>
           </div>
           <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border text-amber-400">
@@ -307,15 +455,15 @@ html_template = f"""<!DOCTYPE html>
           <div>
             <div class="flex items-center justify-between mb-2">
               <span class="w-6 h-6 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center font-bold text-xs">4</span>
-              <span class="text-[10px] font-mono theme-text-muted">Edge SLM</span>
+              <span class="text-[10px] font-mono text-purple-400 font-bold">Edge SLM &amp; Gate</span>
             </div>
-            <strong class="text-xs block mb-1">Synthesized Briefing</strong>
+            <strong class="text-xs block mb-1">Synthesize &amp; Verify Briefing</strong>
             <p class="text-[11px] theme-text-muted leading-relaxed">
-              Gemma 4 2B translates the pre-clamped directives into an empathetic, clear 3-bullet script for the CHW. Box 1's post-verifier validates zero prohibited words escaped.
+              Gemma 2B translates context + guardrails into an empathetic 3-bullet CHW script (&le; 120 words). Deterministic Regex Gate verifies zero forbidden tokens escaped.
             </p>
           </div>
           <div class="mt-3 text-[10px] font-mono bg-slate-900/40 p-1.5 rounded border theme-border text-purple-400">
-            100% Zero-Harm Adherence
+            Verified CHW Guidance
           </div>
         </div>
       </div>
@@ -432,7 +580,10 @@ html_template = f"""<!DOCTYPE html>
         <div class="p-3 border-b theme-border flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-400 border border-sky-500/40 flex items-center justify-center text-[10px] font-bold">1</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Scenario Explorer</span>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider block leading-none">Patient Context</span>
+              <span class="text-[10px] theme-text-muted">Tokempic SQL-on-FHIR</span>
+            </div>
           </div>
           <span id="scenarioCountBadge" class="text-[11px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">42 Cases</span>
         </div>
@@ -453,7 +604,7 @@ html_template = f"""<!DOCTYPE html>
         <!-- Selected Scenario Context Summary Box -->
         <div class="p-3 border-t theme-border theme-card flex-shrink-0">
           <div class="text-[11px] font-semibold uppercase tracking-wider mb-1 flex items-center justify-between theme-text-muted">
-            <span>Clinical Presentation</span>
+            <span class="text-sky-400"><i class="fa-solid fa-compress mr-1"></i> Tokempic Grounding View:</span>
             <span id="tierBadge" class="text-[10px] px-1.5 py-0.2 rounded font-bold border bg-sky-500/10 text-sky-400 border-sky-500/30">Tier 1</span>
           </div>
           <div id="scenarioPresentation" class="text-xs theme-card-muted p-2.5 rounded border theme-border max-h-24 overflow-y-auto custom-scroll leading-relaxed italic text-slate-300">
@@ -467,9 +618,12 @@ html_template = f"""<!DOCTYPE html>
         <div class="p-3 border-b theme-border flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center text-[10px] font-bold">2</span>
-            <span class="text-xs font-bold uppercase tracking-wider">PlanDefinitions</span>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider block leading-none">Rule Engine</span>
+              <span class="text-[10px] text-emerald-400">PlanDefinition &amp; FHIRPath</span>
+            </div>
           </div>
-          <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">FHIRPath</span>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-semibold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">100% Deterministic</span>
         </div>
 
         <!-- PlanDefinitions list -->
@@ -480,11 +634,11 @@ html_template = f"""<!DOCTYPE html>
         <!-- Milestone Banner -->
         <div class="p-3 border-t theme-border bg-indigo-500/10 border-l-2 border-l-indigo-500 m-2 rounded">
           <div class="flex items-center space-x-2 text-indigo-400 text-xs font-bold">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Architecture Milestone:</span>
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Architecture Note:</span>
           </div>
           <p class="text-[11px] theme-text-muted mt-1 leading-snug">
-            <strong>TODO:</strong> Integrate native <code>kotlin-fhirpath</code> runner to evaluate expressions dynamically over raw FHIR bundles.
+            FHIRPath evaluates structured rules over patient data to select the <strong>aCDU code</strong>. The SLM is never used to determine clinical logic.
           </p>
         </div>
       </section>
@@ -494,7 +648,10 @@ html_template = f"""<!DOCTYPE html>
         <div class="p-3 border-b theme-border flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 flex items-center justify-center text-[10px] font-bold">3</span>
-            <span class="text-xs font-bold uppercase tracking-wider">aCDU Editor</span>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider block leading-none">aCDU Guardrails</span>
+              <span class="text-[10px] text-amber-400">Prompt Rules &amp; Veto</span>
+            </div>
           </div>
           <div id="lintBadge" class="text-[11px] px-2 py-0.5 rounded font-mono font-bold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
             Clean &bull; 0 tok
@@ -579,7 +736,11 @@ html_template = f"""<!DOCTYPE html>
         <div class="p-3 border-b theme-border flex items-center justify-between">
           <div class="flex items-center space-x-2">
             <span class="w-5 h-5 rounded-full bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center text-[10px] font-bold">4</span>
-            <span class="text-xs font-bold uppercase tracking-wider">Downstream Impact</span>
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider block leading-none">SLM Synthesis &amp; Verifier</span>
+              <span class="text-[10px] text-purple-400">CHW Briefing &amp; Safety Gate</span>
+            </div>
+          </div>
           </div>
           <div class="flex items-center space-x-1 theme-card-muted p-0.5 rounded border theme-border text-[11px]">
             <button id="viewTabRaw" onclick="switchOutputTab('raw')" class="px-2 py-0.5 rounded font-semibold text-white bg-sky-600 cursor-pointer">Raw vs Clamped</button>
