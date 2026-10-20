@@ -1234,4 +1234,6 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
 out_file = DOCS_DIR / "playground.html"
 out_file.write_text(html_template, encoding="utf-8")
-print(f"Successfully compiled fixed {out_file} ({len(html_template) // 1024} KB)")
+sim_index_file = WORKSPACE_DIR / "acdu_simulator" / "index.html"
+sim_index_file.write_text(html_template, encoding="utf-8")
+print(f"Successfully compiled fixed {out_file} and {sim_index_file} ({len(html_template) // 1024} KB)")
