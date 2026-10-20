@@ -2,9 +2,8 @@
 """Builds a single-page, readable, ergonomic aCDU Playground.
 Features:
 - Integrated Single-Page Concept & Architecture Explainer (No intrusive popups)
-- Ergonomic, comfortable color palette (Slate / Soft Indigo / Zinc) with high text contrast
-- Light / Dark Mode Toggle with WCAG AAA readability
-- 4-Quadrant Simulator Layout (Scenarios -> PlanDefinitions -> aCDU Editor -> Downstream Output)
+- Ergonomic, comfortable Slate palette with high-contrast text and Light/Dark mode
+- Complete 4-Quadrant Simulator Controls (including Model Selector, Run Simulation button, Reset button)
 - Real-time client-side Token Budgeting and Refusal Linting
 - One-click presets for L1 (Single-Axis), L2 (Danger Veto), L3 (Cultural Myth), L4 (PHC Collision)
 Outputs directly into docs/playground.html ready for GitHub Pages.
@@ -58,10 +57,10 @@ html_template = f"""<!DOCTYPE html>
   <style>
     /* Ergonomic Slate Dark Mode (Default) */
     :root {{
-      --bg: #0f172a;               /* Slate 900 - softer than pure pitch black */
+      --bg: #0f172a;               /* Slate 900 */
       --card-bg: #1e293b;          /* Slate 800 */
       --card-muted: #162032;       /* Deeper slate */
-      --border: #334155;           /* Slate 700 - clear, soft border */
+      --border: #334155;           /* Slate 700 */
       --border-subtle: #243247;
       --text-main: #f8fafc;        /* Slate 50 */
       --text-muted: #94a3b8;       /* Slate 400 */
@@ -148,26 +147,43 @@ html_template = f"""<!DOCTYPE html>
 
     <!-- Navigation & Utility Controls -->
     <div class="flex items-center space-x-3">
-      <!-- Jump to Concept Guide -->
-      <a href="#concept-guide" class="text-xs px-3 py-1.5 rounded-lg border theme-border font-medium text-sky-500 hover:bg-sky-500/10 transition flex items-center space-x-1.5">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Architecture Guide</span>
-      </a>
+      <!-- Model Selector -->
+      <div class="flex items-center space-x-2 theme-card-muted border theme-border rounded-lg px-2.5 py-1.5">
+        <i class="fa-solid fa-server text-xs text-sky-400"></i>
+        <label for="modelSelect" class="text-xs theme-text-muted font-medium">Model:</label>
+        <select id="modelSelect" onchange="runSimulation()" class="bg-transparent text-xs font-semibold focus:outline-none cursor-pointer">
+          <option value="gemma4-2b:latest" selected>Gemma 4 2B (Edge)</option>
+          <option value="medgemma:latest">MedGemma 4B (Biomedical)</option>
+          <option value="gemma4:e4b">Gemma 4 4B</option>
+        </select>
+      </div>
 
-      <!-- Jump to Interactive Simulator -->
-      <a href="#simulator-section" class="text-xs px-3 py-1.5 rounded-lg border theme-border font-medium theme-text-muted hover:text-white hover:bg-slate-700/30 transition flex items-center space-x-1.5">
-        <i class="fa-solid fa-gamepad"></i>
-        <span>Live Simulator</span>
+      <!-- Live Simulate Button -->
+      <button id="runSimBtn" onclick="runSimulation()" class="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold text-xs px-3.5 py-2 rounded-lg transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer">
+        <i class="fa-solid fa-play text-[11px]"></i>
+        <span>Run Simulation</span>
+      </button>
+
+      <!-- Reset Current aCDU Button -->
+      <button onclick="resetCurrentCDU()" class="theme-card hover:bg-slate-700/40 text-xs px-3 py-2 rounded-lg transition border theme-border theme-text-muted hover:text-white flex items-center space-x-1 cursor-pointer" title="Reset edited aCDU back to certified default">
+        <i class="fa-solid fa-rotate-left mr-1"></i>
+        <span>Reset aCDU</span>
+      </button>
+
+      <!-- Jump to Concept Guide -->
+      <a href="#concept-guide" class="text-xs px-3 py-2 rounded-lg border theme-border font-medium text-sky-500 hover:bg-sky-500/10 transition flex items-center space-x-1.5">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Guide</span>
       </a>
 
       <!-- Back to Suite Hub -->
-      <a href="index.html" class="text-xs px-3 py-1.5 rounded-lg border theme-border font-medium theme-text-muted hover:text-white hover:bg-slate-700/30 transition flex items-center space-x-1.5">
+      <a href="index.html" class="text-xs px-3 py-2 rounded-lg border theme-border font-medium theme-text-muted hover:text-white hover:bg-slate-700/30 transition flex items-center space-x-1.5">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Suite Hub</span>
       </a>
 
       <!-- Light / Dark Mode Toggle -->
-      <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg border theme-border theme-text-muted hover:text-white transition flex items-center justify-center" title="Toggle Light/Dark Theme">
+      <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg border theme-border theme-text-muted hover:text-white transition flex items-center justify-center cursor-pointer" title="Toggle Light/Dark Theme">
         <i id="themeIconSun" class="fa-solid fa-sun text-amber-500 hidden text-sm"></i>
         <i id="themeIconMoon" class="fa-solid fa-moon text-sky-400 text-sm"></i>
       </button>
@@ -177,7 +193,7 @@ html_template = f"""<!DOCTYPE html>
   <!-- ========================================== -->
   <!-- SECTION 1: INLINE SINGLE-PAGE CONCEPT GUIDE -->
   <!-- ========================================== -->
-  <section id="concept-guide" class="max-w-7xl mx-auto px-6 py-8 w-full space-y-6">
+  <section id="concept-guide" class="max-w-7xl mx-auto px-6 py-6 w-full space-y-6">
     
     <!-- Title and Overview Banner -->
     <div class="theme-card rounded-2xl p-6 border shadow-sm space-y-3">
@@ -319,7 +335,7 @@ html_template = f"""<!DOCTYPE html>
 
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <!-- L1 Preset -->
-        <button onclick="loadGuidedPreset('L1')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-sky-500 transition group flex flex-col justify-between">
+        <button onclick="loadGuidedPreset('L1')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-sky-500 transition group flex flex-col justify-between cursor-pointer">
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-sky-400 group-hover:underline">Level 1: Single-Axis</span>
@@ -337,7 +353,7 @@ html_template = f"""<!DOCTYPE html>
         </button>
 
         <!-- L2 Preset -->
-        <button onclick="loadGuidedPreset('L2')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-amber-500 transition group flex flex-col justify-between">
+        <button onclick="loadGuidedPreset('L2')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-amber-500 transition group flex flex-col justify-between cursor-pointer">
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-amber-400 group-hover:underline">Level 2: Danger Collision</span>
@@ -355,7 +371,7 @@ html_template = f"""<!DOCTYPE html>
         </button>
 
         <!-- L3 Preset -->
-        <button onclick="loadGuidedPreset('L3')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-rose-500 transition group flex flex-col justify-between">
+        <button onclick="loadGuidedPreset('L3')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-rose-500 transition group flex flex-col justify-between cursor-pointer">
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-rose-400 group-hover:underline">Level 3: Cultural Myth</span>
@@ -373,7 +389,7 @@ html_template = f"""<!DOCTYPE html>
         </button>
 
         <!-- L4 Preset -->
-        <button onclick="loadGuidedPreset('L4')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-purple-500 transition group flex flex-col justify-between">
+        <button onclick="loadGuidedPreset('L4')" class="theme-card-muted p-4 rounded-xl border text-left hover:border-purple-500 transition group flex flex-col justify-between cursor-pointer">
           <div>
             <div class="flex items-center justify-between mb-1.5">
               <span class="text-xs font-bold text-purple-400 group-hover:underline">Level 4: PHC Collision</span>
@@ -423,10 +439,10 @@ html_template = f"""<!DOCTYPE html>
 
         <!-- Category Filter Tabs -->
         <div class="p-2 border-b theme-border flex space-x-1 text-xs">
-          <button onclick="filterCategory('ALL')" class="cat-pill pill-active px-2.5 py-1 rounded text-xs transition font-medium" data-cat="ALL">All</button>
-          <button onclick="filterCategory('Kenya eCHIS')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium" data-cat="Kenya eCHIS">eCHIS</button>
-          <button onclick="filterCategory('WHO SMART Guidelines')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium" data-cat="WHO SMART Guidelines">WHO SMART</button>
-          <button onclick="filterCategory('PHC Multi-Morbidity')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium" data-cat="PHC Multi-Morbidity">PHC</button>
+          <button onclick="filterCategory('ALL')" class="cat-pill pill-active px-2.5 py-1 rounded text-xs transition font-medium cursor-pointer" data-cat="ALL">All</button>
+          <button onclick="filterCategory('Kenya eCHIS')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium cursor-pointer" data-cat="Kenya eCHIS">eCHIS</button>
+          <button onclick="filterCategory('WHO SMART Guidelines')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium cursor-pointer" data-cat="WHO SMART Guidelines">WHO SMART</button>
+          <button onclick="filterCategory('PHC Multi-Morbidity')" class="cat-pill theme-card theme-border border theme-text-muted hover:text-white px-2.5 py-1 rounded text-xs transition font-medium cursor-pointer" data-cat="PHC Multi-Morbidity">PHC</button>
         </div>
 
         <!-- Scenarios List Scrollable -->
@@ -551,7 +567,7 @@ html_template = f"""<!DOCTYPE html>
 
           <div class="flex items-center justify-between pt-1">
             <span class="text-[10px] theme-text-muted">In-memory playground session.</span>
-            <button onclick="exportCduJson()" class="text-xs theme-card hover:bg-slate-700/50 border theme-border px-3 py-1.5 rounded transition">
+            <button onclick="exportCduJson()" class="text-xs theme-card hover:bg-slate-700/50 border theme-border px-3 py-1.5 rounded transition cursor-pointer">
               <i class="fa-solid fa-download mr-1"></i> Export JSON
             </button>
           </div>
@@ -566,9 +582,9 @@ html_template = f"""<!DOCTYPE html>
             <span class="text-xs font-bold uppercase tracking-wider">Downstream Impact</span>
           </div>
           <div class="flex items-center space-x-1 theme-card-muted p-0.5 rounded border theme-border text-[11px]">
-            <button id="viewTabRaw" onclick="switchOutputTab('raw')" class="px-2 py-0.5 rounded font-semibold text-white bg-sky-600">Raw vs Clamped</button>
-            <button id="viewTabDiff" onclick="switchOutputTab('diff')" class="px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white">Before vs After</button>
-            <button id="viewTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white">Prompt</button>
+            <button id="viewTabRaw" onclick="switchOutputTab('raw')" class="px-2 py-0.5 rounded font-semibold text-white bg-sky-600 cursor-pointer">Raw vs Clamped</button>
+            <button id="viewTabDiff" onclick="switchOutputTab('diff')" class="px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white cursor-pointer">Before vs After</button>
+            <button id="viewTabPrompt" onclick="switchOutputTab('prompt')" class="px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white cursor-pointer">Prompt</button>
           </div>
         </div>
 
@@ -590,7 +606,7 @@ html_template = f"""<!DOCTYPE html>
               <span id="rawStatusBadge" class="text-[10px] px-1.5 py-0.2 rounded font-semibold border bg-rose-500/10 text-rose-400 border-rose-500/30">Unchecked</span>
             </div>
             <div id="rawOutputText" class="text-xs text-slate-300 leading-relaxed font-sans whitespace-pre-wrap theme-card-muted p-2.5 rounded border theme-border max-h-36 overflow-y-auto custom-scroll">
-              Click 'Simulate Scenario' to view baseline comparison.
+              Click 'Run Simulation' to view baseline comparison.
             </div>
           </div>
 
@@ -604,7 +620,7 @@ html_template = f"""<!DOCTYPE html>
               <span id="slmStatusBadge" class="text-[10px] px-1.5 py-0.2 rounded font-semibold border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">Protected</span>
             </div>
             <div id="slmOutputText" class="text-xs text-emerald-200 leading-relaxed font-sans whitespace-pre-wrap theme-card-muted p-2.5 rounded border theme-border min-h-[140px] max-h-56 overflow-y-auto custom-scroll">
-              Click 'Simulate Scenario' to run live edge SLM inference.
+              Click 'Run Simulation' to run live edge SLM inference.
             </div>
           </div>
 
@@ -623,7 +639,7 @@ html_template = f"""<!DOCTYPE html>
         <!-- Tab View B: Before vs After Tweak Diff -->
         <div id="tabContentDiff" class="flex-1 overflow-y-auto custom-scroll p-3 space-y-3 hidden max-h-[540px]">
           <div class="p-2.5 bg-sky-500/10 border border-sky-500/30 rounded text-xs text-sky-400">
-            <i class="fa-solid fa-code-compare mr-1"></i> Tweak an aCDU in Panel 3, then hit <strong>Simulate Scenario</strong> to compare results before and after your edit.
+            <i class="fa-solid fa-code-compare mr-1"></i> Tweak an aCDU in Panel 3, then hit <strong>Run Simulation</strong> to compare results before and after your edit.
           </div>
           <div class="grid grid-cols-2 gap-2 flex-1">
             <div class="border theme-border rounded p-2.5 theme-card-muted">
@@ -635,7 +651,7 @@ html_template = f"""<!DOCTYPE html>
             <div class="border border-emerald-500/40 rounded p-2.5 theme-card-muted">
               <div class="text-[11px] font-bold text-emerald-400 uppercase mb-1">Current Run (After Tweak):</div>
               <div id="diffAfterOutput" class="text-xs text-emerald-200 whitespace-pre-wrap font-sans max-h-80 overflow-y-auto custom-scroll">
-                Click 'Simulate Scenario' to populate.
+                Click 'Run Simulation' to populate.
               </div>
             </div>
           </div>
@@ -719,7 +735,6 @@ Select a scenario to view injected prompt.
 
       selectScenario(targetId);
 
-      // Scroll smoothly down to simulator section
       const simSection = document.getElementById('simulator-section');
       if (simSection) {{
         simSection.scrollIntoView({{ behavior: 'smooth' }});
@@ -994,7 +1009,7 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
           <div class="flex items-center justify-between text-[11px] pt-1 border-t theme-border">
             <span class="theme-text-muted">Mapped aCDU:</span>
-            <button onclick="editSpecificCdu('${{pd.mapped_acdu}}')" class="font-mono text-sky-400 font-bold hover:underline flex items-center space-x-1">
+            <button onclick="editSpecificCdu('${{pd.mapped_acdu}}')" class="font-mono text-sky-400 font-bold hover:underline flex items-center space-x-1 cursor-pointer">
               <span>${{pd.mapped_acdu}}</span>
               <i class="fa-solid fa-arrow-up-right-from-square text-[9px] ml-1"></i>
             </button>
@@ -1049,20 +1064,30 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
     function getEditedCduObject() {{
       const select = document.getElementById('activeCduSelect');
+      const cduId = select.value || currentActiveCduId;
+      const topic = document.getElementById('cduTopic').value;
+      const priority = parseInt(document.getElementById('cduPriority').value) || 2;
+      const source = document.getElementById('cduSource').value;
+      const criteria = document.getElementById('cduCriteria').value;
+      const actions = document.getElementById('cduActions').value.split('\\n').filter(s => s.trim().length > 0);
+      const negatives = document.getElementById('cduNegatives').value.split('\\n').filter(s => s.trim().length > 0);
+
       return {{
-        id: select.value || currentActiveCduId,
-        topic: document.getElementById('cduTopic').value,
-        priority_tier: parseInt(document.getElementById('cduPriority').value),
-        source_guideline: document.getElementById('cduSource').value,
-        entry_criteria: document.getElementById('cduCriteria').value,
-        mandated_actions: document.getElementById('cduActions').value.split('\\n').filter(s => s.trim().length > 0),
-        negative_boundaries: document.getElementById('cduNegatives').value.split('\\n').filter(s => s.trim().length > 0)
+        id: cduId,
+        topic: topic,
+        priority_tier: priority,
+        source_guideline: source,
+        entry_criteria: criteria,
+        mandated_actions: actions,
+        negative_boundaries: negatives
       }};
     }}
 
     function onCduChange() {{
       const cdu = getEditedCduObject();
-      sessionAcdus[cdu.id] = cdu;
+      if (cdu.id) {{
+        sessionAcdus[cdu.id] = cdu;
+      }}
 
       const res = lintCduClient(cdu);
 
@@ -1104,7 +1129,8 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
         sessionAcdus[editedCdu.id] = editedCdu;
       }}
 
-      const model = document.getElementById('modelSelect').value;
+      const modelSelectEl = document.getElementById('modelSelect');
+      const model = modelSelectEl ? modelSelectEl.value : 'gemma4-2b:latest';
       const activeCdus = (currentScenario.expected_acdu_ids || []).map(cid => sessionAcdus[cid] || ORIGINAL_ACDUS[cid]).filter(Boolean);
 
       const rawOutput = getRawOutputClient(currentScenario.id, model);
@@ -1173,10 +1199,10 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
         const btn = document.getElementById(`viewTab${{t.charAt(0).toUpperCase() + t.slice(1)}}`);
         const content = document.getElementById(`tabContent${{t.charAt(0).toUpperCase() + t.slice(1)}}`);
         if (t === tab) {{
-          btn.className = "px-2 py-0.5 rounded font-semibold text-white bg-sky-600";
+          btn.className = "px-2 py-0.5 rounded font-semibold text-white bg-sky-600 cursor-pointer";
           content.classList.remove('hidden');
         }} else {{
-          btn.className = "px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white";
+          btn.className = "px-2 py-0.5 rounded font-semibold theme-text-muted hover:text-white cursor-pointer";
           content.classList.add('hidden');
         }}
       }});
@@ -1208,4 +1234,4 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
 out_file = DOCS_DIR / "playground.html"
 out_file.write_text(html_template, encoding="utf-8")
-print(f"Successfully compiled single-page ergonomic {out_file} ({len(html_template) // 1024} KB)")
+print(f"Successfully compiled fixed {out_file} ({len(html_template) // 1024} KB)")
