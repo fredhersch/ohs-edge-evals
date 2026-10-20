@@ -48,7 +48,7 @@ embedded_payload = {
 embedded_json = json.dumps(embedded_payload, ensure_ascii=False)
 
 html_template = f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -138,29 +138,6 @@ html_template = f"""<!DOCTYPE html>
       line-height: 1.5;
     }}
 
-    .ohs-card {{
-      background-color: var(--card);
-      border: 1px solid var(--border);
-    }}
-    .ohs-card-muted {{
-      background-color: var(--card-muted);
-      border: 1px solid var(--border);
-    }}
-    .ohs-input {{
-      background-color: var(--card-muted);
-      border: 1px solid var(--border);
-      color: var(--foreground);
-    }}
-    .ohs-input:focus {{
-      border-color: var(--text-blue);
-      outline: none;
-    }}
-    .ohs-code {{
-      background-color: var(--code-bg);
-      color: var(--code-text);
-      border: 1px solid var(--border);
-    }}
-
     .pill-active {{
       background-color: #2563eb !important;
       color: #ffffff !important;
@@ -170,59 +147,89 @@ html_template = f"""<!DOCTYPE html>
 </head>
 <body class="bg-[var(--background)] text-[var(--foreground)] antialiased min-h-screen p-3 sm:p-5 md:p-8">
 
-  <div class="max-w-7xl mx-auto space-y-5">
+  <div class="max-w-7xl mx-auto space-y-4">
 
-    <!-- GLOBAL OHS TOP NAVIGATION BAR (Matches docs/index.html) -->
-    <nav class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+    <!-- 1. TOP HEADER & BREADCRUMBS -->
+    <header class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md font-bold text-sm tracking-wider shrink-0">
+        <a href="index.html" class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md font-bold text-sm tracking-wider shrink-0 hover:opacity-90 transition">
           OHS
-        </div>
+        </a>
         <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-base text-[var(--foreground)] tracking-tight">OHS Edge</span>
-            <span class="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-[var(--text-blue)] border border-blue-500/20">AI Commons</span>
+          <!-- Clear Breadcrumb Hierarchy -->
+          <nav class="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]" aria-label="Breadcrumb">
+            <a href="index.html" class="hover:text-[var(--text-blue)] transition">Open Health Stack</a>
+            <span>/</span>
+            <a href="index.html" class="hover:text-[var(--text-blue)] transition">OHS Edge Suite</a>
+            <span>/</span>
+            <span class="text-[var(--foreground)] font-semibold">aCDU Playground</span>
+          </nav>
+          <div class="flex items-center gap-2 mt-0.5">
+            <h1 class="text-base sm:text-lg font-bold text-[var(--foreground)] tracking-tight">aCDU Clinical Decision Unit Playground</h1>
+            <span class="hidden sm:inline-flex text-[10px] px-2 py-0.5 rounded font-semibold bg-emerald-500/10 text-[var(--text-emerald)] border border-emerald-500/20">Live CDS Simulator</span>
           </div>
-          <p class="text-xs text-[var(--muted-foreground)]">Offline Edge LLM &bull; Tokempic SQL-on-FHIR &bull; aCDU Playground</p>
         </div>
       </div>
 
-      <!-- Suite Links Scrollable / Wrap on Mobile -->
-      <div class="flex items-center gap-1.5 p-1 bg-[var(--surface-hover)] rounded-xl border border-[var(--border)] text-xs font-medium overflow-x-auto custom-scroll py-1.5">
-        <a href="index.html" class="px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all whitespace-nowrap flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          <span>3-Way Benchmark</span>
-        </a>
-        <a href="vignettes.html" class="px-3 py-1.5 rounded-lg text-purple-400 hover:text-white bg-purple-600/15 border border-purple-500/30 transition-all whitespace-nowrap flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-          <span>Vignettes</span>
-        </a>
-        <a href="gemma4_benchmark_report.html" class="px-3 py-1.5 rounded-lg text-emerald-400 hover:text-white bg-emerald-600/15 border border-emerald-500/30 transition-all whitespace-nowrap flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span>Gemma 4 Report</span>
-        </a>
-        <a href="playground.html" class="px-3.5 py-1.5 rounded-lg text-white bg-blue-600 font-semibold shadow-sm whitespace-nowrap flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span>aCDU Playground</span>
-        </a>
-      </div>
-
-      <!-- Theme Toggle & Fast Links -->
-      <div class="flex items-center gap-2 shrink-0">
-        <a href="#concept-guide" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-blue-500/50 transition-colors flex items-center gap-1">
-          <svg class="w-3.5 h-3.5 text-[var(--text-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <span>Architecture</span>
+      <!-- Suite Links & Theme -->
+      <div class="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+        <a href="index.html" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-blue-500/50 transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[var(--text-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Suite Hub</span>
         </a>
 
+        <!-- Theme Toggle Button -->
         <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-lg text-xs font-medium bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-blue-500/50 transition-colors flex items-center justify-center cursor-pointer" title="Toggle Light/Dark Theme">
           <svg id="themeIconSun" class="w-4 h-4 text-[var(--text-amber)] hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
           <svg id="themeIconMoon" class="w-4 h-4 text-[var(--text-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
         </button>
       </div>
+    </header>
+
+    <!-- 2. STICKY IN-PAGE NAVIGATION & SIMULATOR QUICK ACTIONS -->
+    <nav class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-2.5 sm:p-3 shadow-md sticky top-3 z-30 flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-sm bg-opacity-95 dark:bg-opacity-95">
+      <!-- Section Jump Pills -->
+      <div class="flex items-center gap-1.5 text-xs font-semibold overflow-x-auto custom-scroll py-0.5">
+        <span class="text-[10px] text-[var(--muted-foreground)] uppercase tracking-wider font-bold mr-1 shrink-0">Navigate:</span>
+        <a href="#concept-guide" class="px-3 py-1.5 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-blue-500/50 transition whitespace-nowrap flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[var(--text-blue)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          <span>Architecture Guide</span>
+        </a>
+        <a href="#presets-section" class="px-3 py-1.5 rounded-lg bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--foreground)] hover:border-amber-500/50 transition whitespace-nowrap flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-[var(--text-amber)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Presets (L1–L4)</span>
+        </a>
+        <a href="#simulator-section" class="px-3 py-1.5 rounded-lg bg-blue-600/15 border border-blue-500/40 text-[var(--text-blue)] hover:bg-blue-600/25 transition whitespace-nowrap flex items-center gap-1.5 font-bold">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Live Simulator</span>
+        </a>
+      </div>
+
+      <!-- Quick Simulator Controls Dock -->
+      <div class="flex items-center gap-2 shrink-0 self-end md:self-auto">
+        <div class="flex items-center gap-1 bg-[var(--surface-hover)] border border-[var(--border)] rounded-lg px-2.5 py-1 text-xs">
+          <span class="text-[var(--muted-foreground)] font-medium">Model:</span>
+          <select id="modelSelect" onchange="runSimulation()" class="bg-transparent font-semibold focus:outline-none cursor-pointer text-[var(--foreground)] text-xs">
+            <option value="gemma4-2b:latest" selected>Gemma 4 2B (Edge)</option>
+            <option value="medgemma:latest">MedGemma 4B (Biomedical)</option>
+            <option value="gemma4:e4b">Gemma 4 4B</option>
+          </select>
+        </div>
+
+        <button id="runSimBtn" onclick="runSimulation()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
+          <span>Run Simulation</span>
+        </button>
+
+        <button onclick="resetCurrentCDU()" class="bg-[var(--surface-hover)] hover:bg-[var(--card-muted)] text-xs px-2.5 py-1.5 rounded-lg transition border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] flex items-center gap-1 cursor-pointer" title="Reset edited aCDU back to certified default">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Reset</span>
+        </button>
+      </div>
     </nav>
 
     <!-- ARCHITECTURE GUIDE HEADER (Clean, scannable, non-verbose) -->
-    <header id="concept-guide" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
+    <section id="concept-guide" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-sm space-y-4">
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <div class="flex flex-wrap items-center gap-2 mb-1.5">
@@ -230,9 +237,9 @@ html_template = f"""<!DOCTYPE html>
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-[var(--text-emerald)] border border-emerald-500/20">Deterministic Safety Floor</span>
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-[var(--text-purple)] border border-purple-500/20">Offline Small Models (1B–4B)</span>
           </div>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)]">
+          <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--foreground)]">
             Atomic Clinical Decision Units (aCDU) &amp; Tokempic
-          </h1>
+          </h2>
           <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1 max-w-3xl">
             Decoupled edge architecture: deterministic rule evaluation (FHIRPath), compressed patient context (Tokempic SQL-on-FHIR), and safe language synthesis.
           </p>
@@ -316,10 +323,10 @@ html_template = f"""<!DOCTYPE html>
           </div>
         </div>
       </div>
-    </header>
+    </section>
 
     <!-- GUIDED USE-CASE PRESETS (Fully Responsive 1 -> 2 -> 4 Grid) -->
-    <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
+    <section id="presets-section" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 shadow-sm space-y-3">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <span class="w-6 h-6 rounded-lg bg-[var(--badge-amber-bg)] text-[var(--text-amber)] border border-[var(--badge-amber-border)] flex items-center justify-center font-bold text-xs">
@@ -410,37 +417,27 @@ html_template = f"""<!DOCTYPE html>
     <!-- ========================================== -->
     <div id="simulator-section" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col">
       
-      <!-- Quadrant Header with Responsive Controls -->
+      <!-- Quadrant Header with Active Case Status -->
       <div class="p-3 sm:p-4 border-b border-[var(--border)] bg-[var(--surface-hover)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center gap-2">
           <div class="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           </div>
           <div>
-            <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--foreground)]">4-Quadrant Clinical Simulator</h2>
-            <p class="text-[11px] text-[var(--muted-foreground)]">Modify aCDU rules in Panel 3 to test live SLM synthesis &amp; safety clamping</p>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-[var(--foreground)]">4-Quadrant Clinical Simulator Cockpit</h2>
+            <p class="text-[11px] text-[var(--muted-foreground)]">Select a case in Panel 1 or tweak boundaries in Panel 3 &bull; Output updates instantly</p>
           </div>
         </div>
 
-        <!-- Controls: Model Select, Run, Reset -->
-        <div class="flex flex-wrap items-center gap-2">
-          <!-- Model Selector -->
-          <div class="flex items-center gap-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg px-2.5 py-1 text-xs">
-            <span class="text-[var(--muted-foreground)] font-medium">Model:</span>
-            <select id="modelSelect" onchange="runSimulation()" class="bg-transparent font-semibold focus:outline-none cursor-pointer text-[var(--foreground)] text-xs">
-              <option value="gemma4-2b:latest" selected>Gemma 4 2B (Edge)</option>
-              <option value="medgemma:latest">MedGemma 4B (Biomedical)</option>
-              <option value="gemma4:e4b">Gemma 4 4B</option>
-            </select>
-          </div>
-
-          <!-- Run Simulation Button -->
-          <button id="runSimBtn" onclick="runSimulation()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/></svg>
-            <span>Run Simulation</span>
-          </button>
-
-          <!-- Reset Current CDU Button -->
+        <!-- Active Case Pill Indicator -->
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-[var(--muted-foreground)]">Selected:</span>
+          <span class="text-xs px-2.5 py-1 rounded-lg bg-[var(--card)] border border-[var(--border)] font-mono font-semibold text-[var(--text-blue)] flex items-center gap-1.5 shadow-xs">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="activeCasePillText">EVAL-ECHIS-L1-001</span>
+          </span>
+        </div>
+      </div>
           <button onclick="resetCurrentCDU()" class="bg-[var(--card)] hover:bg-[var(--surface-hover)] text-xs px-2.5 py-1.5 rounded-lg transition border border-[var(--border)] text-[var(--muted-foreground)] hover:text-[var(--foreground)] flex items-center gap-1 cursor-pointer" title="Reset edited aCDU back to certified default">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
             <span>Reset</span>
@@ -1028,6 +1025,10 @@ Provide your response in <= ${{scenario.word_limit || 120}} words.`;
 
       document.getElementById('scenarioPresentation').innerText = currentScenario.clinical_presentation;
       document.getElementById('tierBadge').innerText = currentScenario.level.split(':')[0];
+      const pillText = document.getElementById('activeCasePillText');
+      if (pillText) {{
+        pillText.innerText = currentScenario.id;
+      }}
 
       renderPlanDefinitions();
       setupCduSelector();
