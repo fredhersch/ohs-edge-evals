@@ -242,6 +242,7 @@ html_template = f"""<!DOCTYPE html>
           </h2>
           <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1 max-w-3xl">
             Decoupled edge architecture: deterministic rule evaluation (FHIRPath), compressed patient context (Tokempic SQL-on-FHIR), and safe language synthesis.
+            For the comprehensive evaluation and background, see the <a href="acdu_story_and_benchmarks.html" class="text-[var(--text-blue)] font-medium hover:underline inline-flex items-center gap-0.5">Architecture Story &rarr;</a>
           </p>
         </div>
       </div>
@@ -751,8 +752,9 @@ Select a scenario to view injected prompt.
     const PAYLOAD = {embedded_json};
     const scenarios = PAYLOAD.scenarios || [];
     const ORIGINAL_ACDUS = {{}};
-    (PAYLOAD.acdus || []).forEach(c => {{
-      ORIGINAL_ACDUS[c.id] = c;
+    const rawAcdus = Array.isArray(PAYLOAD.acdus) ? PAYLOAD.acdus : Object.values(PAYLOAD.acdus || {{}});
+    rawAcdus.forEach(c => {{
+      if (c && c.id) ORIGINAL_ACDUS[c.id] = c;
     }});
 
     const RAW_CACHE = PAYLOAD.raw_cache || {{}};
