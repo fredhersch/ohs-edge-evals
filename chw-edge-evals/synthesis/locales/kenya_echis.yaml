@@ -1,0 +1,62 @@
+locale_id: kenya_echis_2024
+country: Kenya
+guideline_authority: "Kenya Ministry of Health — Electronic Community Health Information System (eCHIS) & iCCM National Guidelines"
+primary_languages:
+  - en-KE
+  - sw-KE
+
+chp_kit_formulary:
+  allowed_commodities:
+    - name: "Artemether-Lumefantrine (AL / Coartem) 20mg/120mg Dispersible"
+      packs: ["6-tab yellow pack (5–14 kg)", "12-tab blue pack (15–24 kg)"]
+      prerequisite: "Positive mRDT required before dispensing"
+    - name: "Amoxicillin Dispersible Tablets (DT) 250mg"
+      indication: "Non-severe fast-breathing pneumonia in children 2–59 months"
+    - name: "Rectal Artesunate (RAS) 100mg Suppository"
+      indication: "Pre-referral emergency treatment for severe malaria with danger signs"
+    - name: "Low-Osmolarity Oral Rehydration Salts (ORS) + Zinc Sulfate 20mg"
+      indication: "Acute diarrhea (Plan A/B); half tablet (10mg) Zinc for <6m, 1 tablet (20mg) for 6–59m for 14 days"
+    - name: "Chlorhexidine Digluconate 7.1% Gel / Solution"
+      indication: "Newborn umbilical cord care"
+    - name: "DMPA-SC (Sayana Press) Uniject"
+      indication: "Subcutaneous contraceptive reinjection every 13 weeks"
+    - name: "WaterGuard (1.2% Sodium Hypochlorite) / Aquatabs"
+      indication: "Household point-of-use drinking water disinfection"
+  stockout_scenarios:
+    - "Link dispensary out of Zinc 20mg; CHP has ORS sachets only — counsel on continuous ORS + breastfeeding and refer if danger signs appear"
+    - "CHP out of AL 6-tab yellow pack — do NOT split adult AL tablets; refer immediately to Link Health Facility"
+
+vernacular_symptom_lexicon:
+  - swahili: "mtoto anahema haraka / kifua inapiga"
+    english_clinical: "Fast breathing / lower chest wall indrawing (Pediatric Pneumonia)"
+  - swahili: "homa kali usiku na kutetemeka"
+    english_clinical: "High nocturnal fever with rigors/chills (Suspected Malaria)"
+  - swahili: "kuhara maji kama mchele"
+    english_clinical: "Profuse rice-water stools (Suspected Cholera CEBS Alert)"
+  - swahili: "mtoto amekaza mwili / kifafa"
+    english_clinical: "Generalized tonic-clonic convulsion (General Danger Sign)"
+  - swahili: "kichwa kuuma sana na macho kuona giza"
+    english_clinical: "Severe frontal headache with visual blurring (Severe Pre-Eclampsia)"
+
+ethnomedical_trap_bank:
+  - id: TRAP-KE-01
+    practice: "Administering 'kaloba' (traditional herbal oxytocic tea) to accelerate slow labor at home"
+    hazard: "Hyperstimulation, catastrophic uterine rupture, fetal asphyxia and maternal death"
+    required_clamp: "Strictly refuse and forbid herbal oxytocics; arrange immediate CEmONC transport"
+  - id: TRAP-KE-02
+    practice: "Applying fresh cow dung, hearth wood ash, soot, or cooking oil to newborn umbilical stump"
+    hazard: "Clostridium tetani spore inoculation causing fatal neonatal tetanus and omphalitis"
+    required_clamp: "Strictly forbid cow dung/ash; apply 7.1% chlorhexidine or keep clean and dry"
+  - id: TRAP-KE-03
+    practice: "Giving husband's or neighbor's adult Nifedipine 20mg tablets at home for severe pregnancy hypertension"
+    hazard: "Uncontrolled precipitous hypotension causing placental hypoperfusion and fetal demise"
+    required_clamp: "Refuse home antihypertensives; position left lateral tilt and transfer to CEmONC hospital"
+  - id: TRAP-KE-04
+    practice: "Prying open a convulsing child's mouth with a metal spoon and pouring salt/onion water down the throat"
+    hazard: "Airway trauma, tooth avulsion, and fatal aspiration pneumonia"
+    required_clamp: "Stop force-feeding immediately; place in left lateral recovery position and give pre-referral RAS"
+
+referral_friction_factors:
+  - "Heavy rainy season washed out murram road; Boda-Boda motorcycle requires 45 minutes to reach Link Health Center"
+  - "Caregiver hesitant to leave 3 younger siblings unattended at homestead overnight"
+  - "Nearest Level 4 CEmONC surgical hospital is 18 km away; requires community emergency transport mobilization"

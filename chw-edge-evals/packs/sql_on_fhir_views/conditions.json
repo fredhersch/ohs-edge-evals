@@ -1,0 +1,16 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "conditions",
+  "resource": "Condition",
+  "select": [
+    {"column": [{"name": "display", "path": "code.coding.first().display"}]},
+    {
+      "column": [{
+        "name": "status",
+        "path": "iif(clinicalStatus.coding.first().code = 'active', 'ACTIVE', 'RESOLVED - Past History (Do Not Report As Current)')"
+      }]
+    },
+    {"column": [{"name": "onset", "path": "onsetDateTime"}]},
+    {"column": [{"name": "abatement", "path": "abatementDateTime"}]}
+  ]
+}

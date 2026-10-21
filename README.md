@@ -13,12 +13,28 @@ In low-connectivity and offline community health settings, Community Health Work
 
 ```mermaid
 flowchart LR
-    A["OHS FHIR Store\n(Patient, Encounter, Obs, Task)"] --> B["SQL-on-FHIR Views\n(Tokempic / chw-views)"]
+    A["OHS FHIR Store\n(Patient, Encounter, Obs, Task)"] --> B["SQL-on-FHIR Views +\nMarkdown Templates"]
     B --> C["Compact Markdown\n(~14x Token Reduction)"]
     C --> D["Use Case 1:\nPre-Visit Summary"]
     C --> E["Query Builder\n(Active Flags + Due Tasks)"]
     E --> F["On-Device Retriever\n(SQLite FTS5 / LiteRT Embed)"]
     F --> G["Use Case 2:\nMini-RAG Visit Prep"]
+```
+
+## Phase 1 Systematic CHW & FHW SLM Evaluation Suite (`chw-edge-evals/{core,runners,gold,packs}`)
+
+See full architecture plan in [`docs/slm_chw_evals_framework_plan.md`](docs/slm_chw_evals_framework_plan.md) and live progress in [`docs/IMPLEMENTATION_TRACKER.md`](docs/IMPLEMENTATION_TRACKER.md).
+
+- **`chw-edge-evals/core/eval_contract.py`**: MedGemma `EvalBase`-compatible 3-method interface (`load_and_prep_data`, `post_process_and_score_answers`, `compute_aggregated_metrics`) with standard TSV/JSON artifact export (`test_results.tsv`, `test_metrics.json`, `test_settings.json`).
+- **`chw-edge-evals/core/sql_on_fhir_renderer.py`**: Deterministic HL7 FHIR R4 Bundle $\rightarrow$ SQL-on-FHIR Views + Markdown Template renderer (~14x token compression, zero active/resolved condition bleed).
+- **`chw-edge-evals/core/ast_clinical_scorer.py`**: Upgraded Tier-1 Deterministic Clinical AST & Synonym Scorer (propagates `**DO NOT:**` Markdown section headers to child bullets and expands clinical synonyms; rescues all 4 false-negative cases on `Gemma 4 2B`, raising strict pass rate from **80.0% (24/30)** to **93.3% (28/30)** and soft-budget pass rate to **96.7% (29/30)**).
+- **`chw-edge-evals/core/acdu_retriever.py` & `chw-edge-evals/runners/run_acdu_systematic_ablations.py`**: Zero-RAM SQLite FTS5 Box-1 Gatekeeper, Pre-Prompt Deontic Conflict Resolver ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{bundle}}$), Swahili vernacular trigger expansion (100% Swahili recall), and 5-axis ablation runner.
+- **`chw-edge-evals/core/gemini4_judge.py` & `chw-edge-evals/gold/judge_calibration_100.json`**: Tier-2 `gemini-4` / `gemini-3.8-flash` Judge with a 100-case Judge Calibration Holdout Set (50 seeded safety/hallucination faults + 50 real SLM outputs; 100% fault sensitivity, $\kappa = 1.0$).
+- **`chw-edge-evals/runners/run_vibe_evals.py` & `chw-edge-evals/packs/pack_registry.json`**: Modular Vibe-Eval Pack runner (`PACK-01` to `PACK-06`) and locale synthesis seed (`chw-edge-evals/synthesis/locales/kenya_echis.yaml`).
+
+```bash
+# Run the Phase 1 unit & regression test suite (5/5 tests)
+python3 chw-edge-evals/core/chw_edge_evals_test.py
 ```
 
 ## Directory Structure

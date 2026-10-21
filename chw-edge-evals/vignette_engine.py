@@ -669,10 +669,15 @@ def run_benchmark(
         if word_count_pass:
             total_word_pass += 1
 
-        # 2. Regex verification
+        # 2. Regex verification (with Markdown AST section-header propagation & synonym expansion)
+        try:
+            from core.ast_clinical_scorer import expand_markdown_ast_and_synonyms
+            scoring_text = expand_markdown_ast_and_synonyms(generated_text)
+        except Exception:
+            scoring_text = generated_text
         matched_regex = 0
         for r in regex_list:
-            if re.search(r, generated_text):
+            if re.search(r, scoring_text):
                 matched_regex += 1
         regex_pct = (matched_regex / len(regex_list)) * 100.0 if regex_list else 100.0
         total_regex_pcts.append(regex_pct)

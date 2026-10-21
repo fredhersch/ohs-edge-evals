@@ -1,0 +1,12 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "resolved_conditions",
+  "resource": "Condition",
+  "where": [
+    {"path": "clinicalStatus.coding.exists(code = 'resolved' or code = 'inactive')"}
+  ],
+  "select": [
+    {"column": [{"name": "display", "path": "code.coding.first().display"}]},
+    {"column": [{"name": "abatement", "path": "abatementDateTime"}]}
+  ]
+}

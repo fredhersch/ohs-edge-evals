@@ -1,0 +1,120 @@
+{
+  "schema_version": "1.0.0",
+  "description": "Modular CHW & FHW Vibe-Eval Packs (Track A Inner Loop) mapped to Slm Chw Fhw Use Cases And Feasibility.md",
+  "packs": [
+    {
+      "pack_id": "PACK-01-SUMMARIZATION-LONGITUDINAL",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P0",
+      "title": "Longitudinal Patient & Household Summarization (SQL-on-FHIR + Markdown Templates)",
+      "source_file": "eval_cases.json",
+      "case_count": 20,
+      "status": "READY",
+      "target_metrics": [
+        "temporal_status_pass",
+        "faithfulness_pass",
+        "word_count_strict_pass"
+      ]
+    },
+    {
+      "pack_id": "PACK-02-ACDU-PROTOCOL-SYNTHESIS",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P0",
+      "title": "Kenya eCHIS L1 Single-Axis & L2 Multi-Morbidity aCDU Synthesis",
+      "source_file": "eval_cases_echis.json",
+      "level_filter": [
+        "Level 1: Single-Axis Protocol Adherence",
+        "Level 2: Multi-Morbidity Prioritization & Collisions"
+      ],
+      "case_count": 20,
+      "status": "READY",
+      "target_metrics": [
+        "ast_adherence_pct",
+        "negative_boundary_pass",
+        "word_count_strict_pass"
+      ]
+    },
+    {
+      "pack_id": "PACK-03-ADVERSARIAL-SAFETY-CLAMPS",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P0",
+      "title": "Level 3 Adversarial Community Traps & Scope-of-Practice Refusal",
+      "source_file": "eval_cases_echis.json",
+      "level_filter": [
+        "Level 3: Adversarial Traps & Negative Clamping"
+      ],
+      "case_count": 10,
+      "status": "READY",
+      "target_metrics": [
+        "ast_adherence_pct",
+        "negative_boundary_pass",
+        "no_unauthorized_advice_pass"
+      ]
+    },
+    {
+      "pack_id": "PACK-04-HOUSEHOLD-RISK-STACKING",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P0",
+      "title": "Multi-Member Household Risk-Stacking (k=2..6 Concurrent aCDUs)",
+      "source_file": "eval_cases_echis.json",
+      "case_count": 15,
+      "status": "PHASE_2_SYNTHESIS",
+      "target_metrics": [
+        "multi_unit_action_recall_pct",
+        "priority_ordering_accuracy"
+      ]
+    },
+    {
+      "pack_id": "PACK-05-VISIT-PLANNING-AND-OPS",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P1",
+      "title": "Catchment Visit Planning, Overdue Task Triage & Formulary Stockouts",
+      "source_file": "eval_cases.json",
+      "case_count": 15,
+      "status": "PHASE_2_SYNTHESIS",
+      "target_metrics": [
+        "overdue_task_recall_pct",
+        "stockout_fallback_safety"
+      ]
+    },
+    {
+      "pack_id": "PACK-06-CHW-MICROLEARNING-ROLEPLAY",
+      "stage": "Stage 1 (Text & Structured EHR)",
+      "priority": "P1",
+      "title": "CHW Pre-Service & In-Field Micro-Learning Quizzes & Roleplay",
+      "source_file": "eval_cases_echis.json",
+      "case_count": 15,
+      "status": "PHASE_2_SYNTHESIS",
+      "target_metrics": [
+        "curriculum_grounding_pct",
+        "counseling_empathy_score"
+      ]
+    },
+    {
+      "pack_id": "PACK-07-MULTIMODAL-IMAGE-TO-FHIR",
+      "stage": "Stage 2 (Multimodal Vision)",
+      "priority": "P1/P2",
+      "title": "Image-to-FHIR Extraction (mRDT Strips, Digital BP Screens, Growth Charts)",
+      "source_file": "catalog_pending",
+      "case_count": 25,
+      "status": "CATALOGING_EXISTING_DATASETS",
+      "target_metrics": [
+        "rdt_line_sensitivity",
+        "lcd_numeric_exact_match"
+      ]
+    },
+    {
+      "pack_id": "PACK-08-VERNACULAR-AUDIO-SCRIBE",
+      "stage": "Stage 3 (Vernacular Audio — P2)",
+      "priority": "P2",
+      "title": "Vernacular Dictation, Translation & Ambient Encounter Scribing (Swahili / Kinyarwanda)",
+      "source_file": "partner_external_data",
+      "case_count": 25,
+      "status": "PARTNER_GATED_PATH_DIGITAL_UMUGANDA",
+      "target_metrics": [
+        "clinical_entity_wer",
+        "ambient_fhir_extraction_f1"
+      ]
+    }
+  ]
+}
