@@ -160,3 +160,7 @@ flowchart TD
 
 3. **Multimodal Expansion (RDT & Medical Displays):**
    - Ingest Roboflow / Figshare validation subsets into a vision evaluation suite comparing small edge Vision-Language Models (e.g., Florence-2, Moondream2, Qwen2-VL-2B) against standard OCR baselines for 7-segment digit accuracy and cassette status classification.
+
+4. **Longitudinal Trend Interpretation & Visualization (Use Case 3):**
+   - Implemented via `chw-views/longitudinal_trends.json`, compressing serial FHIR Observation resources (pediatric growth faltering, glycemic logs, hypertensive creep, gestational fluid surges) into ~110 token markdown tables.
+   - Evaluates SLMs on text/ASCII sparkline trajectories, directional velocity classification, and protocol-bounded referral actions. See full specification in [LONGITUDINAL_TREND_INTERPRETATION_SPEC.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/LONGITUDINAL_TREND_INTERPRETATION_SPEC.md).

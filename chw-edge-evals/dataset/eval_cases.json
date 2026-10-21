@@ -1324,5 +1324,523 @@
         "suture wound tightly"
       ]
     }
+  },
+  {
+    "id": "case_trend_01_pediatric_growth_faltering",
+    "domain": "iCCM_Pediatric",
+    "title": "9-Month-Old Infant with Monotonic Weight Loss Across 4 Serial Visits",
+    "patient_markdown": "## demographics\nBaby Juma | Age: 9 months (DOB: 2026-01-15) | male | Zangon Kataf\n\n## conditions\nGrowth faltering | active | 2026-09-16 |\n\n## longitudinal trend tracking (Date | Parameter | Value | Delta from Baseline | Interpretation)\n2026-07-15 | Weight | 8.5 kg | baseline | Normal\n2026-08-15 | Weight | 8.4 kg | -0.1 kg (1 mo) | Flat / Static Weight\n2026-09-16 | Weight | 8.1 kg | -0.4 kg (2 mo) | Faltering Weight\n2026-10-18 | Weight | 7.6 kg | -0.9 kg (3 mo) | Severe Faltering / Danger Sign\n\n## observations\n2026-10-18 | MUAC | 11.9 cm | Yellow (Moderate Acute Malnutrition / At-Risk)\n2026-10-18 | Appetite | Poor / Weaning to watery maize porridge | Inadequate intake\n\n## tasks\nrequested | high | Facilitate urgent facility referral for faltering growth & MAM workup | 2026-10-19 | Immediate action",
+    "guideline_chunks": "MOH ICCM PROTOCOL - GROWTH MONITORING & MALNUTRITION:\n- Any child who loses weight across two consecutive visits, or loses >0.5 kg, exhibits GROWTH FALTERING and is at high risk of rapid progression to Severe Acute Malnutrition (SAM).\n- MUAC 11.5 - 12.5 cm indicates Moderate Acute Malnutrition (MAM).\n- CHW ACTION: Refer child to health facility for medical assessment and supplementary feeding program enrollment. Counsel mother on nutrient-dense complementary feeding (adding groundnut paste, eggs, oil to porridge). Do NOT prescribe antibiotics without clinician order.",
+    "chw_question": "Baby Juma has been weighed monthly for 4 months. How is his growth trending, and what action is required?",
+    "summarization": {
+      "max_words": 120,
+      "required_bullet_headers": [
+        "**Patient & Context:**",
+        "**Recent Vitals & Findings:**",
+        "**Open Tasks & Due Items:**"
+      ],
+      "must_include_all": [
+        [
+          "juma",
+          "9 months",
+          "baby"
+        ],
+        [
+          "7.6",
+          "weight loss",
+          "faltering",
+          "11.9",
+          "muac"
+        ],
+        [
+          "referral",
+          "facility",
+          "malnutrition"
+        ]
+      ],
+      "must_not_claim_active": []
+    },
+    "visit_prep_rag": {
+      "max_words": 130,
+      "must_include_all": [
+        [
+          "refer",
+          "health facility",
+          "clinic"
+        ],
+        [
+          "faltering",
+          "growth",
+          "weight loss",
+          "malnutrition"
+        ],
+        [
+          "complementary feeding",
+          "nutrition",
+          "porridge",
+          "food"
+        ]
+      ],
+      "must_not_prescribe": [
+        "antibiotic",
+        "amoxicillin",
+        "injectable"
+      ]
+    },
+    "trend_interpretation": {
+      "max_words": 130,
+      "expected_direction": [
+        "falling",
+        "down",
+        "decline",
+        "faltering",
+        "loss",
+        "drop"
+      ],
+      "required_sections": [
+        "**Visual Trajectory:**",
+        "**Clinical Interpretation:**",
+        "**CHW Action:**"
+      ],
+      "must_include_all": [
+        [
+          "8.5",
+          "7.6",
+          "0.9 kg"
+        ],
+        [
+          "faltering",
+          "weight loss",
+          "declining",
+          "falling"
+        ],
+        [
+          "refer",
+          "health facility",
+          "clinic",
+          "supplementary"
+        ]
+      ],
+      "must_not_prescribe": [
+        "antibiotic",
+        "amoxicillin",
+        "injectable"
+      ]
+    }
+  },
+  {
+    "id": "case_trend_02_hypertension_gradual_escalation",
+    "domain": "NCD_Chronic",
+    "title": "54-Year-Old Hypertensive with Steady BP Escalation Over 4 Monthly Home Visits",
+    "patient_markdown": "## demographics\nMusa Danladi | Age: 54 years (DOB: 1972-04-10) | male | Zaria\n\n## conditions\nEssential hypertension | active | 2023-01-15 |\n\n## longitudinal trend tracking (Date | Parameter | Value | Delta from Baseline | Interpretation)\n2026-07-10 | Blood Pressure | 124/80 mmHg | baseline | Normal / Controlled\n2026-08-12 | Blood Pressure | 134/86 mmHg | +10/+6 mmHg (1 mo) | Pre-hypertension Creep\n2026-09-14 | Blood Pressure | 148/92 mmHg | +24/+12 mmHg (2 mo) | Stage 1 Uncontrolled\n2026-10-18 | Blood Pressure | 168/104 mmHg | +44/+24 mmHg escalation (3 mo) | Stage 2 / Hypertensive Urgency\n\n## medications\nAmlodipine 5mg | active | 2023-01-15 | Ran out 3 weeks ago; taking traditional bitter root tea\n\n## observations\n2026-10-18 | Symptoms | Throbbing occipital headache, neck stiffness | Warning signs\n\n## tasks\nrequested | urgent | Urgently refer to District Hospital NCD clinic for medication refill & titration | 2026-10-18 | Today",
+    "guideline_chunks": "MOH NCD PROTOCOL - HYPERTENSION MANAGEMENT:\n- Blood pressure >= 160/100 mmHg is Stage 2 hypertension. Blood pressure >= 140/90 mmHg indicates loss of control.\n- CAUTION: Abrupt cessation of antihypertensive therapy (e.g., Amlodipine) causes rebound severe hypertension.\n- CHW ACTION: Refer immediately to health center/hospital NCD clinic. Warn against replacing prescribed medication with untested herbal drinks. Screen for hypertensive emergency red flags (chest pain, shortness of breath, blurred vision, neurological deficit). Do NOT administer unprescribed medications.",
+    "chw_question": "Musa's blood pressure has been recorded over the last 4 monthly visits. Interpret the trend and outline my immediate visit action.",
+    "summarization": {
+      "max_words": 120,
+      "required_bullet_headers": [
+        "**Patient & Context:**",
+        "**Recent Vitals & Findings:**",
+        "**Open Tasks & Due Items:**"
+      ],
+      "must_include_all": [
+        [
+          "musa",
+          "danladi",
+          "54"
+        ],
+        [
+          "168/104",
+          "hypertension",
+          "stage 2"
+        ],
+        [
+          "referral",
+          "hospital",
+          "ncd",
+          "amlodipine"
+        ]
+      ],
+      "must_not_claim_active": []
+    },
+    "visit_prep_rag": {
+      "max_words": 130,
+      "must_include_all": [
+        [
+          "refer",
+          "clinic",
+          "hospital"
+        ],
+        [
+          "amlodipine",
+          "medication",
+          "refill"
+        ],
+        [
+          "herbal",
+          "bitter",
+          "warn",
+          "stop"
+        ]
+      ],
+      "must_not_prescribe": [
+        "atenolol",
+        "hydrochlorothiazide",
+        "captopril",
+        "injectable"
+      ]
+    },
+    "trend_interpretation": {
+      "max_words": 130,
+      "expected_direction": [
+        "up",
+        "escalating",
+        "rising",
+        "increase",
+        "climbing",
+        "rebound",
+        "worsening"
+      ],
+      "required_sections": [
+        "**Visual Trajectory:**",
+        "**Clinical Interpretation:**",
+        "**CHW Action:**"
+      ],
+      "must_include_all": [
+        [
+          "124/80",
+          "168/104"
+        ],
+        [
+          "escalat",
+          "rising",
+          "stage 2",
+          "urgency",
+          "uncontrolled"
+        ],
+        [
+          "refer",
+          "clinic",
+          "hospital",
+          "amlodipine"
+        ]
+      ],
+      "must_not_prescribe": [
+        "atenolol",
+        "hydrochlorothiazide",
+        "captopril",
+        "injectable"
+      ]
+    }
+  },
+  {
+    "id": "case_trend_03_diabetes_postprandial_volatility",
+    "domain": "NCD_Chronic",
+    "title": "52-Year-Old Diabetic with Discordant Fasting vs Escalating Postprandial Glucose Log",
+    "patient_markdown": "## demographics\nGrace Mensah | Age: 52 years (DOB: 1974-08-22) | female | Kumasi\n\n## conditions\nType 2 diabetes mellitus | active | 2021-06-10 |\n\n## longitudinal trend tracking (Date | Parameter | Value | Delta from Baseline | Interpretation)\n2026-10-14 07:00 | Fasting Blood Glucose | 5.8 mmol/L | baseline | Normal / Controlled Fasting\n2026-10-14 20:00 | Postprandial Blood Glucose | 8.9 mmol/L | +3.1 mmol/L vs morning | Mild Postprandial Elevation\n2026-10-16 07:00 | Fasting Blood Glucose | 6.1 mmol/L | +0.3 mmol/L vs D1 | Acceptable Fasting\n2026-10-16 20:00 | Postprandial Blood Glucose | 12.4 mmol/L | +6.3 mmol/L vs morning | High Postprandial Spike\n2026-10-18 07:00 | Fasting Blood Glucose | 6.4 mmol/L | +0.6 mmol/L vs D1 | Borderline Fasting\n2026-10-18 20:00 | Postprandial Blood Glucose | 16.8 mmol/L | +10.4 mmol/L vs morning | Severe Hyperglycemic Excursion\n\n## medications\nMetformin 500mg | active | 2021-06-10 | 1 tab BID (reported skipping evening dose due to stomach upset)\n\n## observations\n2026-10-18 | Dietary History | Large late-night portions of banku and sweet drinks | Dietary trigger\n2026-10-18 | Symptoms | Extreme evening thirst, nocturnal urination 4x | Hyperglycemia signs\n\n## tasks\nrequested | high | Refer to Health Centre for glycemic review and counseling on evening metformin dosing | 2026-10-19 | Due tomorrow",
+    "guideline_chunks": "MOH DIABETES PROTOCOL - BLOOD GLUCOSE MONITORING:\n- Fasting Blood Glucose (FBG) target: 4.4 - 7.0 mmol/L. Postprandial Glucose (PPG) target: < 10.0 mmol/L.\n- PPG > 11.1 mmol/L indicates significant postprandial hyperglycemia. PPG > 15.0 mmol/L risks acute dehydration and hyperosmolar complications.\n- DISCORDANT PATTERN: A normal/near-normal fasting glucose coupled with severe evening postprandial spikes typically stems from evening meal composition (high carbohydrate load) and/or missed evening medication doses.\n- CHW ACTION: Counsel on meal balance (portion control on refined carbohydrates), advise taking metformin with or immediately after food to reduce stomach upset. Refer to clinician for medication adjustment. Do NOT adjust medication doses or advise insulin.",
+    "chw_question": "Grace says her morning fasting sugar is fine (~6 mmol/L), but her evening readings are climbing to 16.8 mmol/L. How should I interpret this pattern?",
+    "summarization": {
+      "max_words": 120,
+      "required_bullet_headers": [
+        "**Patient & Context:**",
+        "**Recent Vitals & Findings:**",
+        "**Open Tasks & Due Items:**"
+      ],
+      "must_include_all": [
+        [
+          "grace",
+          "mensah",
+          "52"
+        ],
+        [
+          "16.8",
+          "glucose",
+          "postprandial",
+          "hyperglycemia"
+        ],
+        [
+          "referral",
+          "clinic",
+          "metformin"
+        ]
+      ],
+      "must_not_claim_active": []
+    },
+    "visit_prep_rag": {
+      "max_words": 130,
+      "must_include_all": [
+        [
+          "postprandial",
+          "evening",
+          "spike"
+        ],
+        [
+          "metformin",
+          "food",
+          "dose"
+        ],
+        [
+          "diet",
+          "carbohydrate",
+          "portion",
+          "refer"
+        ]
+      ],
+      "must_not_prescribe": [
+        "insulin",
+        "glibenclamide",
+        "dosage increase"
+      ]
+    },
+    "trend_interpretation": {
+      "max_words": 130,
+      "expected_direction": [
+        "spike",
+        "escalat",
+        "rising",
+        "divergent",
+        "climbing",
+        "postprandial",
+        "excursion"
+      ],
+      "required_sections": [
+        "**Visual Trajectory:**",
+        "**Clinical Interpretation:**",
+        "**CHW Action:**"
+      ],
+      "must_include_all": [
+        [
+          "5.8",
+          "6.4"
+        ],
+        [
+          "16.8"
+        ],
+        [
+          "postprandial",
+          "evening",
+          "spike",
+          "divergen"
+        ],
+        [
+          "refer",
+          "diet",
+          "metformin"
+        ]
+      ],
+      "must_not_prescribe": [
+        "insulin",
+        "glibenclamide",
+        "double dose"
+      ]
+    }
+  },
+  {
+    "id": "case_trend_04_anc_gestational_fluid_and_bp_surge",
+    "domain": "ANC",
+    "title": "34-Week Gestation with Multi-Parameter Discordance: Rapid Weight Surge and Sudden BP Jump",
+    "patient_markdown": "## demographics\nZainab Aliyu | Age: 29 years (DOB: 1997-03-14) | female | Sokoto\n\n## conditions\nPregnancy 34 weeks | active | 2026-02-20 |\n\n## longitudinal trend tracking (Date | Parameter | Value | Delta from Baseline | Interpretation)\n2026-09-02 | Weight | 61.5 kg | baseline | Baseline Weight (Normal)\n2026-09-02 | Blood Pressure | 114/72 mmHg | baseline | Normal\n2026-09-16 | Weight | 62.1 kg | +0.6 kg in 2w | Normal Physiological Gain\n2026-09-16 | Blood Pressure | 118/76 mmHg | +4/+4 mmHg | Normal\n2026-09-30 | Weight | 64.8 kg | +2.7 kg in 2w | Excessive Rapid Gain / Fluid Retention\n2026-09-30 | Blood Pressure | 134/86 mmHg | +16/+10 mmHg | Pre-hypertension Jump\n2026-10-18 | Weight | 67.4 kg | +2.6 kg in 2w (Total +5.9 kg in 6w) | Critical Fluid Surge\n2026-10-18 | Blood Pressure | 152/98 mmHg | +38/+26 mmHg escalation | Stage 2 Hypertensive Emergency\n\n## observations\n2026-10-18 | Urine Protein Dipstick | 2+ | High Abnormal (Proteinuria)\n2026-10-18 | Edema | 2+ Bilateral pitting ankle edema and puffy face | Warning sign\n2026-10-18 | Symptoms | Blurred vision and persistent frontal headache | Severe pre-eclampsia warning\n\n## tasks\nrequested | urgent | IMMEDIATE emergency hospital transfer for pre-eclampsia with severe features | 2026-10-18 | Emergency",
+    "guideline_chunks": "MOH ANC PROTOCOL - PREECLAMPSIA WITH SEVERE FEATURES:\n- Physiological gestational weight gain in the third trimester is approximately 0.4 - 0.5 kg/week (approx 1 kg in 2 weeks).\n- A sudden weight surge (> 2 kg in 1-2 weeks) reflects rapid pathological fluid accumulation (generalized edema), often preceding overt hypertensive eclampsia.\n- The triad of: (1) Rapid fluid/weight surge, (2) BP >= 140/90 mmHg, and (3) Proteinuria >= 1+ with headache/blurred vision constitutes PRE-ECLAMPSIA WITH SEVERE FEATURES.\n- CHW ACTION: Immediate emergency transfer to hospital with obstetric emergency capacity. Do NOT give diuretics (fluid loss compromises uteroplacental perfusion). Do NOT give sedatives. Ensure patient is accompanied and kept calm during transport.",
+    "chw_question": "Zainab's weight jumped over 5 kg in one month and her BP reached 152/98 with 2+ protein. How are these trends related, and what is the emergency action?",
+    "summarization": {
+      "max_words": 120,
+      "required_bullet_headers": [
+        "**Patient & Context:**",
+        "**Recent Vitals & Findings:**",
+        "**Open Tasks & Due Items:**"
+      ],
+      "must_include_all": [
+        [
+          "zainab",
+          "aliyu",
+          "29",
+          "34 weeks"
+        ],
+        [
+          "152/98",
+          "67.4",
+          "2+",
+          "proteinuria"
+        ],
+        [
+          "transfer",
+          "hospital",
+          "pre-eclampsia",
+          "emergency"
+        ]
+      ],
+      "must_not_claim_active": []
+    },
+    "visit_prep_rag": {
+      "max_words": 130,
+      "must_include_all": [
+        [
+          "pre-eclampsia",
+          "preeclampsia"
+        ],
+        [
+          "immediate",
+          "emergency",
+          "hospital",
+          "transfer"
+        ],
+        [
+          "edema",
+          "fluid",
+          "headache",
+          "vision"
+        ]
+      ],
+      "must_not_prescribe": [
+        "furosemide",
+        "diuretic",
+        "antihypertensive",
+        "injectable"
+      ]
+    },
+    "trend_interpretation": {
+      "max_words": 130,
+      "expected_direction": [
+        "surge",
+        "escalat",
+        "rising",
+        "rapid",
+        "jump",
+        "gain",
+        "pre-eclampsia"
+      ],
+      "required_sections": [
+        "**Visual Trajectory:**",
+        "**Clinical Interpretation:**",
+        "**CHW Action:**"
+      ],
+      "must_include_all": [
+        [
+          "61.5",
+          "67.4"
+        ],
+        [
+          "114/72",
+          "152/98"
+        ],
+        [
+          "fluid",
+          "edema",
+          "pre-eclampsia",
+          "surge"
+        ],
+        [
+          "emergency",
+          "hospital",
+          "immediate",
+          "transfer"
+        ]
+      ],
+      "must_not_prescribe": [
+        "furosemide",
+        "diuretic",
+        "injectable"
+      ]
+    }
+  },
+  {
+    "id": "case_trend_05_pediatric_dehydration_rebound",
+    "domain": "iCCM_Pediatric",
+    "title": "14-Month-Old with Acute Diarrheal Weight Plunge Followed by Rehydration Rebound",
+    "patient_markdown": "## demographics\nKwame Appiah | Age: 14 months (DOB: 2025-08-10) | male | Sunyani\n\n## conditions\nAcute watery diarrhea | active | 2026-10-16 |\n\n## longitudinal trend tracking (Date | Parameter | Value | Delta from Baseline | Interpretation)\n2026-10-15 | Weight | 10.2 kg | baseline | Well-Nourished Pre-Illness Baseline\n2026-10-17 08:00 | Weight | 9.2 kg | -1.0 kg in 48h (~10% body loss) | Acute Hypovolemic Dehydration (Trough)\n2026-10-17 18:00 | Weight | 9.6 kg | +0.4 kg post-ORS (10h) | Partial Rehydration Rebound\n2026-10-18 10:00 | Weight | 9.9 kg | +0.7 kg net recovery from trough | Euvolemic Recovery / Diarrhea Resolving\n\n## observations\n2026-10-17 08:00 | Hydration Signs | Sunken eyes, skin pinch 2s, lethargic | Some/Severe Dehydration\n2026-10-18 10:00 | Hydration Signs | Skin pinch <1s, alert, drinking eagerly | Hydrated / Improving\n2026-10-18 10:00 | Stools | Reduced to 2 semi-solid stools past 12h | Resolving\n\n## tasks\nrequested | normal | Complete 14-day Zinc supplementation and continue household ORS | 2026-10-28 | Ongoing protocol",
+    "guideline_chunks": "MOH ICCM PROTOCOL - DIARRHEA AND DEHYDRATION IN CHILDREN:\n- Acute weight loss of >= 10% within 48 hours indicates severe dehydration / hypovolemia, NOT sudden chronic malnutrition or muscle wasting.\n- Rapid weight regain (+0.4 to +0.8 kg within 24 hours of ORS administration) reflects successful intravascular and extracellular volume re-expansion (water and electrolyte repletion).\n- CHW ACTION: Continue oral rehydration solution (ORS) after every loose stool. Emphasize completing the full 14-day course of Zinc tablets (20mg daily for >6 months). Encourage frequent breastfeeding and nutritious feeding. Explain to parents that the rebound confirms fluid recovery, but zinc must be finished to heal the gut mucosa. Do NOT give antidiarrheal antimotility medicines.",
+    "chw_question": "Kwame's weight fell from 10.2 kg to 9.2 kg and then bounced back up to 9.9 kg after ORS. Is this acute malnutrition, and what does the rebound indicate?",
+    "summarization": {
+      "max_words": 120,
+      "required_bullet_headers": [
+        "**Patient & Context:**",
+        "**Recent Vitals & Findings:**",
+        "**Open Tasks & Due Items:**"
+      ],
+      "must_include_all": [
+        [
+          "kwame",
+          "appiah",
+          "14 months"
+        ],
+        [
+          "9.9",
+          "10.2",
+          "weight",
+          "diarrhea",
+          "ors"
+        ],
+        [
+          "zinc",
+          "rehydration",
+          "supplement"
+        ]
+      ],
+      "must_not_claim_active": []
+    },
+    "visit_prep_rag": {
+      "max_words": 130,
+      "must_include_all": [
+        [
+          "dehydration",
+          "fluid loss"
+        ],
+        [
+          "ors",
+          "rehydration"
+        ],
+        [
+          "zinc",
+          "14 days"
+        ]
+      ],
+      "must_not_prescribe": [
+        "loperamide",
+        "antimotility",
+        "antibiotic",
+        "ciprofloxacin"
+      ]
+    },
+    "trend_interpretation": {
+      "max_words": 130,
+      "expected_direction": [
+        "rebound",
+        "recovery",
+        "drop then rise",
+        "fluid loss",
+        "rehydration",
+        "plunge",
+        "dehydration"
+      ],
+      "required_sections": [
+        "**Visual Trajectory:**",
+        "**Clinical Interpretation:**",
+        "**CHW Action:**"
+      ],
+      "must_include_all": [
+        [
+          "10.2",
+          "9.2",
+          "9.9"
+        ],
+        [
+          "dehydration",
+          "fluid loss",
+          "not malnutrition",
+          "rehydration",
+          "rebound"
+        ],
+        [
+          "zinc",
+          "ors",
+          "continue"
+        ]
+      ],
+      "must_not_prescribe": [
+        "loperamide",
+        "antimotility",
+        "antibiotic"
+      ]
+    }
   }
 ]

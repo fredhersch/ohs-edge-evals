@@ -4,21 +4,23 @@ Evaluation harness and benchmark suite for offline, on-device Small Language Mod
 
 ## Overview
 
-In low-connectivity and offline community health settings, Community Health Workers (CHWs) require responsive, hallucination-safe clinical decision support on budget Android hardware. This project operationalizes the two highest-priority on-device LLM use cases:
+In low-connectivity and offline community health settings, Community Health Workers (CHWs) require responsive, hallucination-safe clinical decision support on budget Android hardware. This project operationalizes the three highest-priority on-device LLM use cases:
 
 1. **Pre-Visit Patient & Household Summarization:** Compressing longitudinal FHIR records (`Patient`, `Encounter`, `Observation`, `Condition`, `Task`) into grounded, structured 3-bullet pre-visit briefings ($\le 120$ words).
 2. **Mini-RAG CHW Visit Preparation:** Pairing the summarized FHIR record with retrieved MOH/WHO clinical protocol guidelines to generate focused counseling talking points ($\le 130$ words) with strict closed-book safety boundaries.
+3. **Longitudinal Trend Interpretation & Text Visualization:** Transforming serial measurements (pediatric growth faltering weight curves, discordant postprandial glucose spikes, hypertensive creep, gestational fluid surges) into compact text sparklines with directional trajectory and protocol triage actions ($\le 130$ words).
 
 ## Architecture
 
 ```mermaid
 flowchart LR
     A["OHS FHIR Store\n(Patient, Encounter, Obs, Task)"] --> B["SQL-on-FHIR Views +\nMarkdown Templates"]
-    B --> C["Compact Markdown\n(~14x Token Reduction)"]
+    B --> C["Compact Markdown\n(~14x-34x Compression)"]
     C --> D["Use Case 1:\nPre-Visit Summary"]
     C --> E["Query Builder\n(Active Flags + Due Tasks)"]
     E --> F["On-Device Retriever\n(SQLite FTS5 / LiteRT Embed)"]
     F --> G["Use Case 2:\nMini-RAG Visit Prep"]
+    B --> H["Use Case 3:\nTrend Interpretation & Sparklines"]
 ```
 
 ## Phase 1 Systematic CHW & FHW SLM Evaluation Suite (`chw-edge-evals/{core,runners,gold,packs}`)
@@ -163,4 +165,6 @@ python3 fine_tune_slm_dpo.py \
 For open-source framework comparisons (Argilla, Promptfoo, DeepEval, Phoenix, TRL/Unsloth), see [OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md).
 
 For a comprehensive landscape of external evaluation datasets and benchmarks across CHW/FHW use cases, healthcare delivery computer vision (RDTs, medical displays, anthropometry), and primary care speech recognition (ASR), see [CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md).
+
+For the full specification, synthetic FHIR data pipeline, Tokempic views, and scoring criteria for serial trend data (weight faltering, blood glucose logs, gestational surges), see [LONGITUDINAL_TREND_INTERPRETATION_SPEC.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/LONGITUDINAL_TREND_INTERPRETATION_SPEC.md).
 

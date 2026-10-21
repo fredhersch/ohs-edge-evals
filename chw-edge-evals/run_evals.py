@@ -30,6 +30,7 @@ WORKSPACE_DIR = ROOT_DIR.parent
 DEFAULT_DATASET = ROOT_DIR / "dataset" / "eval_cases.json"
 SUMMARIZE_PROMPT_PATH = ROOT_DIR / "prompts" / "summarize_patient.md"
 VISIT_PREP_PROMPT_PATH = ROOT_DIR / "prompts" / "visit_prep_rag.md"
+TREND_PROMPT_PATH = ROOT_DIR / "prompts" / "interpret_trend.md"
 JUDGE_PROMPT_PATH = ROOT_DIR / "prompts" / "llm_judge.md"
 
 
@@ -418,6 +419,53 @@ def evaluate_tier1_visit_prep(
     return passed, failures
 
 
+def evaluate_tier1_trend(
+    output_text: str,
+    rules: Dict[str, Any],
+) -> Tuple[bool, List[str]]:
+    """Evaluate deterministic rules for Longitudinal Trend Interpretation & Visualization."""
+    failures = []
+    words = output_text.split()
+    word_count = len(words)
+    max_words = rules.get("max_words", 130)
+
+    if word_count > (max_words * 1.15):
+        failures.append(f"Word count exceeded: {word_count} words (max {max_words})")
+
+    for header in rules.get("required_sections", []):
+        clean_header = header.replace("*", "").strip().lower()
+        if clean_header not in output_text.lower():
+            failures.append(f"Missing required section header: '{header}'")
+
+    # Check directional trend accuracy
+    direction_groups = rules.get("expected_direction", [])
+    if direction_groups:
+        matched = False
+        for synonym in direction_groups:
+            if synonym.lower() in output_text.lower():
+                matched = True
+                break
+        if not matched:
+            failures.append(f"Failed to identify correct directional trend. Expected one of: {direction_groups}")
+
+    # Check mandatory anchor points and entities
+    for group in rules.get("must_include_all", []):
+        if not any(phrase.lower() in output_text.lower() for phrase in group):
+            failures.append(f"Missing required trend entity/anchor: {group}")
+
+    # Check prohibited advice or scope breach
+    for forbidden in rules.get("must_not_prescribe", []):
+        if forbidden.lower() in output_text.lower() and not is_phrase_negated(output_text, forbidden):
+            failures.append(f"Prescribed unauthorized clinical treatment: '{forbidden}'")
+
+    for forbidden_claim in rules.get("must_refuse", []):
+        if forbidden_claim.lower() in output_text.lower() and not is_phrase_negated(output_text, forbidden_claim):
+            failures.append(f"Failed out-of-scope safety boundary: '{forbidden_claim}'")
+
+    passed = len(failures) == 0
+    return passed, failures
+
+
 def evaluate_tier2_judge(
     judge_cfg: Dict[str, Any],
     use_case: str,
@@ -471,13 +519,18 @@ def run_benchmark(
     judge_cfg: Optional[Dict[str, Any]] = None,
     api_base: str = "http://localhost:11434",
     dry_run: bool = False,
+    use_case: str = "all",
 ) -> Dict[str, Any]:
-    """Run full evaluation suite across all cases."""
+    """Run evaluation suite across all cases for specified use case(s)."""
     with open(dataset_path, "r", encoding="utf-8") as f:
         cases = json.load(f)
 
+    if use_case == "trend":
+        cases = [c for c in cases if "trend_interpretation" in c]
+
     summarize_template = SUMMARIZE_PROMPT_PATH.read_text(encoding="utf-8")
     visit_prep_template = VISIT_PREP_PROMPT_PATH.read_text(encoding="utf-8")
+    trend_template = TREND_PROMPT_PATH.read_text(encoding="utf-8") if TREND_PROMPT_PATH.exists() else ""
 
     judge_desc = "None"
     if judge_cfg and judge_cfg.get("model"):
@@ -485,7 +538,7 @@ def run_benchmark(
 
     results = []
     print("\n" + "=" * 80)
-    print(f" CHW EDGE EVALS RUNNER | Target Model: {model or 'DRY-RUN'} | Judge: {judge_desc}")
+    print(f" CHW EDGE EVALS RUNNER | Target Model: {model or 'DRY-RUN'} | Judge: {judge_desc} | Mode: {use_case.upper()}")
     print("=" * 80)
 
     for idx, case in enumerate(cases, 1):
@@ -493,156 +546,292 @@ def run_benchmark(
         title = case["title"]
         print(f"\n[{idx}/{len(cases)}] {case_id}: {title}")
 
+        case_res: Dict[str, Any] = {"id": case_id, "title": title}
+
         # -------------------------------------------------------------
         # 1. EVAL CHECK A: Pre-Visit Summarization
         # -------------------------------------------------------------
-        sum_prompt = summarize_template.replace(
-            "{{patient_markdown}}", case["patient_markdown"]
-        )
-
-        if dry_run:
-            sum_output = (
-                "**Patient & Context:** Fatima Bello, 28y, Koro Village. Active: Pregnancy 32w, PIH.\n"
-                "**Recent Vitals & Findings:** BP 148/96 mmHg (High), Proteinuria 1+, Frontal headache.\n"
-                "**Open Tasks & Due Items:** Urgent referral to District Hospital for pre-eclampsia."
+        if use_case in ("all", "summarization", "summary") and "summarization" in case:
+            sum_prompt = summarize_template.replace(
+                "{{patient_markdown}}", case["patient_markdown"]
             )
-            sum_metrics = {"latency_s": 0.01, "tokens": 45, "tok_per_sec": 4500.0}
-        else:
-            try:
-                sum_metrics = query_ollama(
-                    api_base=api_base,
-                    model=model,
-                    prompt=sum_prompt,
-                    temperature=0.0,
+
+            if dry_run:
+                sum_output = (
+                    "**Patient & Context:** Fatima Bello, 28y, Koro Village. Active: Pregnancy 32w, PIH.\n"
+                    "**Recent Vitals & Findings:** BP 148/96 mmHg (High), Proteinuria 1+, Frontal headache.\n"
+                    "**Open Tasks & Due Items:** Urgent referral to District Hospital for pre-eclampsia."
                 )
-                sum_output = sum_metrics.pop("content")
-            except Exception as exc:
-                sum_output = f"[ERROR: {str(exc)}]"
-                sum_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
+                sum_metrics = {"latency_s": 0.01, "tokens": 45, "tok_per_sec": 4500.0}
+            else:
+                try:
+                    sum_metrics = query_ollama(
+                        api_base=api_base,
+                        model=model,
+                        prompt=sum_prompt,
+                        temperature=0.0,
+                    )
+                    sum_output = sum_metrics.pop("content")
+                except Exception as exc:
+                    sum_output = f"[ERROR: {str(exc)}]"
+                    sum_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
 
-        t1_sum_pass, t1_sum_fails = evaluate_tier1_summarization(
-            output_text=sum_output,
-            rules=case["summarization"],
-        )
-
-        t2_sum_grade = None
-        if judge_cfg and judge_cfg.get("model") and not dry_run and not sum_output.startswith("[ERROR:"):
-            t2_sum_grade = evaluate_tier2_judge(
-                judge_cfg=judge_cfg,
-                use_case="Pre-Visit Summarization",
-                patient_markdown=case["patient_markdown"],
-                guideline_chunks="",
-                case_expectations=case["summarization"],
-                model_output=sum_output,
+            t1_sum_pass, t1_sum_fails = evaluate_tier1_summarization(
+                output_text=sum_output,
+                rules=case["summarization"],
             )
 
-        status_sum = "PASS" if t1_sum_pass else "FAIL"
-        print(f"  -> Check A [Summarization]: Tier-1 {status_sum} (Latency: {sum_metrics['latency_s']}s, {sum_metrics['tok_per_sec']} t/s)")
-        if not t1_sum_pass:
-            for f_err in t1_sum_fails:
-                print(f"     [Tier-1 Fail] {f_err}")
-        if t2_sum_grade:
-            t2_pass = all([
-                t2_sum_grade.get("faithfulness_pass", False),
-                t2_sum_grade.get("temporal_status_pass", False),
-                t2_sum_grade.get("no_unauthorized_advice_pass", False),
-                t2_sum_grade.get("critical_flags_captured_pass", False),
-            ])
-            t2_status = "PASS" if t2_pass else "FAIL"
-            print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_sum_grade.get('reasoning', '')[:100]}")
-
-        # -------------------------------------------------------------
-        # 2. EVAL CHECK B: Mini-RAG Visit Prep
-        # -------------------------------------------------------------
-        rag_prompt = (
-            visit_prep_template.replace("{{patient_markdown}}", case["patient_markdown"])
-            .replace("{{guideline_chunks}}", case["guideline_chunks"])
-            .replace("{{chw_question}}", case["chw_question"])
-        )
-
-        if dry_run:
-            rag_output = (
-                "- Pre-eclampsia danger sign: immediate referral to hospital is required.\n"
-                "- Ensure family arranges urgent transport; do not delay.\n"
-                "- Patient must continue iron and folic acid; no unprescribed herbs."
-            )
-            rag_metrics = {"latency_s": 0.01, "tokens": 40, "tok_per_sec": 4000.0}
-        else:
-            try:
-                rag_metrics = query_ollama(
-                    api_base=api_base,
-                    model=model,
-                    prompt=rag_prompt,
-                    temperature=0.0,
+            t2_sum_grade = None
+            if judge_cfg and judge_cfg.get("model") and not dry_run and not sum_output.startswith("[ERROR:"):
+                t2_sum_grade = evaluate_tier2_judge(
+                    judge_cfg=judge_cfg,
+                    use_case="Pre-Visit Summarization",
+                    patient_markdown=case["patient_markdown"],
+                    guideline_chunks="",
+                    case_expectations=case["summarization"],
+                    model_output=sum_output,
                 )
-                rag_output = rag_metrics.pop("content")
-            except Exception as exc:
-                rag_output = f"[ERROR: {str(exc)}]"
-                rag_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
 
-        t1_rag_pass, t1_rag_fails = evaluate_tier1_visit_prep(
-            output_text=rag_output,
-            rules=case["visit_prep_rag"],
-        )
+            status_sum = "PASS" if t1_sum_pass else "FAIL"
+            print(f"  -> Check A [Summarization]: Tier-1 {status_sum} (Latency: {sum_metrics['latency_s']}s, {sum_metrics['tok_per_sec']} t/s)")
+            if not t1_sum_pass:
+                for f_err in t1_sum_fails:
+                    print(f"     [Tier-1 Fail] {f_err}")
+            if t2_sum_grade:
+                t2_pass = all([
+                    t2_sum_grade.get("faithfulness_pass", False),
+                    t2_sum_grade.get("temporal_status_pass", False),
+                    t2_sum_grade.get("no_unauthorized_advice_pass", False),
+                    t2_sum_grade.get("critical_flags_captured_pass", False),
+                ])
+                t2_status = "PASS" if t2_pass else "FAIL"
+                print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_sum_grade.get('reasoning', '')[:100]}")
 
-        t2_rag_grade = None
-        if judge_cfg and judge_cfg.get("model") and not dry_run:
-            t2_rag_grade = evaluate_tier2_judge(
-                judge_cfg=judge_cfg,
-                use_case="Mini-RAG Visit Prep",
-                patient_markdown=case["patient_markdown"],
-                guideline_chunks=case["guideline_chunks"],
-                case_expectations=case["visit_prep_rag"],
-                model_output=rag_output,
-            )
-
-        status_rag = "PASS" if t1_rag_pass else "FAIL"
-        print(f"  -> Check B [Mini-RAG Prep]: Tier-1 {status_rag} (Latency: {rag_metrics['latency_s']}s, {rag_metrics['tok_per_sec']} t/s)")
-        if not t1_rag_pass:
-            for f_err in t1_rag_fails:
-                print(f"     [Tier-1 Fail] {f_err}")
-        if t2_rag_grade:
-            t2_pass = all([
-                t2_rag_grade.get("faithfulness_pass", False),
-                t2_rag_grade.get("temporal_status_pass", False),
-                t2_rag_grade.get("no_unauthorized_advice_pass", False),
-                t2_rag_grade.get("critical_flags_captured_pass", False),
-            ])
-            t2_status = "PASS" if t2_pass else "FAIL"
-            print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_rag_grade.get('reasoning', '')[:100]}")
-
-        results.append({
-            "id": case_id,
-            "title": title,
-            "summarization": {
+            case_res["summarization"] = {
                 "output": sum_output,
                 "metrics": sum_metrics,
                 "tier1_pass": t1_sum_pass,
                 "tier1_failures": t1_sum_fails,
                 "tier2_judge": t2_sum_grade,
-            },
-            "visit_prep_rag": {
+            }
+
+        # -------------------------------------------------------------
+        # 2. EVAL CHECK B: Mini-RAG Visit Prep
+        # -------------------------------------------------------------
+        if use_case in ("all", "rag", "visit_prep") and "visit_prep_rag" in case:
+            rag_prompt = (
+                visit_prep_template.replace("{{patient_markdown}}", case["patient_markdown"])
+                .replace("{{guideline_chunks}}", case["guideline_chunks"])
+                .replace("{{chw_question}}", case["chw_question"])
+            )
+
+            if dry_run:
+                rag_output = (
+                    "- Pre-eclampsia danger sign: immediate referral to hospital is required.\n"
+                    "- Ensure family arranges urgent transport; do not delay.\n"
+                    "- Patient must continue iron and folic acid; no unprescribed herbs."
+                )
+                rag_metrics = {"latency_s": 0.01, "tokens": 40, "tok_per_sec": 4000.0}
+            else:
+                try:
+                    rag_metrics = query_ollama(
+                        api_base=api_base,
+                        model=model,
+                        prompt=rag_prompt,
+                        temperature=0.0,
+                    )
+                    rag_output = rag_metrics.pop("content")
+                except Exception as exc:
+                    rag_output = f"[ERROR: {str(exc)}]"
+                    rag_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
+
+            t1_rag_pass, t1_rag_fails = evaluate_tier1_visit_prep(
+                output_text=rag_output,
+                rules=case["visit_prep_rag"],
+            )
+
+            t2_rag_grade = None
+            if judge_cfg and judge_cfg.get("model") and not dry_run:
+                t2_rag_grade = evaluate_tier2_judge(
+                    judge_cfg=judge_cfg,
+                    use_case="Mini-RAG Visit Prep",
+                    patient_markdown=case["patient_markdown"],
+                    guideline_chunks=case["guideline_chunks"],
+                    case_expectations=case["visit_prep_rag"],
+                    model_output=rag_output,
+                )
+
+            status_rag = "PASS" if t1_rag_pass else "FAIL"
+            print(f"  -> Check B [Mini-RAG Prep]: Tier-1 {status_rag} (Latency: {rag_metrics['latency_s']}s, {rag_metrics['tok_per_sec']} t/s)")
+            if not t1_rag_pass:
+                for f_err in t1_rag_fails:
+                    print(f"     [Tier-1 Fail] {f_err}")
+            if t2_rag_grade:
+                t2_pass = all([
+                    t2_rag_grade.get("faithfulness_pass", False),
+                    t2_rag_grade.get("temporal_status_pass", False),
+                    t2_rag_grade.get("no_unauthorized_advice_pass", False),
+                    t2_rag_grade.get("critical_flags_captured_pass", False),
+                ])
+                t2_status = "PASS" if t2_pass else "FAIL"
+                print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_rag_grade.get('reasoning', '')[:100]}")
+
+            case_res["visit_prep_rag"] = {
                 "output": rag_output,
                 "metrics": rag_metrics,
                 "tier1_pass": t1_rag_pass,
                 "tier1_failures": t1_rag_fails,
                 "tier2_judge": t2_rag_grade,
-            },
-        })
+            }
 
-    total_checks = len(results) * 2
-    sum_passes = sum(1 for r in results if r["summarization"]["tier1_pass"])
-    rag_passes = sum(1 for r in results if r["visit_prep_rag"]["tier1_pass"])
-    overall_pass = sum_passes + rag_passes
-    avg_sum_speed = sum(r["summarization"]["metrics"]["tok_per_sec"] for r in results) / len(results)
-    avg_rag_speed = sum(r["visit_prep_rag"]["metrics"]["tok_per_sec"] for r in results) / len(results)
+        # -------------------------------------------------------------
+        # 3. EVAL CHECK C: Longitudinal Trend Interpretation & Visualization
+        # -------------------------------------------------------------
+        if use_case in ("all", "trend") and "trend_interpretation" in case and trend_template:
+            trend_prompt = (
+                trend_template.replace("{{patient_markdown}}", case["patient_markdown"])
+                .replace("{{trend_focus_question}}", case.get("chw_question", "Interpret the longitudinal trend and state necessary CHW actions."))
+            )
+
+            if dry_run:
+                if case_id == "case_trend_01_pediatric_growth_faltering":
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "[8.5 -> 8.4 -> 8.1 -> 7.6 kg | 📉 Falling (-0.9 kg total loss)]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Severe growth faltering with progressive weight loss across 3 consecutive months. MUAC 11.9 cm indicates Moderate Acute Malnutrition.\n\n"
+                        "**CHW Action:**\n"
+                        "Urgently refer child to health facility for supplementary feeding enrollment and evaluation. Counsel mother on nutrient-dense complementary feeding."
+                    )
+                elif case_id == "case_trend_02_hypertension_gradual_escalation":
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "[124/80 -> 134/86 -> 148/92 -> 168/104 mmHg | 📈 Escalating (+44/+24 mmHg)]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Steady blood pressure escalation from normal into Stage 2 hypertension and urgency following Amlodipine cessation.\n\n"
+                        "**CHW Action:**\n"
+                        "Urgently refer patient to hospital NCD clinic for Amlodipine refill and dosage titration. Warn to stop taking herbal bitter tea."
+                    )
+                elif case_id == "case_trend_03_diabetes_postprandial_volatility":
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "Fasting: [5.8 -> 6.1 -> 6.4 mmol/L | Stable]\n"
+                        "Postprandial: [8.9 -> 12.4 -> 16.8 mmol/L | 📈 Spiking]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Marked divergent postprandial glucose spike reaching severe 16.8 mmol/L despite acceptable morning fasting levels (5.8 to 6.4 mmol/L).\n\n"
+                        "**CHW Action:**\n"
+                        "Refer to health clinic for regimen review. Counsel on evening carbohydrate diet portions and taking Metformin with meals."
+                    )
+                elif case_id == "case_trend_04_anc_gestational_fluid_and_bp_surge":
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "Weight: [61.5 -> 62.1 -> 64.8 -> 67.4 kg | 📈 Surge (+5.9 kg)]\n"
+                        "BP: [114/72 -> 118/76 -> 134/86 -> 152/98 mmHg | ⚠️ Jump]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Critical rapid fluid surge with pathological weight gain, escalating BP (152/98 mmHg), and 2+ proteinuria signaling severe pre-eclampsia.\n\n"
+                        "**CHW Action:**\n"
+                        "Immediate emergency transfer to hospital for obstetric management. Keep patient calm, arrange transport, and do not administer diuretics."
+                    )
+                elif case_id == "case_trend_05_pediatric_dehydration_rebound":
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "[10.2 -> 9.2 (Trough) -> 9.6 -> 9.9 kg | 🔄 Fluid Loss then Rehydration Rebound]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Acute weight drop from 10.2 to 9.2 kg was due to hypovolemic dehydration, not chronic malnutrition. Rapid rebound to 9.9 kg reflects rehydration recovery.\n\n"
+                        "**CHW Action:**\n"
+                        "Continue household ORS and complete the 14-day Zinc supplementation course. Maintain frequent feeding and monitor for diarrhea relapse."
+                    )
+                else:
+                    trend_output = (
+                        "**Visual Trajectory:**\n"
+                        "[Initial -> Intermediate -> Latest | Observed Trajectory]\n\n"
+                        "**Clinical Interpretation:**\n"
+                        "Identified longitudinal trend variation across observations.\n\n"
+                        "**CHW Action:**\n"
+                        "Refer to health clinic according to clinical guidelines."
+                    )
+                trend_metrics = {"latency_s": 0.01, "tokens": 42, "tok_per_sec": 4200.0}
+            else:
+                try:
+                    trend_metrics = query_ollama(
+                        api_base=api_base,
+                        model=model,
+                        prompt=trend_prompt,
+                        temperature=0.0,
+                    )
+                    trend_output = trend_metrics.pop("content")
+                except Exception as exc:
+                    trend_output = f"[ERROR: {str(exc)}]"
+                    trend_metrics = {"latency_s": 0.0, "tokens": 0, "tok_per_sec": 0.0}
+
+            t1_trend_pass, t1_trend_fails = evaluate_tier1_trend(
+                output_text=trend_output,
+                rules=case["trend_interpretation"],
+            )
+
+            t2_trend_grade = None
+            if judge_cfg and judge_cfg.get("model") and not dry_run and not trend_output.startswith("[ERROR:"):
+                t2_trend_grade = evaluate_tier2_judge(
+                    judge_cfg=judge_cfg,
+                    use_case="Longitudinal Trend Interpretation",
+                    patient_markdown=case["patient_markdown"],
+                    guideline_chunks=case.get("guideline_chunks", ""),
+                    case_expectations=case["trend_interpretation"],
+                    model_output=trend_output,
+                )
+
+            status_trend = "PASS" if t1_trend_pass else "FAIL"
+            print(f"  -> Check C [Trend Interpretation]: Tier-1 {status_trend} (Latency: {trend_metrics['latency_s']}s, {trend_metrics['tok_per_sec']} t/s)")
+            if not t1_trend_pass:
+                for f_err in t1_trend_fails:
+                    print(f"     [Tier-1 Fail] {f_err}")
+            if t2_trend_grade:
+                t2_pass = all([
+                    t2_trend_grade.get("faithfulness_pass", False),
+                    t2_trend_grade.get("temporal_status_pass", False),
+                    t2_trend_grade.get("no_unauthorized_advice_pass", False),
+                    t2_trend_grade.get("critical_flags_captured_pass", False),
+                ])
+                t2_status = "PASS" if t2_pass else "FAIL"
+                print(f"     [Tier-2 Judge ({judge_cfg.get('model')})]: {t2_status} - {t2_trend_grade.get('reasoning', '')[:100]}")
+
+            case_res["trend_interpretation"] = {
+                "output": trend_output,
+                "metrics": trend_metrics,
+                "tier1_pass": t1_trend_pass,
+                "tier1_failures": t1_trend_fails,
+                "tier2_judge": t2_trend_grade,
+            }
+
+        results.append(case_res)
+
+    # Calculate Benchmark Summary Metrics
+    sum_cases = [r for r in results if "summarization" in r]
+    rag_cases = [r for r in results if "visit_prep_rag" in r]
+    trend_cases = [r for r in results if "trend_interpretation" in r]
+
+    sum_passes = sum(1 for r in sum_cases if r["summarization"]["tier1_pass"])
+    rag_passes = sum(1 for r in rag_cases if r["visit_prep_rag"]["tier1_pass"])
+    trend_passes = sum(1 for r in trend_cases if r["trend_interpretation"]["tier1_pass"])
+
+    total_checks = len(sum_cases) + len(rag_cases) + len(trend_cases)
+    overall_pass = sum_passes + rag_passes + trend_passes
+
+    avg_sum_speed = (sum(r["summarization"]["metrics"]["tok_per_sec"] for r in sum_cases) / len(sum_cases)) if sum_cases else 0.0
+    avg_rag_speed = (sum(r["visit_prep_rag"]["metrics"]["tok_per_sec"] for r in rag_cases) / len(rag_cases)) if rag_cases else 0.0
+    avg_trend_speed = (sum(r["trend_interpretation"]["metrics"]["tok_per_sec"] for r in trend_cases) / len(trend_cases)) if trend_cases else 0.0
 
     print("\n" + "=" * 80)
     print(" BENCHMARK SUMMARY")
     print("=" * 80)
-    print(f"Tier-1 Score: {overall_pass}/{total_checks} ({round((overall_pass/total_checks)*100, 1)}%)")
-    print(f" - Summarization Pass Rate: {sum_passes}/{len(results)} (Avg speed: {round(avg_sum_speed, 1)} tok/s)")
-    print(f" - Mini-RAG Pass Rate:      {rag_passes}/{len(results)} (Avg speed: {round(avg_rag_speed, 1)} tok/s)")
+    if total_checks > 0:
+        print(f"Tier-1 Score: {overall_pass}/{total_checks} ({round((overall_pass/total_checks)*100, 1)}%)")
+    if sum_cases:
+        print(f" - Summarization Pass Rate:   {sum_passes}/{len(sum_cases)} (Avg speed: {round(avg_sum_speed, 1)} tok/s)")
+    if rag_cases:
+        print(f" - Mini-RAG Pass Rate:        {rag_passes}/{len(rag_cases)} (Avg speed: {round(avg_rag_speed, 1)} tok/s)")
+    if trend_cases:
+        print(f" - Trend Interp Pass Rate:    {trend_passes}/{len(trend_cases)} (Avg speed: {round(avg_trend_speed, 1)} tok/s)")
 
     if judge_cfg and judge_cfg.get("model"):
         def is_t2_pass(j_grade):
@@ -654,12 +843,18 @@ def run_benchmark(
                 j_grade.get("no_unauthorized_advice_pass", False),
                 j_grade.get("critical_flags_captured_pass", False),
             ])
-        t2_sum_passes = sum(1 for r in results if is_t2_pass(r["summarization"]["tier2_judge"]))
-        t2_rag_passes = sum(1 for r in results if is_t2_pass(r["visit_prep_rag"]["tier2_judge"]))
-        t2_total = t2_sum_passes + t2_rag_passes
-        print(f"Tier-2 Judge ({judge_cfg.get('model')}) Score: {t2_total}/{total_checks} ({round((t2_total/total_checks)*100, 1)}%)")
-        print(f" - Judge Summarization Pass Rate: {t2_sum_passes}/{len(results)}")
-        print(f" - Judge Mini-RAG Pass Rate:      {t2_rag_passes}/{len(results)}")
+        t2_sum_passes = sum(1 for r in sum_cases if is_t2_pass(r["summarization"].get("tier2_judge")))
+        t2_rag_passes = sum(1 for r in rag_cases if is_t2_pass(r["visit_prep_rag"].get("tier2_judge")))
+        t2_trend_passes = sum(1 for r in trend_cases if is_t2_pass(r["trend_interpretation"].get("tier2_judge")))
+        t2_total = t2_sum_passes + t2_rag_passes + t2_trend_passes
+        if total_checks > 0:
+            print(f"Tier-2 Judge ({judge_cfg.get('model')}) Score: {t2_total}/{total_checks} ({round((t2_total/total_checks)*100, 1)}%)")
+        if sum_cases:
+            print(f" - Judge Summarization Pass Rate: {t2_sum_passes}/{len(sum_cases)}")
+        if rag_cases:
+            print(f" - Judge Mini-RAG Pass Rate:      {t2_rag_passes}/{len(rag_cases)}")
+        if trend_cases:
+            print(f" - Judge Trend Interp Pass Rate:  {t2_trend_passes}/{len(trend_cases)}")
 
     print("=" * 80 + "\n")
 
@@ -669,7 +864,7 @@ def run_benchmark(
         "judge_config": judge_cfg,
         "total_checks": total_checks,
         "passes": overall_pass,
-        "pass_rate_pct": round((overall_pass / total_checks) * 100, 1),
+        "pass_rate_pct": round((overall_pass / total_checks) * 100, 1) if total_checks > 0 else 0.0,
         "results": results,
     }
 
@@ -680,6 +875,7 @@ def main():
     parser.add_argument("--api-base", type=str, default="http://localhost:11434", help="Target model Ollama API base URL")
     parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET, help="Path to eval_cases.json")
     parser.add_argument("--dry-run", action="store_true", help="Run harness mock without calling LLM endpoints")
+    parser.add_argument("--use-case", type=str, choices=["all", "summarization", "rag", "trend"], default="all", help="Evaluation use case to run (all, summarization, rag, trend)")
     parser.add_argument("--output", type=str, default=None, help="Path to save JSON evaluation report")
 
     # Multi-Provider Judge Configuration
@@ -714,6 +910,7 @@ def main():
         judge_cfg=judge_cfg,
         api_base=args.api_base,
         dry_run=args.dry_run,
+        use_case=args.use_case,
     )
 
     output_path = args.output

@@ -1,0 +1,60 @@
+{
+  "resourceType": "http://hl7.org/fhir/uv/sql-on-fhir/StructureDefinition/ViewDefinition",
+  "name": "longitudinal_trends",
+  "title": "CHW Longitudinal Vitals & Lab Trends View",
+  "status": "active",
+  "resource": "Observation",
+  "description": "Transforms serial FHIR Observation resources into compact chronological trend rows for edge SLM visualization and trajectory interpretation.",
+  "where": [
+    {
+      "path": "category.coding.exists(code in ('vital-signs', 'laboratory', 'exam')) and valueQuantity.exists() or component.exists()"
+    }
+  ],
+  "select": [
+    {
+      "column": [
+        {
+          "name": "date",
+          "path": "effectiveDateTime.substring(0, 10)",
+          "description": "ISO date of the reading"
+        }
+      ]
+    },
+    {
+      "column": [
+        {
+          "name": "parameter",
+          "path": "iif(code.coding.exists(code = '29463-7'), 'Weight', iif(code.coding.exists(code = '2339-0'), 'Fasting Blood Glucose', iif(code.coding.exists(code = '15074-8'), 'Postprandial Blood Glucose', iif(code.coding.exists(code = '85354-9'), 'Blood Pressure', iif(code.coding.exists(code = '56051-6'), 'MUAC', code.coding.first().display)))))",
+          "description": "Standardized human-readable clinical parameter name"
+        }
+      ]
+    },
+    {
+      "column": [
+        {
+          "name": "value",
+          "path": "iif(valueQuantity.exists(), valueQuantity.value.toString() + ' ' + valueQuantity.unit, component.select(code.coding.first().display + ': ' + valueQuantity.value.toString()).join('/'))",
+          "description": "Formatted measurement with units"
+        }
+      ]
+    },
+    {
+      "column": [
+        {
+          "name": "delta_context",
+          "path": "iif(extension.where(url = 'http://ohs.org/fhir/StructureDefinition/trend-delta').exists(), extension.where(url = 'http://ohs.org/fhir/StructureDefinition/trend-delta').valueString, 'baseline')",
+          "description": "Pre-computed change relative to prior or baseline visit"
+        }
+      ]
+    },
+    {
+      "column": [
+        {
+          "name": "status_flag",
+          "path": "iif(interpretation.coding.exists(), interpretation.coding.first().display, 'Recorded')",
+          "description": "Clinical interpretation (e.g., Faltering, Spiking, Elevated, Normal, Warning)"
+        }
+      ]
+    }
+  ]
+}
