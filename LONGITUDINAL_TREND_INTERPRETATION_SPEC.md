@@ -282,3 +282,222 @@ Tier-1 Score: 5/5 (100.0%)
  - Trend Interp Pass Rate:    5/5 (Avg speed: 4200.0 tok/s)
 ================================================================================
 ```
+
+---
+
+## Cross-Platform Trend Visualization Specification (Web & Android)
+
+### Motivation & Architectural Need
+
+In frontline primary care, displaying trend data poses a unique dual-platform challenge:
+1. **Low-RAM Android Edge Devices ($50–$150 hardware)**: Devices with 2–4 GB RAM cannot afford embedded WebViews or multi-megabyte JavaScript visualization engines without causing OS-level memory termination (`OutOfMemoryError` or background app kills).
+2. **Web Dashboards & Clinical Supervision**: Referral clinicians and CHW supervisors review cases on desktop browsers, requiring high-resolution vector curves, reference bands, and interactive diagnostics.
+3. **SMS / USSD / Push Notification Fallback**: When connectivity drops or SMS alerts are dispatched, compact text sparklines (`[8.5 -> 8.4 -> 8.1 -> 7.6 kg | 📉 Falling (-0.9 kg)]`) are needed.
+
+To solve this, the OHS Edge framework introduces the **Universal Trend Visualization Specification (`ohs.trend.chart.v1`)**. This declarative JSON schema is emitted or derived from serial observation data and runs equally on Android (native Jetpack Compose Canvas) and Web (inline SVG vector rendering) with **zero external charting dependencies**.
+
+### Dual-Platform Rendering Pipeline
+
+```mermaid
+flowchart TD
+    subgraph Data["1. Serial Clinical Observations"]
+        FHIR["Raw FHIR Bundle"] --> TOK["Tokempic SQL-on-FHIR Transform"]
+    end
+
+    subgraph SpecEngine["2. Universal Visualization Spec Engine"]
+        TOK --> JSON["Declarative TrendVisualSpec (JSON)\n(ohs.trend.chart.v1)"]
+    end
+
+    subgraph CrossPlatform["3. Dual-Platform Native Rendering"]
+        JSON --> ANDROID["Android Mobile (Jetpack Compose)\n- Hardware-accelerated Canvas\n- Zero WebView / Zero SDK overhead\n- 60 FPS on budget MediaTek/Snapdragon"]
+        JSON --> WEB["Web Studio & Clinical Portal\n- Responsive HTML5 SVG Vector Canvas\n- WCAG AAA Accessible Clinical Bands\n- Interactive inspect & JSON export"]
+        JSON --> SMS["Low-Bandwidth Sparkline Fallback\n- Text ASCII trajectory\n- USSD & push notification ready"]
+    end
+```
+
+### JSON Schema Specification (`ohs.trend.chart.v1`)
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OHSTrendVisualSpec",
+  "type": "object",
+  "required": ["schema", "chart_id", "chart_type", "title", "x_axis", "y_axis", "clinical_bands", "series", "summary"],
+  "properties": {
+    "schema": { "type": "string", "const": "ohs.trend.chart.v1" },
+    "chart_id": { "type": "string" },
+    "chart_type": { "type": "string", "enum": ["growth_curve", "dual_line_bp", "paired_daily_glucose", "dual_axis_anc", "rehydration_trough"] },
+    "title": { "type": "string" },
+    "subtitle": { "type": "string" },
+    "parameter": { "type": "string" },
+    "unit": { "type": "string" },
+    "x_axis": {
+      "type": "object",
+      "required": ["label", "ticks"],
+      "properties": {
+        "label": { "type": "string" },
+        "ticks": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "y_axis": {
+      "type": "object",
+      "required": ["label", "unit", "min", "max"],
+      "properties": {
+        "label": { "type": "string" },
+        "unit": { "type": "string" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" }
+      }
+    },
+    "secondary_y_axis": {
+      "type": "object",
+      "properties": {
+        "label": { "type": "string" },
+        "unit": { "type": "string" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" }
+      }
+    },
+    "clinical_bands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "min", "max", "color", "border", "status"],
+        "properties": {
+          "name": { "type": "string" },
+          "min": { "type": "number" },
+          "max": { "type": "number" },
+          "color": { "type": "string" },
+          "border": { "type": "string" },
+          "status": { "type": "string", "enum": ["normal", "borderline", "warning", "danger"] }
+        }
+      }
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "color", "points"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "stroke_width": { "type": "number" },
+          "stroke_dash": { "type": "string" },
+          "secondary_axis": { "type": "boolean" },
+          "points": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["x", "y"],
+              "properties": {
+                "x": { "type": "string" },
+                "y": { "type": "number" },
+                "delta": { "type": "string" },
+                "alert": { "type": "boolean" },
+                "annotation": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "secondary_vitals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "value", "status"],
+        "properties": {
+          "parameter": { "type": "string" },
+          "value": { "type": "string" },
+          "status": { "type": "string" },
+          "alert": { "type": "boolean" }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["direction", "direction_label", "net_change", "urgency", "sparkline_text", "action_prompt"],
+      "properties": {
+        "direction": { "type": "string" },
+        "direction_label": { "type": "string" },
+        "net_change": { "type": "string" },
+        "urgency": { "type": "string" },
+        "sparkline_text": { "type": "string" },
+        "action_prompt": { "type": "string" }
+      }
+    }
+  }
+}
+```
+
+### Native Android Jetpack Compose Implementation
+
+On Android, developers render this JSON using Jetpack Compose's hardware-accelerated Canvas with zero third-party dependencies:
+
+```kotlin
+@Composable
+fun ClinicalTrendChart(
+    spec: TrendVisualSpec,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF080E18)),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(text = spec.title, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = spec.subtitle, style = MaterialTheme.typography.bodySmall, color = Color(0xFF94A3B8))
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Canvas(modifier = Modifier.fillMaxWidth().height(160.dp)) {
+                val pLeft = 40f
+                val pBottom = 30f
+                val plotW = size.width - pLeft - 20f
+                val plotH = size.height - pBottom - 10f
+
+                // 1. Draw Shaded Clinical Reference Bands (WHO growth, HTN staging, etc.)
+                spec.clinicalBands.forEach { b ->
+                    val topY = 10f + plotH * (1f - (b.max - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                    val botY = 10f + plotH * (1f - (b.min - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                    drawRect(
+                        color = Color(android.graphics.Color.parseColor(b.color)),
+                        topLeft = Offset(pLeft, topY),
+                        size = Size(plotW, (botY - topY).coerceAtLeast(0f))
+                    )
+                }
+
+                // 2. Plot Multi-Series Smooth Curves and Point Markers
+                spec.series.forEach { s ->
+                    val path = Path()
+                    s.points.forEachIndexed { i, pt ->
+                        val px = pLeft + (plotW / (spec.xAxis.ticks.size - 1)) * i
+                        val py = 10f + plotH * (1f - (pt.y - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+                        drawCircle(
+                            color = if (pt.alert) Color(0xFFEF4444) else Color(android.graphics.Color.parseColor(s.color)),
+                            radius = if (pt.alert) 8f else 5f,
+                            center = Offset(px, py)
+                        )
+                    }
+                    drawPath(path = path, color = Color(android.graphics.Color.parseColor(s.color)), style = Stroke(width = 4f, cap = StrokeCap.Round))
+                }
+            }
+        }
+    }
+}
+```
+
+### Visual Archetypes Matrix
+
+| Case ID | Archetype | Clinical Domain | Primary Parameter & Unit | Clinical Reference Zones | Visual Format |
+|---|---|---|---|---|---|
+| `case_trend_01` | Pediatric Growth Faltering | iCCM / Nutrition | Weight (kg) | WHO Median (8.2–9.6 kg), MAM (-2 SD, 7.3–8.2 kg), SAM (-3 SD, <7.3 kg) | Single curve with WHO z-score shaded bands + MUAC status |
+| `case_trend_02` | Hypertensive Creep | NCD / Chronic Care | Blood Pressure (mmHg) | Normal (<120/80), Pre-HTN (120–139), Stage 1 (140–159), Crisis (≥160) | Dual-line series (Systolic + Diastolic) with AHA/WHO clinical stages |
+| `case_trend_03` | Diabetic Volatility | NCD / Diabetes | Blood Glucose (mmol/L) | Target Range (4.0–7.8), Elevated (7.8–11.1), Severe Excursion (>11.1) | Paired daily comparison (Fasting morning vs Postprandial evening) |
+| `case_trend_04` | Pre-Eclampsia Fluid Surge | Antenatal Care | Weight (kg) & BP (mmHg) | Physiological Gain (60–63.5 kg) vs Pathological Fluid Surge (>63.5 kg) | Dual-axis time-series (Weight on primary Y, Systolic BP on secondary Y) |
+| `case_trend_05` | Dehydration Rebound | Pediatric Diarrhea | Weight (kg) | Euvolemic Baseline (9.8–10.5 kg) vs Hypovolemic Trough (8.8–9.5 kg) | V-shaped trough curve (acute diarrheal drop and rapid ORS rebound) |
+

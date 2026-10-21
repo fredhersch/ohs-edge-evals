@@ -1426,6 +1426,114 @@
         "amoxicillin",
         "injectable"
       ]
+    },
+    "trend_visual_spec": {
+      "schema": "ohs.trend.chart.v1",
+      "chart_id": "chart_trend_01_pediatric_growth_faltering",
+      "chart_type": "growth_curve",
+      "title": "Pediatric Weight Trajectory vs WHO Growth Standards",
+      "subtitle": "Baby Juma (9 mo) \u2022 Serial 4-Month Monitoring (Zangon Kataf)",
+      "parameter": "Body Weight",
+      "unit": "kg",
+      "x_axis": {
+        "label": "Child Age & Visit Date",
+        "ticks": [
+          "M6 (Jul 15)",
+          "M7 (Aug 15)",
+          "M8 (Sep 16)",
+          "M9 (Oct 18)"
+        ]
+      },
+      "y_axis": {
+        "label": "Weight (kg)",
+        "unit": "kg",
+        "min": 6.0,
+        "max": 10.0,
+        "step": 0.5
+      },
+      "clinical_bands": [
+        {
+          "name": "WHO Median Growth (Normal)",
+          "min": 8.2,
+          "max": 9.6,
+          "color": "rgba(34, 197, 94, 0.16)",
+          "border": "#22c55e",
+          "status": "normal"
+        },
+        {
+          "name": "Moderate Underweight (-2 SD / MAM)",
+          "min": 7.3,
+          "max": 8.2,
+          "color": "rgba(245, 158, 11, 0.18)",
+          "border": "#f59e0b",
+          "status": "warning"
+        },
+        {
+          "name": "Severe Malnutrition (-3 SD / SAM)",
+          "min": 6.0,
+          "max": 7.3,
+          "color": "rgba(239, 68, 68, 0.22)",
+          "border": "#ef4444",
+          "status": "danger"
+        }
+      ],
+      "series": [
+        {
+          "id": "weight",
+          "name": "Observed Weight",
+          "color": "#ef4444",
+          "stroke_width": 3,
+          "points": [
+            {
+              "x": "M6 (Jul 15)",
+              "y": 8.5,
+              "delta": "baseline",
+              "annotation": "Normal Baseline (8.5 kg)"
+            },
+            {
+              "x": "M7 (Aug 15)",
+              "y": 8.4,
+              "delta": "-0.1 kg",
+              "annotation": "Plateau / Static (8.4 kg)"
+            },
+            {
+              "x": "M8 (Sep 16)",
+              "y": 8.1,
+              "delta": "-0.4 kg",
+              "annotation": "Faltering Starts (8.1 kg)"
+            },
+            {
+              "x": "M9 (Oct 18)",
+              "y": 7.6,
+              "delta": "-0.9 kg",
+              "alert": true,
+              "annotation": "Critical MAM (7.6 kg, MUAC 11.9cm)"
+            }
+          ]
+        }
+      ],
+      "secondary_vitals": [
+        {
+          "parameter": "MUAC",
+          "value": "11.9 cm",
+          "status": "MAM (Yellow Zone)",
+          "alert": true
+        },
+        {
+          "parameter": "Appetite",
+          "value": "Poor / Diluted porridge",
+          "status": "Suboptimal intake",
+          "alert": true
+        }
+      ],
+      "summary": {
+        "direction": "declining",
+        "direction_label": "\ud83d\udcc9 Monotonic Weight Faltering",
+        "net_change": "-0.9 kg total loss (-10.6%)",
+        "urgency": "CRITICAL_MAM",
+        "sparkline_text": "[8.5 -> 8.4 -> 8.1 -> 7.6 kg | \ud83d\udcc9 Falling (-0.9 kg)]",
+        "action_prompt": "Facilitate urgent facility referral for supplementary feeding & nutritional rehabilitation"
+      }
     }
   },
   {
@@ -1530,6 +1638,156 @@
         "captopril",
         "injectable"
       ]
+    },
+    "trend_visual_spec": {
+      "schema": "ohs.trend.chart.v1",
+      "chart_id": "chart_trend_02_hypertension_escalation",
+      "chart_type": "dual_line_bp",
+      "title": "Serial Blood Pressure Escalation (Hypertension Creep)",
+      "subtitle": "Musa Danladi (54y) \u2022 4-Month Escalation Post-Amlodipine Cessation (Zaria)",
+      "parameter": "Blood Pressure",
+      "unit": "mmHg",
+      "x_axis": {
+        "label": "Encounter Date",
+        "ticks": [
+          "Jul 10 (M1)",
+          "Aug 12 (M2)",
+          "Sep 14 (M3)",
+          "Oct 18 (M4)"
+        ]
+      },
+      "y_axis": {
+        "label": "Pressure (mmHg)",
+        "unit": "mmHg",
+        "min": 70,
+        "max": 180,
+        "step": 20
+      },
+      "clinical_bands": [
+        {
+          "name": "Normal Blood Pressure (<120/80)",
+          "min": 70,
+          "max": 120,
+          "color": "rgba(34, 197, 94, 0.16)",
+          "border": "#22c55e",
+          "status": "normal"
+        },
+        {
+          "name": "Pre-Hypertension (120-139)",
+          "min": 120,
+          "max": 139,
+          "color": "rgba(56, 189, 248, 0.16)",
+          "border": "#38bdf8",
+          "status": "borderline"
+        },
+        {
+          "name": "Stage 1 Hypertension (140-159)",
+          "min": 140,
+          "max": 159,
+          "color": "rgba(245, 158, 11, 0.18)",
+          "border": "#f59e0b",
+          "status": "warning"
+        },
+        {
+          "name": "Stage 2 / Hypertensive Urgency (>=160)",
+          "min": 160,
+          "max": 180,
+          "color": "rgba(239, 68, 68, 0.22)",
+          "border": "#ef4444",
+          "status": "danger"
+        }
+      ],
+      "series": [
+        {
+          "id": "systolic",
+          "name": "Systolic BP",
+          "color": "#ef4444",
+          "stroke_width": 3,
+          "points": [
+            {
+              "x": "Jul 10 (M1)",
+              "y": 124,
+              "delta": "baseline",
+              "annotation": "Controlled (124 mmHg)"
+            },
+            {
+              "x": "Aug 12 (M2)",
+              "y": 134,
+              "delta": "+10 mmHg",
+              "annotation": "Pre-HTN (134 mmHg)"
+            },
+            {
+              "x": "Sep 14 (M3)",
+              "y": 148,
+              "delta": "+24 mmHg",
+              "annotation": "Stage 1 (148 mmHg)"
+            },
+            {
+              "x": "Oct 18 (M4)",
+              "y": 168,
+              "delta": "+44 mmHg",
+              "alert": true,
+              "annotation": "Urgency (168 mmHg)"
+            }
+          ]
+        },
+        {
+          "id": "diastolic",
+          "name": "Diastolic BP",
+          "color": "#f59e0b",
+          "stroke_width": 2.5,
+          "stroke_dash": "4 2",
+          "points": [
+            {
+              "x": "Jul 10 (M1)",
+              "y": 80,
+              "delta": "baseline",
+              "annotation": "Normal (80 mmHg)"
+            },
+            {
+              "x": "Aug 12 (M2)",
+              "y": 86,
+              "delta": "+6 mmHg",
+              "annotation": "Elevated (86 mmHg)"
+            },
+            {
+              "x": "Sep 14 (M3)",
+              "y": 92,
+              "delta": "+12 mmHg",
+              "annotation": "Stage 1 (92 mmHg)"
+            },
+            {
+              "x": "Oct 18 (M4)",
+              "y": 104,
+              "delta": "+24 mmHg",
+              "alert": true,
+              "annotation": "Severe (104 mmHg)"
+            }
+          ]
+        }
+      ],
+      "secondary_vitals": [
+        {
+          "parameter": "Medication",
+          "value": "Amlodipine ceased 3 weeks ago",
+          "status": "Non-adherent",
+          "alert": true
+        },
+        {
+          "parameter": "Symptoms",
+          "value": "Throbbing occipital headache",
+          "status": "Urgency Red Flag",
+          "alert": true
+        }
+      ],
+      "summary": {
+        "direction": "escalating",
+        "direction_label": "\ud83d\udcc8 Progressive Hypertensive Escalation",
+        "net_change": "+44/+24 mmHg escalation",
+        "urgency": "HYPERTENSIVE_URGENCY",
+        "sparkline_text": "[124/80 -> 134/86 -> 148/92 -> 168/104 mmHg | \ud83d\udcc8 Escalating (+44/+24 mmHg)]",
+        "action_prompt": "Urgently refer to District Hospital NCD clinic for medication refill & titration"
+      }
     }
   },
   {
@@ -1633,6 +1891,134 @@
         "glibenclamide",
         "double dose"
       ]
+    },
+    "trend_visual_spec": {
+      "schema": "ohs.trend.chart.v1",
+      "chart_id": "chart_trend_03_diabetes_postprandial",
+      "chart_type": "paired_daily_glucose",
+      "title": "Discordant Fasting vs Postprandial Glycemic Log",
+      "subtitle": "Grace Mensah (52y) \u2022 Morning Fasting vs Evening Postprandial Excursions (Kumasi)",
+      "parameter": "Blood Glucose",
+      "unit": "mmol/L",
+      "x_axis": {
+        "label": "Test Date",
+        "ticks": [
+          "Day 1 (Oct 14)",
+          "Day 2 (Oct 16)",
+          "Day 3 (Oct 18)"
+        ]
+      },
+      "y_axis": {
+        "label": "Glucose (mmol/L)",
+        "unit": "mmol/L",
+        "min": 3.5,
+        "max": 18.5,
+        "step": 2.5
+      },
+      "clinical_bands": [
+        {
+          "name": "Target Glycemic Range (4.0-7.8)",
+          "min": 4.0,
+          "max": 7.8,
+          "color": "rgba(34, 197, 94, 0.16)",
+          "border": "#22c55e",
+          "status": "normal"
+        },
+        {
+          "name": "Elevated Postprandial (7.8-11.1)",
+          "min": 7.8,
+          "max": 11.1,
+          "color": "rgba(245, 158, 11, 0.18)",
+          "border": "#f59e0b",
+          "status": "warning"
+        },
+        {
+          "name": "Severe Hyperglycemic Excursion (>11.1)",
+          "min": 11.1,
+          "max": 18.5,
+          "color": "rgba(239, 68, 68, 0.22)",
+          "border": "#ef4444",
+          "status": "danger"
+        }
+      ],
+      "series": [
+        {
+          "id": "fasting",
+          "name": "Fasting AM (07:00)",
+          "color": "#06b6d4",
+          "stroke_width": 2.5,
+          "points": [
+            {
+              "x": "Day 1 (Oct 14)",
+              "y": 5.8,
+              "delta": "baseline",
+              "annotation": "Controlled Fasting (5.8)"
+            },
+            {
+              "x": "Day 2 (Oct 16)",
+              "y": 6.1,
+              "delta": "+0.3",
+              "annotation": "Acceptable Fasting (6.1)"
+            },
+            {
+              "x": "Day 3 (Oct 18)",
+              "y": 6.4,
+              "delta": "+0.6",
+              "annotation": "Borderline Fasting (6.4)"
+            }
+          ]
+        },
+        {
+          "id": "postprandial",
+          "name": "Postprandial PM (20:00)",
+          "color": "#dc2626",
+          "stroke_width": 3.5,
+          "points": [
+            {
+              "x": "Day 1 (Oct 14)",
+              "y": 8.9,
+              "delta": "+3.1 vs AM",
+              "annotation": "Mild Spike (8.9)"
+            },
+            {
+              "x": "Day 2 (Oct 16)",
+              "y": 12.4,
+              "delta": "+6.3 vs AM",
+              "alert": true,
+              "annotation": "High Spike (12.4)"
+            },
+            {
+              "x": "Day 3 (Oct 18)",
+              "y": 16.8,
+              "delta": "+10.4 vs AM",
+              "alert": true,
+              "annotation": "Critical Excursion (16.8)"
+            }
+          ]
+        }
+      ],
+      "secondary_vitals": [
+        {
+          "parameter": "Divergence Spread",
+          "value": "+10.4 mmol/L postprandial jump",
+          "status": "Severe Volatility",
+          "alert": true
+        },
+        {
+          "parameter": "Etiology",
+          "value": "Skipping evening Metformin due to GI upset",
+          "status": "Medication Barrier",
+          "alert": true
+        }
+      ],
+      "summary": {
+        "direction": "divergent_spiking",
+        "direction_label": "\ud83d\udcc8 Severe Postprandial Excursion",
+        "net_change": "+10.4 mmol/L evening divergence (reaching 16.8 mmol/L)",
+        "urgency": "HIGH_HYPERGLYCEMIA",
+        "sparkline_text": "Fasting: [5.8 -> 6.1 -> 6.4 | Stable] | Postprandial: [8.9 -> 12.4 -> 16.8 | \ud83d\udcc8 Spiking]",
+        "action_prompt": "Refer to Health Centre for regimen review and counseling on evening Metformin with meals"
+      }
     }
   },
   {
@@ -1741,6 +2127,148 @@
         "diuretic",
         "injectable"
       ]
+    },
+    "trend_visual_spec": {
+      "schema": "ohs.trend.chart.v1",
+      "chart_id": "chart_trend_04_anc_fluid_surge",
+      "chart_type": "dual_axis_anc",
+      "title": "Gestational Fluid Retention & Systolic BP Multi-Parameter Surge",
+      "subtitle": "Zainab Aliyu (34w) \u2022 Severe Pre-Eclampsia Fluid Surge (Sokoto)",
+      "parameter": "Weight & Blood Pressure",
+      "unit": "kg & mmHg",
+      "x_axis": {
+        "label": "Gestational Age",
+        "ticks": [
+          "W28 (Sep 02)",
+          "W30 (Sep 16)",
+          "W32 (Sep 30)",
+          "W34 (Oct 18)"
+        ]
+      },
+      "y_axis": {
+        "label": "Maternal Weight (kg)",
+        "unit": "kg",
+        "min": 60.0,
+        "max": 69.0,
+        "step": 1.5
+      },
+      "secondary_y_axis": {
+        "label": "Systolic BP (mmHg)",
+        "unit": "mmHg",
+        "min": 105,
+        "max": 165,
+        "step": 15
+      },
+      "clinical_bands": [
+        {
+          "name": "Normal Gestational Weight Gain",
+          "min": 60.0,
+          "max": 63.5,
+          "color": "rgba(34, 197, 94, 0.16)",
+          "border": "#22c55e",
+          "status": "normal"
+        },
+        {
+          "name": "Pathological Fluid Retention Zone",
+          "min": 63.5,
+          "max": 69.0,
+          "color": "rgba(239, 68, 68, 0.22)",
+          "border": "#ef4444",
+          "status": "danger"
+        }
+      ],
+      "series": [
+        {
+          "id": "weight",
+          "name": "Maternal Weight (kg)",
+          "color": "#38bdf8",
+          "stroke_width": 3,
+          "points": [
+            {
+              "x": "W28 (Sep 02)",
+              "y": 61.5,
+              "delta": "baseline",
+              "annotation": "Baseline (61.5 kg)"
+            },
+            {
+              "x": "W30 (Sep 16)",
+              "y": 62.1,
+              "delta": "+0.6 kg",
+              "annotation": "Physiological Gain (62.1 kg)"
+            },
+            {
+              "x": "W32 (Sep 30)",
+              "y": 64.8,
+              "delta": "+3.3 kg",
+              "annotation": "Excessive Fluid (+2.7 kg/2w)"
+            },
+            {
+              "x": "W34 (Oct 18)",
+              "y": 67.4,
+              "delta": "+5.9 kg",
+              "alert": true,
+              "annotation": "Critical Fluid Surge (67.4 kg)"
+            }
+          ]
+        },
+        {
+          "id": "systolic_bp",
+          "name": "Systolic BP (mmHg)",
+          "color": "#f43f5e",
+          "stroke_width": 3,
+          "stroke_dash": "5 3",
+          "secondary_axis": true,
+          "points": [
+            {
+              "x": "W28 (Sep 02)",
+              "y": 114,
+              "delta": "baseline",
+              "annotation": "Normal (114 mmHg)"
+            },
+            {
+              "x": "W30 (Sep 16)",
+              "y": 118,
+              "delta": "+4 mmHg",
+              "annotation": "Normal (118 mmHg)"
+            },
+            {
+              "x": "W32 (Sep 30)",
+              "y": 134,
+              "delta": "+20 mmHg",
+              "annotation": "Pre-HTN (134 mmHg)"
+            },
+            {
+              "x": "W34 (Oct 18)",
+              "y": 152,
+              "delta": "+38 mmHg",
+              "alert": true,
+              "annotation": "Severe HTN (152 mmHg)"
+            }
+          ]
+        }
+      ],
+      "secondary_vitals": [
+        {
+          "parameter": "Urine Protein",
+          "value": "2+ Dipstick",
+          "status": "Severe Proteinuria",
+          "alert": true
+        },
+        {
+          "parameter": "Edema & Symptoms",
+          "value": "2+ Bilateral edema, blurred vision",
+          "status": "Pre-Eclampsia Signs",
+          "alert": true
+        }
+      ],
+      "summary": {
+        "direction": "rapid_surge",
+        "direction_label": "\u26a0\ufe0f Critical Pathological Fluid & BP Surge",
+        "net_change": "+5.9 kg fluid surge & +38/+26 mmHg escalation",
+        "urgency": "OBSTETRIC_EMERGENCY",
+        "sparkline_text": "Weight: [61.5 -> 62.1 -> 64.8 -> 67.4 kg | \ud83d\udcc8 Surge (+5.9 kg)] | BP: [114/72 -> 118/76 -> 134/86 -> 152/98 mmHg | \u26a0\ufe0f Jump]",
+        "action_prompt": "IMMEDIATE emergency transfer to hospital for obstetric pre-eclampsia management"
+      }
     }
   },
   {
@@ -1841,6 +2369,106 @@
         "antimotility",
         "antibiotic"
       ]
+    },
+    "trend_visual_spec": {
+      "schema": "ohs.trend.chart.v1",
+      "chart_id": "chart_trend_05_pediatric_dehydration",
+      "chart_type": "rehydration_trough",
+      "title": "Acute Dehydration Trough & Rehydration Recovery Curve",
+      "subtitle": "Kwame Appiah (14 mo) \u2022 Fluid Loss Drop & Rebound Following ORS/Zinc (Sunyani)",
+      "parameter": "Body Weight",
+      "unit": "kg",
+      "x_axis": {
+        "label": "Illness Timeline",
+        "ticks": [
+          "D1 Baseline (Oct 15)",
+          "D3 Trough (Oct 17 08:00)",
+          "D3 Post-ORS (Oct 17 18:00)",
+          "D4 Euvolemic (Oct 18 10:00)"
+        ]
+      },
+      "y_axis": {
+        "label": "Weight (kg)",
+        "unit": "kg",
+        "min": 8.8,
+        "max": 10.6,
+        "step": 0.4
+      },
+      "clinical_bands": [
+        {
+          "name": "Euvolemic Healthy Baseline",
+          "min": 9.8,
+          "max": 10.5,
+          "color": "rgba(34, 197, 94, 0.16)",
+          "border": "#22c55e",
+          "status": "normal"
+        },
+        {
+          "name": "Hypovolemic Dehydration Trough",
+          "min": 8.8,
+          "max": 9.5,
+          "color": "rgba(239, 68, 68, 0.22)",
+          "border": "#ef4444",
+          "status": "danger"
+        }
+      ],
+      "series": [
+        {
+          "id": "weight",
+          "name": "Observed Weight",
+          "color": "#10b981",
+          "stroke_width": 3,
+          "points": [
+            {
+              "x": "D1 Baseline (Oct 15)",
+              "y": 10.2,
+              "delta": "baseline",
+              "annotation": "Pre-illness (10.2 kg)"
+            },
+            {
+              "x": "D3 Trough (Oct 17 08:00)",
+              "y": 9.2,
+              "delta": "-1.0 kg (-10%)",
+              "alert": true,
+              "annotation": "Dehydration Trough (9.2 kg)"
+            },
+            {
+              "x": "D3 Post-ORS (Oct 17 18:00)",
+              "y": 9.6,
+              "delta": "+0.4 kg",
+              "annotation": "ORS Response (9.6 kg)"
+            },
+            {
+              "x": "D4 Euvolemic (Oct 18 10:00)",
+              "y": 9.9,
+              "delta": "+0.7 kg recovery",
+              "annotation": "Rebound Recovery (9.9 kg)"
+            }
+          ]
+        }
+      ],
+      "secondary_vitals": [
+        {
+          "parameter": "Hydration Signs",
+          "value": "Alert, skin pinch <1s, drinking well",
+          "status": "Rehydrated",
+          "alert": false
+        },
+        {
+          "parameter": "Stools",
+          "value": "Reduced to 2 semi-solid stools past 12h",
+          "status": "Resolving Diarrhea",
+          "alert": false
+        }
+      ],
+      "summary": {
+        "direction": "v_shaped_rebound",
+        "direction_label": "\ud83d\udd04 Fluid Loss then Rapid Rehydration Rebound",
+        "net_change": "-1.0 kg acute fluid plunge followed by +0.7 kg rebound recovery",
+        "urgency": "RECOVERY_RESOLVING",
+        "sparkline_text": "[10.2 -> 9.2 (Trough) -> 9.6 -> 9.9 kg | \ud83d\udd04 Fluid Loss then Rehydration Rebound]",
+        "action_prompt": "Continue household ORS and complete the 14-day Zinc supplementation course"
+      }
     }
   }
 ]

@@ -191,6 +191,7 @@ def load_trend_cases() -> List[Dict[str, Any]]:
             "raw_fhir_bundle": raw_bundle,
             "transformed_markdown": c.get("patient_markdown"),
             "output_text": output_text,
+            "trend_visual_spec": c.get("trend_visual_spec", {}),
             "metrics": trend_res.get("metrics") or {"latency_s": 0.48, "tokens": 58, "tok_per_sec": 120.8},
             "scoring_criteria": {
                 "expected_direction": rules.get("expected_direction", []),
@@ -1371,21 +1372,25 @@ def get_embedded_studio_html() -> str:
           <div class="ohs-card bg-white border border-[#e1e8eb] p-5 space-y-4">
             <!-- SubTab Nav -->
             <div class="flex items-center space-x-1.5 border-b border-[#e1e8eb] pb-3 text-xs overflow-x-auto">
-              <button onclick="setTrendSubTab('tokempic')" id="subtab-btn-tokempic" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1f75a8] text-white transition flex items-center gap-1.5">
+              <button onclick="setTrendSubTab('visual')" id="subtab-btn-visual" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1f75a8] text-white transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-chart-area"></i>
+                <span>Interactive Visual &amp; JSON Spec</span>
+              </button>
+              <button onclick="setTrendSubTab('tokempic')" id="subtab-btn-tokempic" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-table"></i>
-                <span>Transformed Tokempic Data</span>
+                <span>Tokempic Transform</span>
               </button>
               <button onclick="setTrendSubTab('fhir')" id="subtab-btn-fhir" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-fire"></i>
-                <span>Raw FHIR Bundle (JSON)</span>
+                <span>Raw FHIR Bundle</span>
               </button>
               <button onclick="setTrendSubTab('scoring')" id="subtab-btn-scoring" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-clipboard-check"></i>
-                <span>Scoring Criteria &amp; Score</span>
+                <span>Scoring Breakdown</span>
               </button>
               <button onclick="setTrendSubTab('guideline')" id="subtab-btn-guideline" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
                 <i class="fa-solid fa-book-medical"></i>
-                <span>MOH Protocol Rules</span>
+                <span>MOH Guidelines</span>
               </button>
             </div>
 
@@ -1454,16 +1459,30 @@ def get_embedded_studio_html() -> str:
 
               <!-- App Scrollable Body -->
               <div class="p-3.5 space-y-3 flex-1 overflow-y-auto custom-scroll text-xs">
-                <!-- Trajectory Sparkline Console -->
-                <div class="p-3 rounded-2xl bg-[#0f172a] border border-[#334155] space-y-1.5 shadow-sm">
+                <!-- Trajectory Visual & Sparkline Mobile Card -->
+                <div class="p-3 rounded-2xl bg-[#0f172a] border border-[#334155] space-y-2 shadow-sm">
                   <div class="flex items-center justify-between text-[10px] text-[#94a3b8]">
-                    <span class="font-bold uppercase tracking-wider text-[#38bdf8] flex items-center gap-1">
-                      <i class="fa-solid fa-chart-line text-[10px]"></i> Visual Trajectory
+                    <span class="font-bold uppercase tracking-wider text-[#38bdf8] flex items-center gap-1.5">
+                      <i class="fa-solid fa-chart-line text-[10px]"></i>
+                      <span id="phone-chart-title">Visual Trajectory</span>
                     </span>
-                    <span class="font-mono text-[9px] text-slate-400">Chronological</span>
+                    <!-- Mobile Mode Toggle: Chart / Sparkline / JSON -->
+                    <div class="flex items-center bg-[#030712] p-0.5 rounded-lg border border-[#1e293b] text-[9px] font-mono">
+                      <button onclick="setMobileViewMode('chart')" id="phone-btn-chart" class="px-2 py-0.5 rounded font-bold bg-[#1f75a8] text-white">Chart</button>
+                      <button onclick="setMobileViewMode('sparkline')" id="phone-btn-sparkline" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">Text</button>
+                      <button onclick="setMobileViewMode('json')" id="phone-btn-json" class="px-2 py-0.5 rounded text-slate-400 hover:text-white">JSON</button>
+                    </div>
                   </div>
-                  <div class="p-2.5 rounded-xl bg-[#030712] border border-[#1e293b] font-mono text-xs text-[#38bdf8] font-bold leading-relaxed whitespace-pre-wrap break-words" id="phone-sparkline-box">
-                    [8.5 -> 8.4 -> 8.1 -> 7.6 kg | 📉 Falling (-0.9 kg)]
+
+                  <!-- Dynamic Visual Render Container -->
+                  <div id="phone-visual-render-box" class="overflow-hidden rounded-xl border border-[#1e293b] bg-[#080e18]">
+                    <!-- Injected by renderPhoneMockup: SVG Chart, Sparkline box, or JSON -->
+                  </div>
+
+                  <!-- Quick Metric Footer -->
+                  <div class="flex items-center justify-between text-[10px] pt-1 border-t border-[#1e293b]/60 font-mono">
+                    <span class="text-slate-400" id="phone-metric-delta">Net: -0.9 kg</span>
+                    <span class="text-[#38bdf8] font-bold" id="phone-metric-dir">📉 Falling</span>
                   </div>
                 </div>
 
@@ -2069,7 +2088,9 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
     let pollInterval = null;
     let trendCases = [];
     let selectedTrendIndex = 0;
-    let activeTrendSubTab = 'tokempic';
+    let activeTrendSubTab = 'visual';
+    let mobileViewMode = 'chart';
+    let specSubTab = 'json';
 
     async function init() {
       await loadCases();
@@ -2747,7 +2768,7 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
 
     function setTrendSubTab(subTab) {
       activeTrendSubTab = subTab;
-      ['tokempic', 'fhir', 'scoring', 'guideline'].forEach(t => {
+      ['visual', 'tokempic', 'fhir', 'scoring', 'guideline'].forEach(t => {
         const btn = document.getElementById(`subtab-btn-${t}`);
         if (!btn) return;
         if (t === subTab) {
@@ -2761,11 +2782,341 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       }
     }
 
+    function renderTrendSvgChart(spec, width, height, isMobile) {
+      if (!spec || !spec.series || !spec.series.length) {
+        return `<div class="p-6 text-center text-xs text-slate-400 font-mono">No visual chart spec available</div>`;
+      }
+
+      const pLeft = isMobile ? 38 : 55;
+      const pRight = spec.secondary_y_axis ? (isMobile ? 38 : 55) : (isMobile ? 18 : 25);
+      const pTop = isMobile ? 18 : 28;
+      const pBottom = isMobile ? 28 : 36;
+
+      const plotW = width - pLeft - pRight;
+      const plotH = height - pTop - pBottom;
+
+      const yMin = spec.y_axis?.min ?? 0;
+      const yMax = spec.y_axis?.max ?? 10;
+      const yRange = (yMax - yMin) || 1;
+
+      const secYMin = spec.secondary_y_axis ? spec.secondary_y_axis.min : 0;
+      const secYMax = spec.secondary_y_axis ? spec.secondary_y_axis.max : 100;
+      const secYRange = (secYMax - secYMin) || 1;
+
+      const numTicks = (spec.x_axis?.ticks || []).length || 2;
+
+      function getX(i) {
+        if (numTicks <= 1) return pLeft + plotW / 2;
+        return pLeft + (plotW / (numTicks - 1)) * i;
+      }
+
+      function getY(val, isSec) {
+        if (isSec) {
+          const clamped = Math.max(secYMin, Math.min(secYMax, val));
+          return pTop + plotH - ((clamped - secYMin) / secYRange) * plotH;
+        }
+        const clamped = Math.max(yMin, Math.min(yMax, val));
+        return pTop + plotH - ((clamped - yMin) / yRange) * plotH;
+      }
+
+      let svg = `<svg viewBox="0 0 ${width} ${height}" class="w-full h-auto select-none font-sans" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<defs>`;
+      svg += `<linearGradient id="chart_grad_${spec.chart_id || 'main'}" x1="0%" y1="0%" x2="0%" y2="100%">`;
+      svg += `<stop offset="0%" stop-color="${spec.series[0]?.color || '#38bdf8'}" stop-opacity="0.32"/>`;
+      svg += `<stop offset="100%" stop-color="${spec.series[0]?.color || '#38bdf8'}" stop-opacity="0.0"/>`;
+      svg += `</linearGradient>`;
+      svg += `</defs>`;
+
+      // Background
+      svg += `<rect width="${width}" height="${height}" fill="#080e18" rx="${isMobile ? 12 : 16}"/>`;
+
+      // Draw Clinical Reference Bands
+      (spec.clinical_bands || []).forEach(b => {
+        const topY = getY(Math.min(yMax, b.max), false);
+        const botY = getY(Math.max(yMin, b.min), false);
+        const bandH = Math.max(0, botY - topY);
+        svg += `<rect x="${pLeft}" y="${topY}" width="${plotW}" height="${bandH}" fill="${b.color}" opacity="0.9"/>`;
+        svg += `<line x1="${pLeft}" y1="${topY}" x2="${pLeft + plotW}" y2="${topY}" stroke="${b.border}" stroke-dasharray="3,3" stroke-width="0.8" stroke-opacity="0.5"/>`;
+        if (!isMobile && b.name) {
+          svg += `<text x="${pLeft + 6}" y="${topY + 12}" fill="${b.border}" font-size="9" font-weight="bold" opacity="0.85">${escapeHtml(b.name)}</text>`;
+        }
+      });
+
+      // Horizontal Grid Lines & Primary Y-Ticks
+      const step = spec.y_axis?.step || ((yMax - yMin) / 4);
+      for (let val = yMin; val <= yMax + 0.0001; val += step) {
+        const yPos = getY(val, false);
+        svg += `<line x1="${pLeft}" y1="${yPos}" x2="${pLeft + plotW}" y2="${yPos}" stroke="#1e293b" stroke-width="0.75" stroke-dasharray="2,2"/>`;
+        const labelVal = Number.isInteger(val) ? val : val.toFixed(1);
+        svg += `<text x="${pLeft - 6}" y="${yPos + 3.5}" text-anchor="end" fill="#64748b" font-size="${isMobile ? 8 : 9}" font-family="monospace">${labelVal}</text>`;
+      }
+
+      // Secondary Y-Ticks if present
+      if (spec.secondary_y_axis) {
+        const sStep = spec.secondary_y_axis.step || ((secYMax - secYMin) / 4);
+        for (let sVal = secYMin; sVal <= secYMax + 0.0001; sVal += sStep) {
+          const yPos = getY(sVal, true);
+          const labelVal = Number.isInteger(sVal) ? sVal : sVal.toFixed(0);
+          svg += `<text x="${pLeft + plotW + 6}" y="${yPos + 3.5}" text-anchor="start" fill="#f43f5e" font-size="${isMobile ? 8 : 9}" font-family="monospace">${labelVal}</text>`;
+        }
+      }
+
+      // Draw Series
+      (spec.series || []).forEach((s, sIdx) => {
+        const isSec = !!s.secondary_axis;
+        const pts = s.points || [];
+        if (!pts.length) return;
+
+        let pathD = '';
+        let areaD = `M ${getX(0)} ${pTop + plotH} `;
+
+        pts.forEach((pt, i) => {
+          const px = getX(i);
+          const py = getY(pt.y, isSec);
+          if (i === 0) {
+            pathD += `M ${px} ${py} `;
+            areaD += `L ${px} ${py} `;
+          } else {
+            pathD += `L ${px} ${py} `;
+            areaD += `L ${px} ${py} `;
+          }
+        });
+
+        areaD += `L ${getX(pts.length - 1)} ${pTop + plotH} Z`;
+
+        // Draw gradient fill for first series
+        if (sIdx === 0 && !s.stroke_dash) {
+          svg += `<path d="${areaD}" fill="url(#chart_grad_${spec.chart_id || 'main'})"/>`;
+        }
+
+        // Draw line path
+        svg += `<path d="${pathD}" fill="none" stroke="${s.color}" stroke-width="${s.stroke_width || 3}" stroke-dasharray="${s.stroke_dash || 'none'}" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+        // Draw points & annotations
+        pts.forEach((pt, i) => {
+          const px = getX(i);
+          const py = getY(pt.y, isSec);
+          const isAlert = !!pt.alert;
+
+          if (isAlert) {
+            svg += `<circle cx="${px}" cy="${py}" r="${isMobile ? 7 : 9}" fill="none" stroke="${pt.alert_color || s.color}" stroke-width="1.5" stroke-opacity="0.8"/>`;
+          }
+
+          svg += `<circle cx="${px}" cy="${py}" r="${isAlert ? (isMobile ? 4.5 : 5.5) : (isMobile ? 3 : 4)}" fill="${isAlert ? '#ef4444' : s.color}" stroke="#080e18" stroke-width="2"/>`;
+
+          // Value label above point
+          const yOffset = isAlert ? (isMobile ? 8 : 10) : (isMobile ? 6 : 8);
+          svg += `<text x="${px}" y="${py - yOffset}" text-anchor="middle" fill="${isAlert ? '#f87171' : (s.color || '#e2e8f0')}" font-size="${isMobile ? 8 : 10}" font-weight="bold" font-family="monospace">${pt.y}</text>`;
+        });
+      });
+
+      // X-Axis tick labels
+      (spec.x_axis?.ticks || []).forEach((t, i) => {
+        const px = getX(i);
+        svg += `<line x1="${px}" y1="${pTop + plotH}" x2="${px}" y2="${pTop + plotH + 4}" stroke="#475569" stroke-width="1"/>`;
+        svg += `<text x="${px}" y="${height - (isMobile ? 6 : 10)}" text-anchor="middle" fill="#94a3b8" font-size="${isMobile ? 8 : 10}" font-family="monospace">${escapeHtml(t)}</text>`;
+      });
+
+      svg += `</svg>`;
+      return svg;
+    }
+
+    function setMobileViewMode(mode) {
+      mobileViewMode = mode;
+      if (trendCases[selectedTrendIndex]) {
+        renderPhoneMockup(trendCases[selectedTrendIndex]);
+      }
+    }
+
+    function setSpecSubTab(tab) {
+      specSubTab = tab;
+      if (trendCases[selectedTrendIndex]) {
+        renderTrendSubTabContent(trendCases[selectedTrendIndex]);
+      }
+    }
+
     function renderTrendSubTabContent(c) {
       const container = document.getElementById('trend-subtab-container');
       if (!container || !c) return;
 
-      if (activeTrendSubTab === 'tokempic') {
+      if (activeTrendSubTab === 'visual') {
+        const spec = c.trend_visual_spec || {};
+        const isJson = specSubTab === 'json';
+        const isKotlin = specSubTab === 'kotlin';
+        const isWeb = specSubTab === 'web';
+
+        const jsonCode = JSON.stringify(spec, null, 2);
+        const kotlinCode = `// Android Jetpack Compose Native Canvas Renderer
+// Zero webview overhead, runs offline on budget Android devices
+@Composable
+fun ClinicalTrendChart(
+    spec: TrendVisualSpec,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF080E18)),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(text = spec.title, style = MaterialTheme.typography.titleMedium, color = Color.White, fontWeight = FontWeight.Bold)
+            Text(text = spec.subtitle, style = MaterialTheme.typography.bodySmall, color = Color(0xFF94A3B8))
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Canvas(modifier = Modifier.fillMaxWidth().height(180.dp)) {
+                val pLeft = 40f
+                val pBottom = 30f
+                val plotW = size.width - pLeft - 20f
+                val plotH = size.height - pBottom - 10f
+
+                // 1. Shaded clinical bands (WHO, HTN staging, glycemic bounds)
+                spec.clinicalBands.forEach { b ->
+                    val topY = 10f + plotH * (1f - (b.max - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                    val botY = 10f + plotH * (1f - (b.min - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                    drawRect(color = Color(android.graphics.Color.parseColor(b.color)), topLeft = Offset(pLeft, topY), size = Size(plotW, (botY - topY).coerceAtLeast(0f)))
+                }
+
+                // 2. Hardware-accelerated multi-series curves & markers
+                spec.series.forEach { s ->
+                    val path = Path()
+                    s.points.forEachIndexed { i, pt ->
+                        val px = pLeft + (plotW / (spec.xAxis.ticks.size - 1)) * i
+                        val py = 10f + plotH * (1f - (pt.y - spec.yAxis.min) / (spec.yAxis.max - spec.yAxis.min))
+                        if (i == 0) path.moveTo(px, py) else path.lineTo(px, py)
+                        drawCircle(color = if (pt.alert) Color(0xFFEF4444) else Color(android.graphics.Color.parseColor(s.color)), radius = if (pt.alert) 8f else 5f, center = Offset(px, py))
+                    }
+                    drawPath(path = path, color = Color(android.graphics.Color.parseColor(s.color)), style = Stroke(width = 4f, cap = StrokeCap.Round))
+                }
+            }
+        }
+    }
+}`;
+        const webCode = `<!-- Web / HTML5 Inline Vector SVG Component -->
+<!-- Rendered directly from TrendVisualSpec JSON (Zero external charting library) -->
+<div class="ohs-trend-card bg-[#080e18] rounded-2xl p-4 border border-[#1e293b]">
+  <h4 class="text-xs font-bold text-white">${escapeHtml(spec.title || '')}</h4>
+  <p class="text-[11px] text-slate-400 mb-2">${escapeHtml(spec.subtitle || '')}</p>
+  <div class="trend-chart-wrapper">
+    <!-- Inline SVG rendered by renderTrendSvgChart(spec, width, height) -->
+  </div>
+</div>`;
+
+        container.innerHTML = `
+          <div class="space-y-4">
+            <!-- Chart Card -->
+            <div class="p-4 rounded-2xl bg-[#030712] border border-[#1e293b] space-y-3 shadow-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-[#1e293b] gap-2">
+                <div>
+                  <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#1f75a8]/20 text-[#38bdf8] border border-[#1f75a8]/30 font-mono">
+                      ${escapeHtml(spec.schema || 'ohs.trend.chart.v1')}
+                    </span>
+                    <h3 class="text-xs font-bold text-white">${escapeHtml(spec.title || 'Clinical Trajectory')}</h3>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${escapeHtml(spec.subtitle || '')}</p>
+                </div>
+                <div class="flex items-center space-x-1.5 shrink-0">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#1e293b] text-[#cbd5e1] border border-[#334155] flex items-center gap-1">
+                    <i class="fa-solid fa-layer-group text-[9px] text-[#38bdf8]"></i>
+                    <span>${escapeHtml(spec.chart_type || 'time_series')}</span>
+                  </span>
+                </div>
+              </div>
+
+              <!-- High-Resolution SVG Canvas -->
+              <div class="rounded-xl overflow-hidden border border-[#1e293b]/80 bg-[#080e18]">
+                ${renderTrendSvgChart(spec, 680, 260, false)}
+              </div>
+
+              <!-- Clinical Legend & Zone Guide -->
+              <div class="flex flex-wrap items-center justify-between pt-1 gap-2 text-[10px]">
+                <div class="flex flex-wrap items-center gap-2.5">
+                  ${(spec.series || []).map(s => `
+                    <span class="flex items-center space-x-1.5 font-medium text-slate-300">
+                      <span class="w-3 h-1.5 rounded-full" style="background-color: ${s.color};"></span>
+                      <span>${escapeHtml(s.name)}</span>
+                    </span>
+                  `).join('')}
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                  ${(spec.clinical_bands || []).map(b => `
+                    <span class="px-2 py-0.5 rounded text-[9px] font-medium" style="background-color: ${b.color}; color: ${b.border}; border: 1px solid ${b.border}40;">
+                      ${escapeHtml(b.name)}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Clinical Metric Highlights Strip -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[#1e293b]">
+                <div class="p-2.5 rounded-xl bg-[#0b1320] border border-[#1e293b]">
+                  <span class="text-[9px] font-bold uppercase text-slate-400">Parameter</span>
+                  <div class="text-xs font-bold text-white mt-0.5">${escapeHtml(spec.parameter || 'Metric')}</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#0b1320] border border-[#1e293b]">
+                  <span class="text-[9px] font-bold uppercase text-slate-400">Trajectory</span>
+                  <div class="text-xs font-bold text-[#38bdf8] mt-0.5">${escapeHtml(spec.summary?.direction_label || 'Observed')}</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#0b1320] border border-[#1e293b]">
+                  <span class="text-[9px] font-bold uppercase text-slate-400">Net Delta</span>
+                  <div class="text-xs font-bold text-[#f59e0b] mt-0.5">${escapeHtml(spec.summary?.net_change || '--')}</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-[#0b1320] border border-[#1e293b]">
+                  <span class="text-[9px] font-bold uppercase text-slate-400">Clinical Urgency</span>
+                  <div class="text-xs font-bold text-[#ef4444] mt-0.5">${escapeHtml(spec.summary?.urgency || 'MONITOR')}</div>
+                </div>
+              </div>
+
+              <!-- Secondary Findings / Observations Table -->
+              ${(spec.secondary_vitals && spec.secondary_vitals.length) ? `
+                <div class="p-2.5 rounded-xl bg-[#0b1320] border border-[#1e293b] space-y-1.5">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-[#94a3b8] flex items-center space-x-1.5">
+                    <i class="fa-solid fa-stethoscope text-[#38bdf8]"></i>
+                    <span>Corroborating Clinical Observations &amp; Danger Signs</span>
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                    ${spec.secondary_vitals.map(v => `
+                      <div class="flex items-center justify-between p-1.5 rounded-lg bg-[#080e18] border border-[#1e293b]">
+                        <span class="text-slate-300 font-medium">${escapeHtml(v.parameter)}: <b class="text-white">${escapeHtml(v.value)}</b></span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${v.alert ? 'bg-[#ef4444]/20 text-[#f87171] border border-[#ef4444]/40' : 'bg-[#22c55e]/20 text-[#4ade80]'}">${escapeHtml(v.status)}</span>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Underlying Cross-Platform Spec & Implementation Viewer -->
+            <div class="p-4 rounded-2xl bg-white border border-[#e1e8eb] space-y-3">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-[#e1e8eb] gap-2">
+                <div>
+                  <h4 class="text-xs font-bold text-[#1c2830] flex items-center space-x-1.5">
+                    <i class="fa-solid fa-code text-[#7a4db8]"></i>
+                    <span>Underlying Cross-Platform Specification Structure</span>
+                  </h4>
+                  <p class="text-[11px] text-[#4e5f6a]">Universal declarative schema rendered natively on Android (Jetpack Compose Canvas) and Web (SVG Canvas) with zero heavy charting libraries.</p>
+                </div>
+                <div class="flex items-center space-x-1 bg-[#f8faf9] p-1 rounded-lg border border-[#cbd7dc] text-xs">
+                  <button onclick="setSpecSubTab('json')" class="px-2.5 py-1 rounded font-bold transition ${isJson ? 'bg-[#7a4db8] text-white shadow-xs' : 'text-[#4e5f6a] hover:text-[#1c2830]'}">JSON Spec</button>
+                  <button onclick="setSpecSubTab('kotlin')" class="px-2.5 py-1 rounded font-bold transition ${isKotlin ? 'bg-[#7a4db8] text-white shadow-xs' : 'text-[#4e5f6a] hover:text-[#1c2830]'}">Android (Kotlin)</button>
+                  <button onclick="setSpecSubTab('web')" class="px-2.5 py-1 rounded font-bold transition ${isWeb ? 'bg-[#7a4db8] text-white shadow-xs' : 'text-[#4e5f6a] hover:text-[#1c2830]'}">Web (SVG)</button>
+                </div>
+              </div>
+
+              <div class="relative">
+                <div class="flex items-center justify-between pb-1.5 text-xs text-[#778893]">
+                  <span class="font-mono text-[11px]">${isJson ? 'ohs.trend.chart.v1 (JSON Schema)' : (isKotlin ? 'ClinicalTrendChart.kt (Jetpack Compose)' : 'ClinicalTrendSvg.html (Web)')}</span>
+                  <button onclick="navigator.clipboard.writeText(${isJson ? 'JSON.stringify(trendCases[selectedTrendIndex].trend_visual_spec, null, 2)' : (isKotlin ? '`' + kotlinCode + '`' : '`' + webCode + '`')})" class="text-[#7a4db8] hover:underline font-semibold flex items-center gap-1">
+                    <i class="fa-regular fa-copy"></i> Copy Code
+                  </button>
+                </div>
+                <pre class="bg-[#111820] text-[#38bdf8] border border-[#23313d] p-3.5 rounded-xl text-xs font-mono whitespace-pre max-h-[360px] overflow-auto custom-scroll leading-relaxed">${escapeHtml(isJson ? jsonCode : (isKotlin ? kotlinCode : webCode))}</pre>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (activeTrendSubTab === 'tokempic') {
         container.innerHTML = `
           <div class="space-y-4">
             <div class="p-3.5 rounded-xl bg-[#edf5fb] border border-[#1f75a8]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
@@ -3011,11 +3362,34 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       }
 
       const sections = parseTrendSections(c.output_text || '');
+      const spec = c.trend_visual_spec || {};
 
-      const sparklineEl = document.getElementById('phone-sparkline-box');
-      if (sparklineEl) {
-        sparklineEl.innerText = sections.trajectory || '[No sparkline output]';
+      ['chart', 'sparkline', 'json'].forEach(m => {
+        const btn = document.getElementById(`phone-btn-${m}`);
+        if (!btn) return;
+        if (m === mobileViewMode) {
+          btn.className = 'px-2 py-0.5 rounded font-bold bg-[#1f75a8] text-white';
+        } else {
+          btn.className = 'px-2 py-0.5 rounded text-slate-400 hover:text-white';
+        }
+      });
+
+      const phoneRenderBox = document.getElementById('phone-visual-render-box');
+      if (phoneRenderBox) {
+        if (mobileViewMode === 'chart') {
+          phoneRenderBox.innerHTML = renderTrendSvgChart(spec, 280, 155, true);
+        } else if (mobileViewMode === 'sparkline') {
+          phoneRenderBox.innerHTML = `<div class="p-2.5 font-mono text-[11px] text-[#38bdf8] font-bold leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(sections.trajectory || c.output_text || '')}</div>`;
+        } else if (mobileViewMode === 'json') {
+          phoneRenderBox.innerHTML = `<pre class="p-2.5 font-mono text-[9px] text-[#86efac] max-h-36 overflow-auto custom-scroll leading-tight">${escapeHtml(JSON.stringify(spec.series || {}, null, 2))}</pre>`;
+        }
       }
+
+      const deltaEl = document.getElementById('phone-metric-delta');
+      if (deltaEl) deltaEl.innerText = spec.summary?.net_change || 'Serial delta active';
+
+      const dirEl = document.getElementById('phone-metric-dir');
+      if (dirEl) dirEl.innerText = spec.summary?.direction_label || 'Observed';
 
       const interpEl = document.getElementById('phone-interp-box');
       if (interpEl) {
