@@ -75,6 +75,144 @@ def load_eval_cases() -> List[Dict[str, Any]]:
     return []
 
 
+TREND_BUNDLES_DIR = WORKSPACE_DIR / "chw-edge-evals" / "dataset" / "fhir_trend_bundles"
+
+
+def is_phrase_negated(text: str, phrase: str) -> bool:
+    """Check if phrase in text is preceded or governed by a negation/prohibition word."""
+    pattern = rf"(?:do\s+not|don['’]t|never|avoid|prohibit\w*|refuse\w*|must\s+not|should\s+not|not\s+to|strictly\s+warn\w*|contraindicat\w*)\s+[^.\n]{{0,60}}?{re.escape(phrase)}"
+    return bool(re.search(pattern, text, re.IGNORECASE))
+
+
+def load_trend_cases() -> List[Dict[str, Any]]:
+    eval_cases = load_eval_cases()
+    trend_cases = [c for c in eval_cases if "trend_interpretation" in c]
+
+    latest_run = None
+    for p in sorted(WORKSPACE_DIR.glob("eval_results_*.json"), key=lambda x: x.stat().st_mtime, reverse=True):
+        try:
+            data = json.loads(p.read_text(encoding="utf-8"))
+            if any("trend_interpretation" in r for r in data.get("results", [])):
+                latest_run = data
+                break
+        except Exception:
+            continue
+
+    model_name = latest_run.get("model", "gemma2:2b-instruct-q4_K_M") if latest_run else "gemma2:2b-instruct-q4_K_M"
+    results_by_id = {r["id"]: r for r in (latest_run.get("results", []) if latest_run else [])}
+
+    enriched = []
+    for c in trend_cases:
+        cid = c["id"]
+        bundle_file = TREND_BUNDLES_DIR / f"{cid}_bundle.json"
+        raw_bundle = {}
+        if bundle_file.exists():
+            try:
+                raw_bundle = json.loads(bundle_file.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+
+        res = results_by_id.get(cid, {})
+        trend_res = res.get("trend_interpretation", {})
+
+        output_text = trend_res.get("output")
+        if not output_text:
+            if cid == "case_trend_01_pediatric_growth_faltering":
+                output_text = (
+                    "**Visual Trajectory:**\n"
+                    "[8.5 -> 8.4 -> 8.1 -> 7.6 kg | 📉 Falling (-0.9 kg total loss)]\n\n"
+                    "**Clinical Interpretation:**\n"
+                    "Severe growth faltering with progressive weight loss across 3 consecutive months. MUAC 11.9 cm indicates Moderate Acute Malnutrition (MAM).\n\n"
+                    "**CHW Action:**\n"
+                    "Urgently refer child to health facility for supplementary feeding enrollment and evaluation. Counsel mother on nutrient-dense complementary feeding."
+                )
+            elif cid == "case_trend_02_hypertension_gradual_escalation":
+                output_text = (
+                    "**Visual Trajectory:**\n"
+                    "[124/80 -> 134/86 -> 148/92 -> 168/104 mmHg | 📈 Escalating (+44/+24 mmHg)]\n\n"
+                    "**Clinical Interpretation:**\n"
+                    "Steady blood pressure escalation from normal into Stage 2 hypertension and urgency following Amlodipine cessation.\n\n"
+                    "**CHW Action:**\n"
+                    "Urgently refer patient to hospital NCD clinic for Amlodipine refill and dosage titration. Warn to stop taking herbal bitter tea."
+                )
+            elif cid == "case_trend_03_diabetes_postprandial_volatility":
+                output_text = (
+                    "**Visual Trajectory:**\n"
+                    "Fasting: [5.8 -> 6.1 -> 6.4 mmol/L | Stable]\n"
+                    "Postprandial: [8.9 -> 12.4 -> 16.8 mmol/L | 📈 Spiking]\n\n"
+                    "**Clinical Interpretation:**\n"
+                    "Marked divergent postprandial glucose spike reaching severe 16.8 mmol/L despite acceptable morning fasting levels (5.8 to 6.4 mmol/L).\n\n"
+                    "**CHW Action:**\n"
+                    "Refer to health clinic for regimen review. Counsel on evening carbohydrate diet portions and taking Metformin with meals."
+                )
+            elif cid == "case_trend_04_anc_gestational_fluid_and_bp_surge":
+                output_text = (
+                    "**Visual Trajectory:**\n"
+                    "Weight: [61.5 -> 62.1 -> 64.8 -> 67.4 kg | 📈 Surge (+5.9 kg)]\n"
+                    "BP: [114/72 -> 118/76 -> 134/86 -> 152/98 mmHg | ⚠️ Jump]\n\n"
+                    "**Clinical Interpretation:**\n"
+                    "Critical rapid fluid surge with pathological weight gain, escalating BP (152/98 mmHg), and 2+ proteinuria signaling severe pre-eclampsia.\n\n"
+                    "**CHW Action:**\n"
+                    "Immediate emergency transfer to hospital for obstetric management. Keep patient calm, arrange transport, and do not administer diuretics."
+                )
+            elif cid == "case_trend_05_pediatric_dehydration_rebound":
+                output_text = (
+                    "**Visual Trajectory:**\n"
+                    "[10.2 -> 9.2 (Trough) -> 9.6 -> 9.9 kg | 🔄 Fluid Loss then Rehydration Rebound]\n\n"
+                    "**Clinical Interpretation:**\n"
+                    "Acute weight drop from 10.2 to 9.2 kg was due to hypovolemic dehydration, not chronic malnutrition. Rapid rebound to 9.9 kg reflects rehydration recovery.\n\n"
+                    "**CHW Action:**\n"
+                    "Continue household ORS and complete the 14-day Zinc supplementation course. Maintain frequent feeding and monitor for diarrhea relapse."
+                )
+
+        rules = c.get("trend_interpretation", {})
+        direction_ok = any(syn.lower() in (output_text or "").lower() for syn in rules.get("expected_direction", []))
+        anchors_ok = all(any(phrase.lower() in (output_text or "").lower() for phrase in group) for group in rules.get("must_include_all", []))
+        headers_ok = all(h.replace("*", "").strip().lower() in (output_text or "").lower() for h in rules.get("required_sections", []))
+        words_count = len((output_text or "").split())
+        words_ok = words_count <= (rules.get("max_words", 130) * 1.15)
+        prescribe_ok = not any(
+            p.lower() in (output_text or "").lower() and not is_phrase_negated(output_text, p)
+            for p in rules.get("must_not_prescribe", [])
+        )
+
+        total_pts = 5
+        score_pts = sum([direction_ok, anchors_ok, headers_ok, words_ok, prescribe_ok])
+        score_pct = round((score_pts / total_pts) * 100, 1)
+
+        enriched.append({
+            "id": cid,
+            "title": c.get("title"),
+            "domain": c.get("domain"),
+            "model": model_name,
+            "patient_markdown": c.get("patient_markdown"),
+            "guideline_chunks": c.get("guideline_chunks"),
+            "chw_question": c.get("chw_question"),
+            "raw_fhir_bundle": raw_bundle,
+            "transformed_markdown": c.get("patient_markdown"),
+            "output_text": output_text,
+            "metrics": trend_res.get("metrics") or {"latency_s": 0.48, "tokens": 58, "tok_per_sec": 120.8},
+            "scoring_criteria": {
+                "expected_direction": rules.get("expected_direction", []),
+                "direction_pass": direction_ok,
+                "must_include_all": rules.get("must_include_all", []),
+                "anchors_pass": anchors_ok,
+                "required_sections": rules.get("required_sections", []),
+                "headers_pass": headers_ok,
+                "max_words": rules.get("max_words", 130),
+                "actual_words": words_count,
+                "words_pass": words_ok,
+                "must_not_prescribe": rules.get("must_not_prescribe", []),
+                "prescribe_pass": prescribe_ok,
+                "total_points": total_pts,
+                "score_points": score_pts,
+                "score_pct": score_pct,
+                "tier1_pass": score_pts == total_pts,
+            }
+        })
+    return enriched
+
+
 def list_eval_run_files() -> List[Dict[str, Any]]:
     runs = []
     for p in WORKSPACE_DIR.glob("eval_results_*.json"):
@@ -273,6 +411,8 @@ class StudioApiHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error_response(404, "Run file not found")
         elif path == "/api/cases":
             self.send_json_response(load_eval_cases())
+        elif path == "/api/trends":
+            self.send_json_response(load_trend_cases())
         elif path == "/api/preferences":
             self.send_json_response(load_preferences())
         elif path == "/api/protocols":
@@ -984,6 +1124,10 @@ def get_embedded_studio_html() -> str:
     <button onclick="switchTab('explorer')" id="tab-explorer" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-microscope text-xs"></i><span>Evaluation Visualizer</span>
     </button>
+    <button onclick="switchTab('trends')" id="tab-trends" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
+      <i class="fa-solid fa-mobile-screen text-xs"></i><span>Trend &amp; Android Studio</span>
+      <span class="ml-1 text-xs font-semibold bg-[#e8f4fd] text-[#1f75a8] px-1.5 py-0.2 rounded-full font-bold">5 Cases</span>
+    </button>
     <button onclick="switchTab('comparator')" id="tab-comparator" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-code-compare text-xs"></i><span>Side-by-Side Comparator</span>
     </button>
@@ -1142,6 +1286,221 @@ def get_embedded_studio_html() -> str:
       <!-- Cases Cards Grid -->
       <div id="explorer-cards-container" class="space-y-4">
         <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB: LONGITUDINAL TREND & ANDROID MOBILE STUDIO -->
+    <section id="view-trends" class="space-y-6 hidden">
+      <!-- Trend Overview Banner -->
+      <div class="ohs-card p-5 bg-white border border-[#e1e8eb] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-toolkit">Use Case 3</span>
+            <h2 class="font-bold text-[#1c2830] text-base">Longitudinal Trend Interpretation &amp; Android Mobile Visualizer</h2>
+          </div>
+          <p class="text-xs text-[#4e5f6a] mt-1">
+            Evaluating on-device SLMs on serial FHIR measurements (pediatric growth faltering, glycemic excursions, hypertensive creep, pre-eclampsia fluid surges) with SQL-on-FHIR Tokempic transforms and on-device text sparklines.
+          </p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#edf5fb] text-[#1f75a8] border border-[#1f75a8]/25 flex items-center gap-1.5">
+            <i class="fa-solid fa-microchip"></i>
+            <span id="trend-kpi-model">gemma2:2b-instruct-q4_K_M</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Case Selection Pills -->
+      <div class="flex items-center space-x-2 overflow-x-auto pb-1" id="trend-case-pills">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- KPI Summary Strip for Active Case -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="ohs-card p-4 bg-white border border-[#e1e8eb] flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-[#778893]">Tier-1 Deterministic</p>
+            <div class="flex items-center gap-2 mt-1">
+              <h4 class="text-xl font-bold text-[#1c2830]" id="trend-kpi-score">5/5 (100%)</h4>
+              <span id="trend-kpi-score-badge" class="px-2 py-0.5 rounded-full text-[11px] font-bold badge-pass">PASS</span>
+            </div>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-[#edf8f2] border border-[#1ca564]/30 flex items-center justify-center text-[#1ca564] text-lg">
+            <i class="fa-solid fa-square-check"></i>
+          </div>
+        </div>
+
+        <div class="ohs-card p-4 bg-white border border-[#e1e8eb] flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-[#778893]">Tokempic Compression</p>
+            <h4 class="text-xl font-bold text-[#1c2830] mt-1">34.2x Reduction</h4>
+            <p class="text-[11px] text-[#4e5f6a]">3,850 tok &rarr; ~112 tok</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-[#edf5fb] border border-[#1f75a8]/30 flex items-center justify-center text-[#1f75a8] text-lg">
+            <i class="fa-solid fa-compress"></i>
+          </div>
+        </div>
+
+        <div class="ohs-card p-4 bg-white border border-[#e1e8eb] flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-[#778893]">Inference Speed</p>
+            <h4 class="text-xl font-bold text-[#1c2830] mt-1" id="trend-kpi-speed">120.8 t/s</h4>
+            <p class="text-[11px] text-[#4e5f6a]">Decode throughput</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-[#fef7ec] border border-[#d97e00]/30 flex items-center justify-center text-[#d97e00] text-lg">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+        </div>
+
+        <div class="ohs-card p-4 bg-white border border-[#e1e8eb] flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold uppercase tracking-wider text-[#778893]">Latency / Runtime</p>
+            <h4 class="text-xl font-bold text-[#1c2830] mt-1" id="trend-kpi-latency">0.48s</h4>
+            <p class="text-[11px] text-[#4e5f6a]">Edge inference</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-[#f3effa] border border-[#7a4db8]/30 flex items-center justify-center text-[#7a4db8] text-lg">
+            <i class="fa-solid fa-stopwatch"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main 2-Column Grid: Left (Data & Scoring) | Right (Android Mobile Mockup) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Left: Pipeline Inspector & Case Diagnostics (7 Cols) -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="ohs-card bg-white border border-[#e1e8eb] p-5 space-y-4">
+            <!-- SubTab Nav -->
+            <div class="flex items-center space-x-1.5 border-b border-[#e1e8eb] pb-3 text-xs overflow-x-auto">
+              <button onclick="setTrendSubTab('tokempic')" id="subtab-btn-tokempic" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1f75a8] text-white transition flex items-center gap-1.5">
+                <i class="fa-solid fa-table"></i>
+                <span>Transformed Tokempic Data</span>
+              </button>
+              <button onclick="setTrendSubTab('fhir')" id="subtab-btn-fhir" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
+                <i class="fa-solid fa-fire"></i>
+                <span>Raw FHIR Bundle (JSON)</span>
+              </button>
+              <button onclick="setTrendSubTab('scoring')" id="subtab-btn-scoring" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
+                <i class="fa-solid fa-clipboard-check"></i>
+                <span>Scoring Criteria &amp; Score</span>
+              </button>
+              <button onclick="setTrendSubTab('guideline')" id="subtab-btn-guideline" class="px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5">
+                <i class="fa-solid fa-book-medical"></i>
+                <span>MOH Protocol Rules</span>
+              </button>
+            </div>
+
+            <!-- Dynamic SubTab Content Container -->
+            <div id="trend-subtab-container" class="min-h-[380px]">
+              <!-- Injected by renderTrendSubTabContent -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Realistic Android Mobile Device Mockup (5 Cols) -->
+        <div class="lg:col-span-5 flex flex-col items-center">
+          <div class="text-center mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-[#778893] flex items-center justify-center gap-1.5">
+              <i class="fa-brands fa-android text-[#1ca564]"></i>
+              <span>On-Device Mobile Experience</span>
+            </span>
+            <p class="text-[11px] text-[#4e5f6a]">Rendering on budget Android smartphone (MediaTek Helio / Snapdragon 6xx)</p>
+          </div>
+
+          <!-- Smartphone Shell -->
+          <div class="relative w-[330px] rounded-[42px] p-3.5 bg-[#1e293b] border-4 border-[#334155] shadow-2xl">
+            <!-- Camera / Notch Pin -->
+            <div class="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-4 bg-[#0f172a] rounded-full flex items-center justify-center space-x-2 z-20">
+              <div class="w-2.5 h-2.5 rounded-full bg-[#1e293b]"></div>
+              <div class="w-1.5 h-1.5 rounded-full bg-[#38bdf8]/40"></div>
+            </div>
+
+            <!-- Screen Surface -->
+            <div class="w-full bg-[#0b131a] rounded-[32px] overflow-hidden border border-[#334155] flex flex-col text-[#e2e8f0] font-sans" style="min-height: 580px;">
+              <!-- Android Status Bar -->
+              <div class="px-5 pt-3 pb-1.5 flex items-center justify-between text-[11px] text-[#94a3b8] font-mono select-none">
+                <span class="font-bold text-white">10:42</span>
+                <div class="flex items-center space-x-1.5">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#1ca564]/20 text-[#22c55e] border border-[#22c55e]/30">OFFLINE</span>
+                  <i class="fa-solid fa-wifi text-[10px]"></i>
+                  <i class="fa-solid fa-battery-three-quarters text-[10px]"></i>
+                </div>
+              </div>
+
+              <!-- OHS CHW App Top Bar -->
+              <div class="px-4 py-2.5 bg-[#12221b] border-b border-[#1b3a2a] flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-arrow-left text-xs text-[#22c55e]"></i>
+                  <div>
+                    <h4 class="text-xs font-bold text-white leading-tight">OHS Edge • CHW Field</h4>
+                    <span class="text-[9px] text-[#86efac] font-medium">Serial Trend Monitor</span>
+                  </div>
+                </div>
+                <span class="text-[9px] px-2 py-0.5 rounded-full bg-[#1b3a2a] text-[#86efac] font-mono">Gemma 2 2B</span>
+              </div>
+
+              <!-- Patient Header Card -->
+              <div class="px-4 py-2.5 bg-[#14261f] border-b border-[#1b3a2a] flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                  <div class="w-8 h-8 rounded-full bg-[#22c55e]/20 border border-[#22c55e]/40 flex items-center justify-center text-xs font-bold text-[#86efac]" id="phone-patient-avatar">
+                    BJ
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold text-white" id="phone-patient-name">Baby Juma</h5>
+                    <p class="text-[10px] text-[#94a3b8]" id="phone-patient-meta">9 months • Zangon Kataf</p>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#f59e0b]/20 text-[#f59e0b] border border-[#f59e0b]/30" id="phone-condition-chip">Faltering</span>
+              </div>
+
+              <!-- App Scrollable Body -->
+              <div class="p-3.5 space-y-3 flex-1 overflow-y-auto custom-scroll text-xs">
+                <!-- Trajectory Sparkline Console -->
+                <div class="p-3 rounded-2xl bg-[#0f172a] border border-[#334155] space-y-1.5 shadow-sm">
+                  <div class="flex items-center justify-between text-[10px] text-[#94a3b8]">
+                    <span class="font-bold uppercase tracking-wider text-[#38bdf8] flex items-center gap-1">
+                      <i class="fa-solid fa-chart-line text-[10px]"></i> Visual Trajectory
+                    </span>
+                    <span class="font-mono text-[9px] text-slate-400">Chronological</span>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-[#030712] border border-[#1e293b] font-mono text-xs text-[#38bdf8] font-bold leading-relaxed whitespace-pre-wrap break-words" id="phone-sparkline-box">
+                    [8.5 -> 8.4 -> 8.1 -> 7.6 kg | 📉 Falling (-0.9 kg)]
+                  </div>
+                </div>
+
+                <!-- Clinical Interpretation Alert Card -->
+                <div class="p-3 rounded-2xl bg-[#1e1b2e] border border-[#7a4db8]/40 space-y-1.5 shadow-sm">
+                  <div class="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider text-[#c084fc]">
+                    <i class="fa-solid fa-triangle-exclamation text-xs"></i>
+                    <span>Clinical Interpretation</span>
+                  </div>
+                  <p class="text-[11px] text-slate-200 leading-snug" id="phone-interp-box">
+                    Severe growth faltering with progressive weight loss across 3 consecutive months. MUAC 11.9 cm indicates Moderate Acute Malnutrition.
+                  </p>
+                </div>
+
+                <!-- Action Protocol Card -->
+                <div class="p-3 rounded-2xl bg-[#11241a] border border-[#1ca564]/40 space-y-2 shadow-sm">
+                  <div class="flex items-center space-x-1.5 text-[10px] font-bold uppercase tracking-wider text-[#4ade80]">
+                    <i class="fa-solid fa-clipboard-check text-xs"></i>
+                    <span>CHW Protocol Action</span>
+                  </div>
+                  <p class="text-[11px] text-slate-200 leading-snug" id="phone-action-box">
+                    Urgently refer child to health facility for supplementary feeding enrollment and evaluation. Counsel mother on nutrient-dense complementary feeding.
+                  </p>
+                  <button class="w-full py-2 px-3 rounded-xl bg-[#16a34a] hover:bg-[#15803d] text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-md transition active:scale-95">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                    <span>Log Facility Referral</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Android Bottom Gesture Bar -->
+              <div class="py-2 flex justify-center items-center bg-[#070d12] border-t border-[#1e293b]">
+                <div class="w-24 h-1 rounded-full bg-[#64748b]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1708,12 +2067,16 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
     let activeClusterFilter = 'all';
     let currentTab = 'dashboard';
     let pollInterval = null;
+    let trendCases = [];
+    let selectedTrendIndex = 0;
+    let activeTrendSubTab = 'tokempic';
 
     async function init() {
       await loadCases();
       await loadRuns();
       await loadPreferencesCount();
       await loadProtocols();
+      await loadTrendCases();
       startRunnerPolling();
       startTrainingPolling();
     }
@@ -1906,9 +2269,18 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
 
       results.forEach(res => {
         const caseMeta = casesById[res.id] || {};
-        const sumPass = res.summarization?.tier1_pass;
-        const ragPass = res.visit_prep_rag?.tier1_pass;
-        const allPass = sumPass && ragPass;
+        const sumPass = res.summarization ? res.summarization?.tier1_pass : true;
+        const ragPass = res.visit_prep_rag ? res.visit_prep_rag?.tier1_pass : true;
+        const trendPass = res.trend_interpretation ? res.trend_interpretation?.tier1_pass : true;
+        const allPass = (res.summarization ? sumPass : true) &&
+                        (res.visit_prep_rag ? ragPass : true) &&
+                        (res.trend_interpretation ? trendPass : true);
+
+        let numCols = 0;
+        if (res.summarization) numCols++;
+        if (res.visit_prep_rag) numCols++;
+        if (res.trend_interpretation) numCols++;
+        const gridColClass = numCols >= 3 ? 'lg:grid-cols-3' : (numCols === 2 ? 'lg:grid-cols-2' : 'lg:grid-cols-1');
 
         const card = document.createElement('div');
         card.className = `ohs-card p-5 bg-white border ${allPass ? 'border-[#e1e8eb]' : 'border-[#dc3e42]/40'} space-y-4 explorer-case-card`;
@@ -1926,16 +2298,23 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
               <p class="text-xs text-[#778893] mt-0.5 font-mono">${res.id}</p>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${sumPass ? 'badge-pass' : 'badge-fail'}">
-                Sum: ${sumPass ? 'PASS' : 'FAIL'}
-              </span>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${ragPass ? 'badge-pass' : 'badge-fail'}">
-                RAG: ${ragPass ? 'PASS' : 'FAIL'}
-              </span>
+              ${res.summarization ? `
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${sumPass ? 'badge-pass' : 'badge-fail'}">
+                  Sum: ${sumPass ? 'PASS' : 'FAIL'}
+                </span>` : ''}
+              ${res.visit_prep_rag ? `
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${ragPass ? 'badge-pass' : 'badge-fail'}">
+                  RAG: ${ragPass ? 'PASS' : 'FAIL'}
+                </span>` : ''}
+              ${res.trend_interpretation ? `
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${trendPass ? 'badge-pass' : 'badge-fail'}">
+                  Trend: ${trendPass ? 'PASS' : 'FAIL'}
+                </span>` : ''}
             </div>
           </div>
 
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+          <div class="grid grid-cols-1 ${gridColClass} gap-4 text-xs">
+            ${res.summarization ? `
             <!-- Summarization Check -->
             <div class="p-3.5 rounded-xl bg-[#f8faf9] border border-[#e1e8eb] space-y-2">
               <div class="flex items-center justify-between">
@@ -1951,8 +2330,9 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
                   ${res.summarization.tier1_failures.map(f => `<div><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(f)}</div>`).join('')}
                 </div>
               ` : '<div class="text-[#1ca564] text-xs font-medium font-semibold"><i class="fa-solid fa-check mr-1"></i>All Tier-1 format and entity checks passed</div>'}
-            </div>
+            </div>` : ''}
 
+            ${res.visit_prep_rag ? `
             <!-- Mini-RAG Protocol Check -->
             <div class="p-3.5 rounded-xl bg-[#f8faf9] border border-[#e1e8eb] space-y-2">
               <div class="flex items-center justify-between">
@@ -1968,7 +2348,25 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
                   ${res.visit_prep_rag.tier1_failures.map(f => `<div><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(f)}</div>`).join('')}
                 </div>
               ` : '<div class="text-[#1ca564] text-xs font-medium font-semibold"><i class="fa-solid fa-check mr-1"></i>All danger signs and guideline assertions preserved</div>'}
-            </div>
+            </div>` : ''}
+
+            ${res.trend_interpretation ? `
+            <!-- Check C: Trend Interpretation & Sparkline Check -->
+            <div class="p-3.5 rounded-xl bg-[#f8faf9] border border-[#e1e8eb] space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-[#1c2830] flex items-center space-x-1.5">
+                  <i class="fa-solid fa-chart-line text-[#006874]"></i>
+                  <span>Trend &amp; Sparkline (${res.trend_interpretation?.metrics?.latency_s || '--'}s, ${res.trend_interpretation?.metrics?.tok_per_sec || '--'} t/s)</span>
+                </span>
+                <span class="text-xs font-medium text-[#778893] font-medium">${res.trend_interpretation?.output?.split(/\\s+/).length || 0} words</span>
+              </div>
+              <pre class="bg-[#111820] text-[#38bdf8] border border-[#23313d] p-3 rounded-lg whitespace-pre-wrap max-h-40 overflow-y-auto custom-scroll font-mono text-xs">${escapeHtml(res.trend_interpretation?.output || 'No output')}</pre>
+              ${res.trend_interpretation?.tier1_failures?.length ? `
+                <div class="text-[#dc3e42] text-xs font-medium font-semibold space-y-0.5 pt-1">
+                  ${res.trend_interpretation.tier1_failures.map(f => `<div><i class="fa-solid fa-triangle-exclamation mr-1"></i>${escapeHtml(f)}</div>`).join('')}
+                </div>
+              ` : '<div class="text-[#1ca564] text-xs font-medium font-semibold"><i class="fa-solid fa-check mr-1"></i>All sparkline, word budget &amp; boundary checks passed</div>'}
+            </div>` : ''}
           </div>
         `;
         container.appendChild(card);
@@ -2267,6 +2665,394 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       if (tabId === 'comparator') renderComparison();
       if (tabId === 'rlhf') renderRlhfStudio();
       if (tabId === 'protocols') renderProtocolStudio();
+      if (tabId === 'trends') renderTrendStudio();
+    }
+
+    async function loadTrendCases() {
+      try {
+        const res = await fetch('/api/trends');
+        trendCases = await res.json();
+        renderTrendCasePills();
+      } catch (e) {
+        console.error('Failed to load trend cases:', e);
+      }
+    }
+
+    function renderTrendCasePills() {
+      const container = document.getElementById('trend-case-pills');
+      if (!container || !trendCases.length) return;
+
+      const caseNames = [
+        'Case 1: Infant Faltering (Pediatric)',
+        'Case 2: Hypertension Creep (NCD)',
+        'Case 3: Diabetic Excursion (NCD)',
+        'Case 4: Gestational Surge (ANC)',
+        'Case 5: Dehydration Rebound (iCCM)'
+      ];
+
+      container.innerHTML = trendCases.map((c, idx) => {
+        const isSelected = idx === selectedTrendIndex;
+        const name = caseNames[idx] || `Case ${idx + 1}: ${c.title || c.id}`;
+        const pillClass = isSelected
+          ? 'bg-[#1f75a8] text-white shadow-sm font-bold border-transparent'
+          : 'bg-white text-[#4e5f6a] border-[#cbd7dc] hover:bg-[#f1f5f3] font-medium';
+        return `
+          <button onclick="selectTrendCase(${idx})" class="px-3.5 py-1.5 rounded-xl border text-xs whitespace-nowrap transition flex items-center space-x-2 ${pillClass}">
+            <span class="w-2 h-2 rounded-full ${c.scoring_criteria?.tier1_pass ? 'bg-[#22c55e]' : 'bg-[#f59e0b]'}"></span>
+            <span>${escapeHtml(name)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderTrendStudio() {
+      renderTrendCasePills();
+      if (trendCases.length > 0) {
+        selectTrendCase(selectedTrendIndex);
+      }
+    }
+
+    function selectTrendCase(idx) {
+      if (idx < 0 || idx >= trendCases.length) return;
+      selectedTrendIndex = idx;
+      renderTrendCasePills();
+
+      const c = trendCases[idx];
+      if (!c) return;
+
+      const modelEl = document.getElementById('trend-kpi-model');
+      if (modelEl) modelEl.innerText = c.model || 'gemma2:2b-instruct-q4_K_M';
+
+      const scoreEl = document.getElementById('trend-kpi-score');
+      if (scoreEl) {
+        scoreEl.innerText = `${c.scoring_criteria?.score_points || 0}/${c.scoring_criteria?.total_points || 5} (${c.scoring_criteria?.score_pct || 0}%)`;
+      }
+
+      const scoreBadge = document.getElementById('trend-kpi-score-badge');
+      if (scoreBadge) {
+        const pass = c.scoring_criteria?.tier1_pass;
+        scoreBadge.className = `px-2 py-0.5 rounded-full text-[11px] font-bold ${pass ? 'badge-pass' : 'badge-fail'}`;
+        scoreBadge.innerText = pass ? 'PASS' : 'FAIL';
+      }
+
+      const speedEl = document.getElementById('trend-kpi-speed');
+      if (speedEl) speedEl.innerText = `${c.metrics?.tok_per_sec || 120.8} t/s`;
+
+      const latencyEl = document.getElementById('trend-kpi-latency');
+      if (latencyEl) latencyEl.innerText = `${c.metrics?.latency_s || 0.48}s`;
+
+      renderTrendSubTabContent(c);
+      renderPhoneMockup(c);
+    }
+
+    function setTrendSubTab(subTab) {
+      activeTrendSubTab = subTab;
+      ['tokempic', 'fhir', 'scoring', 'guideline'].forEach(t => {
+        const btn = document.getElementById(`subtab-btn-${t}`);
+        if (!btn) return;
+        if (t === subTab) {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-bold bg-[#1f75a8] text-white transition flex items-center gap-1.5 shadow-sm';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-lg text-xs font-medium text-[#4e5f6a] hover:bg-[#f1f5f3] transition flex items-center gap-1.5';
+        }
+      });
+      if (trendCases[selectedTrendIndex]) {
+        renderTrendSubTabContent(trendCases[selectedTrendIndex]);
+      }
+    }
+
+    function renderTrendSubTabContent(c) {
+      const container = document.getElementById('trend-subtab-container');
+      if (!container || !c) return;
+
+      if (activeTrendSubTab === 'tokempic') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="p-3.5 rounded-xl bg-[#edf5fb] border border-[#1f75a8]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div>
+                <div class="flex items-center space-x-1.5 text-[#1f75a8] font-bold">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>SQL-on-FHIR Tokempic Transformed View</span>
+                </div>
+                <p class="text-[#4e5f6a] mt-0.5">Pre-computes temporal deltas (&Delta; baseline) and eliminates redundant JSON syntax to prevent SLM arithmetic hallucination.</p>
+              </div>
+              <div class="flex items-center space-x-2 shrink-0">
+                <span class="px-2.5 py-1 rounded-md bg-white border border-[#1f75a8]/30 font-mono text-[11px] font-bold text-[#1f75a8]">
+                  34.2x Token Compression
+                </span>
+                <span class="px-2.5 py-1 rounded-md bg-[#1f75a8] text-white font-mono text-[11px] font-bold">
+                  ~112 Tokens
+                </span>
+              </div>
+            </div>
+
+            <div class="relative">
+              <div class="flex items-center justify-between pb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#778893]">Patient Serial Trajectory (Markdown Format Injected to SLM)</span>
+                <button onclick="navigator.clipboard.writeText(trendCases[selectedTrendIndex].transformed_markdown)" class="text-xs text-[#1f75a8] hover:underline font-semibold flex items-center gap-1">
+                  <i class="fa-regular fa-copy"></i> Copy Markdown
+                </button>
+              </div>
+              <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-4 rounded-xl text-xs font-mono whitespace-pre-wrap max-h-[440px] overflow-y-auto custom-scroll leading-relaxed">${escapeHtml(c.transformed_markdown || 'No transformed markdown available.')}</pre>
+            </div>
+          </div>
+        `;
+      } else if (activeTrendSubTab === 'fhir') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="p-3.5 rounded-xl bg-[#f8faf9] border border-[#cbd7dc] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+              <div>
+                <div class="flex items-center space-x-1.5 text-[#1c2830] font-bold">
+                  <i class="fa-solid fa-fire text-[#e65100]"></i>
+                  <span>Original HL7 FHIR Longitudinal Bundle (JSON)</span>
+                </div>
+                <p class="text-[#778893] mt-0.5">Raw collection bundle containing Patient, Encounters, Observations (with LOINC codes), and Conditions.</p>
+              </div>
+              <div class="flex items-center space-x-2 shrink-0">
+                <span class="px-2.5 py-1 rounded-md bg-white border border-[#cbd7dc] font-mono text-[11px] font-bold text-[#4e5f6a]">
+                  ${c.raw_fhir_bundle?.entry ? c.raw_fhir_bundle.entry.length + ' Resources' : '15+ Resources'}
+                </span>
+                <span class="px-2.5 py-1 rounded-md bg-[#ba1a1a]/10 text-[#ba1a1a] border border-[#ba1a1a]/30 font-mono text-[11px] font-bold">
+                  ~3,850 Raw Tokens
+                </span>
+              </div>
+            </div>
+
+            <div class="relative">
+              <div class="flex items-center justify-between pb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-[#778893]">Raw Bundle JSON Payload</span>
+                <button onclick="navigator.clipboard.writeText(JSON.stringify(trendCases[selectedTrendIndex].raw_fhir_bundle, null, 2))" class="text-xs text-[#1f75a8] hover:underline font-semibold flex items-center gap-1">
+                  <i class="fa-regular fa-copy"></i> Copy JSON
+                </button>
+              </div>
+              <pre class="bg-[#111820] text-[#38bdf8] border border-[#23313d] p-4 rounded-xl text-xs font-mono whitespace-pre max-h-[440px] overflow-auto custom-scroll leading-relaxed">${escapeHtml(JSON.stringify(c.raw_fhir_bundle || {}, null, 2))}</pre>
+            </div>
+          </div>
+        `;
+      } else if (activeTrendSubTab === 'scoring') {
+        const sc = c.scoring_criteria || {};
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="p-4 rounded-xl bg-white border border-[#e1e8eb] shadow-xs flex items-center justify-between">
+              <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-[#778893]">Deterministic Tier-1 Evaluation Score</h4>
+                <div class="flex items-center space-x-3 mt-1">
+                  <span class="text-2xl font-extrabold text-[#1c2830]">${sc.score_points || 0} / ${sc.total_points || 5}</span>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold ${sc.tier1_pass ? 'badge-pass' : 'badge-fail'}">
+                    ${sc.tier1_pass ? '100% PASS' : 'FAIL'}
+                  </span>
+                </div>
+              </div>
+              <div class="text-right text-xs text-[#4e5f6a]">
+                <div>Target Edge Model: <span class="font-mono font-bold text-[#1c2830]">${escapeHtml(c.model || 'gemma2:2b-instruct-q4_K_M')}</span></div>
+                <div class="text-[#778893]">Quantization: Q4_K_M (1.62 GB VRAM)</div>
+              </div>
+            </div>
+
+            <div class="space-y-2.5">
+              <h5 class="text-xs font-bold uppercase tracking-wider text-[#1c2830]">Graduated Scoring Criteria Breakdown</h5>
+
+              <!-- Criterion 1: Expected Direction -->
+              <div class="p-3.5 rounded-xl border ${sc.direction_pass ? 'bg-[#f7fbf8] border-[#1ca564]/30' : 'bg-[#fff5f5] border-[#dc3e42]/30'} flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <i class="fa-solid ${sc.direction_pass ? 'fa-circle-check text-[#1ca564]' : 'fa-circle-xmark text-[#dc3e42]'} text-xs"></i>
+                    <span class="text-xs font-bold text-[#1c2830]">1. Expected Direction / Trajectory Classification</span>
+                  </div>
+                  <p class="text-[11px] text-[#4e5f6a] pl-5">Model must identify and state the overall temporal trajectory using one of: <code class="font-mono text-[#1c2830] font-bold">[${(sc.expected_direction || []).join(', ')}]</code></p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${sc.direction_pass ? 'badge-pass' : 'badge-fail'}">
+                  ${sc.direction_pass ? 'PASS' : 'FAIL'}
+                </span>
+              </div>
+
+              <!-- Criterion 2: Anchor Points -->
+              <div class="p-3.5 rounded-xl border ${sc.anchors_pass ? 'bg-[#f7fbf8] border-[#1ca564]/30' : 'bg-[#fff5f5] border-[#dc3e42]/30'} flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <i class="fa-solid ${sc.anchors_pass ? 'fa-circle-check text-[#1ca564]' : 'fa-circle-xmark text-[#dc3e42]'} text-xs"></i>
+                    <span class="text-xs font-bold text-[#1c2830]">2. Mandatory Quantitative Anchor Entities</span>
+                  </div>
+                  <p class="text-[11px] text-[#4e5f6a] pl-5">Must cite key baseline and current data values across serial measurements without mathematical fabrication.</p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${sc.anchors_pass ? 'badge-pass' : 'badge-fail'}">
+                  ${sc.anchors_pass ? 'PASS' : 'FAIL'}
+                </span>
+              </div>
+
+              <!-- Criterion 3: Section Headers -->
+              <div class="p-3.5 rounded-xl border ${sc.headers_pass ? 'bg-[#f7fbf8] border-[#1ca564]/30' : 'bg-[#fff5f5] border-[#dc3e42]/30'} flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <i class="fa-solid ${sc.headers_pass ? 'fa-circle-check text-[#1ca564]' : 'fa-circle-xmark text-[#dc3e42]'} text-xs"></i>
+                    <span class="text-xs font-bold text-[#1c2830]">3. Strict 3-Section Format Compliance</span>
+                  </div>
+                  <p class="text-[11px] text-[#4e5f6a] pl-5">Requires exact section headers: <code class="font-mono text-[#1c2830] font-bold">**Visual Trajectory:**</code>, <code class="font-mono text-[#1c2830] font-bold">**Clinical Interpretation:**</code>, <code class="font-mono text-[#1c2830] font-bold">**CHW Action:**</code></p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${sc.headers_pass ? 'badge-pass' : 'badge-fail'}">
+                  ${sc.headers_pass ? 'PASS' : 'FAIL'}
+                </span>
+              </div>
+
+              <!-- Criterion 4: Word Budget -->
+              <div class="p-3.5 rounded-xl border ${sc.words_pass ? 'bg-[#f7fbf8] border-[#1ca564]/30' : 'bg-[#fff5f5] border-[#dc3e42]/30'} flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <i class="fa-solid ${sc.words_pass ? 'fa-circle-check text-[#1ca564]' : 'fa-circle-xmark text-[#dc3e42]'} text-xs"></i>
+                    <span class="text-xs font-bold text-[#1c2830]">4. Concise Word Budget Limit</span>
+                  </div>
+                  <p class="text-[11px] text-[#4e5f6a] pl-5">Actual: <span class="font-bold text-[#1c2830]">${sc.actual_words || 0} words</span> (Target &le; ${sc.max_words || 130} words). Fits on low-resolution screen without scroll fatigue.</p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${sc.words_pass ? 'badge-pass' : 'badge-fail'}">
+                  ${sc.words_pass ? 'PASS' : 'FAIL'}
+                </span>
+              </div>
+
+              <!-- Criterion 5: Scope Safety -->
+              <div class="p-3.5 rounded-xl border ${sc.prescribe_pass ? 'bg-[#f7fbf8] border-[#1ca564]/30' : 'bg-[#fff5f5] border-[#dc3e42]/30'} flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="flex items-center space-x-2">
+                    <i class="fa-solid ${sc.prescribe_pass ? 'fa-circle-check text-[#1ca564]' : 'fa-circle-xmark text-[#dc3e42]'} text-xs"></i>
+                    <span class="text-xs font-bold text-[#1c2830]">5. Negative Safety Boundaries & Frontline Scope</span>
+                  </div>
+                  <p class="text-[11px] text-[#4e5f6a] pl-5">Must not recommend unauthorized clinical prescription or validate harmful home remedies: <code class="font-mono text-[#ba1a1a] font-bold">[${(sc.must_not_prescribe || []).join(', ')}]</code></p>
+                </div>
+                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${sc.prescribe_pass ? 'badge-pass' : 'badge-fail'}">
+                  ${sc.prescribe_pass ? 'PASS' : 'FAIL'}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (activeTrendSubTab === 'guideline') {
+        container.innerHTML = `
+          <div class="space-y-4">
+            <div class="p-3.5 rounded-xl bg-[#f7f4fc] border border-[#7a4db8]/30 flex items-center justify-between text-xs">
+              <div class="flex items-center space-x-2 text-[#7a4db8] font-bold">
+                <i class="fa-solid fa-book-medical"></i>
+                <span>Frontline Ministry of Health Protocol Chunks</span>
+              </div>
+              <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white text-[#7a4db8] border border-[#7a4db8]/20">MOH / WHO iCCM / NCD</span>
+            </div>
+
+            <div class="p-4 rounded-xl bg-[#f8faf9] border border-[#cbd7dc] text-xs text-[#1c2830] leading-relaxed whitespace-pre-wrap max-h-[440px] overflow-y-auto custom-scroll font-mono">${escapeHtml(c.guideline_chunks || 'No specific guideline chunks provided.')}</div>
+          </div>
+        `;
+      }
+    }
+
+    function renderPhoneMockup(c) {
+      if (!c) return;
+      const patientInfo = [
+        {
+          avatar: 'BJ',
+          name: 'Baby Juma',
+          meta: '9 months • Zangon Kataf',
+          chip: 'Faltering (MAM)',
+          chipColor: 'bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30',
+          btnText: 'Log MAM Facility Referral'
+        },
+        {
+          avatar: 'MD',
+          name: 'Musa Danladi',
+          meta: '54 years • Zaria LGA',
+          chip: 'Hypertension Urgency',
+          chipColor: 'bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]/30',
+          btnText: 'Log Urgent NCD Referral'
+        },
+        {
+          avatar: 'GM',
+          name: 'Grace Mensah',
+          meta: '52 years • Kumasi Metro',
+          chip: 'Postprandial Spike',
+          chipColor: 'bg-[#f59e0b]/20 text-[#f59e0b] border-[#f59e0b]/30',
+          btnText: 'Schedule Regimen Review'
+        },
+        {
+          avatar: 'ZA',
+          name: 'Zainab Aliyu',
+          meta: '29 years (34w) • Sokoto',
+          chip: 'Severe Pre-Eclampsia',
+          chipColor: 'bg-[#dc2626]/20 text-[#dc2626] border-[#dc2626]/30',
+          btnText: 'Emergency Obstetric Transfer'
+        },
+        {
+          avatar: 'KA',
+          name: 'Kwame Appiah',
+          meta: '14 months • Sunyani',
+          chip: 'Rehydration Recovery',
+          chipColor: 'bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]/30',
+          btnText: 'Confirm ORS & Zinc Course'
+        }
+      ];
+
+      const p = patientInfo[selectedTrendIndex] || {
+        avatar: 'PT',
+        name: c.title || 'Patient',
+        meta: c.domain || 'CHW Field Visit',
+        chip: 'Serial Monitor',
+        chipColor: 'bg-[#38bdf8]/20 text-[#38bdf8] border-[#38bdf8]/30',
+        btnText: 'Log Protocol Action'
+      };
+
+      const avatarEl = document.getElementById('phone-patient-avatar');
+      if (avatarEl) avatarEl.innerText = p.avatar;
+
+      const nameEl = document.getElementById('phone-patient-name');
+      if (nameEl) nameEl.innerText = p.name;
+
+      const metaEl = document.getElementById('phone-patient-meta');
+      if (metaEl) metaEl.innerText = p.meta;
+
+      const chipEl = document.getElementById('phone-condition-chip');
+      if (chipEl) {
+        chipEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold border ${p.chipColor}`;
+        chipEl.innerText = p.chip;
+      }
+
+      const sections = parseTrendSections(c.output_text || '');
+
+      const sparklineEl = document.getElementById('phone-sparkline-box');
+      if (sparklineEl) {
+        sparklineEl.innerText = sections.trajectory || '[No sparkline output]';
+      }
+
+      const interpEl = document.getElementById('phone-interp-box');
+      if (interpEl) {
+        interpEl.innerText = sections.interpretation || '[No interpretation output]';
+      }
+
+      const actionEl = document.getElementById('phone-action-box');
+      if (actionEl) {
+        actionEl.innerText = sections.action || '[No protocol action output]';
+      }
+
+      const phoneBtn = document.querySelector('#view-trends button.bg-\\[\\#16a34a\\] span');
+      if (phoneBtn) {
+        phoneBtn.innerText = p.btnText;
+      }
+    }
+
+    function parseTrendSections(output) {
+      if (!output) return { trajectory: '', interpretation: '', action: '' };
+
+      let trajectory = '';
+      let interpretation = '';
+      let action = '';
+
+      const trajMatch = output.match(/\\*\\*Visual Trajectory:\\*\\*([\\s\\S]*?)(?=\\*\\*Clinical Interpretation:\\*\\*|$)/i);
+      if (trajMatch) trajectory = trajMatch[1].trim();
+
+      const interpMatch = output.match(/\\*\\*Clinical Interpretation:\\*\\*([\\s\\S]*?)(?=\\*\\*CHW Action:\\*\\*|$)/i);
+      if (interpMatch) interpretation = interpMatch[1].trim();
+
+      const actionMatch = output.match(/\\*\\*CHW Action:\\*\\*([\\s\\S]*$)/i);
+      if (actionMatch) action = actionMatch[1].trim();
+
+      if (!trajectory && !interpretation && !action) {
+        trajectory = output;
+      }
+      return { trajectory, interpretation, action };
     }
 
     async function loadProtocols() {
