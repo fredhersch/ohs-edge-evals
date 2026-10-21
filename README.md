@@ -146,3 +146,5 @@ python3 fine_tune_slm_dpo.py \
 
 For open-source framework comparisons (Argilla, Promptfoo, DeepEval, Phoenix, TRL/Unsloth), see [OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/OPEN_SOURCE_EVALS_AND_RLHF_GUIDE.md).
 
+For a comprehensive landscape of external evaluation datasets and benchmarks across CHW/FHW use cases, healthcare delivery computer vision (RDTs, medical displays, anthropometry), and primary care speech recognition (ASR), see [CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md).
+
