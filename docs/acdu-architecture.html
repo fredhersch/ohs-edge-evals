@@ -506,6 +506,79 @@
                 </p>
               </div>
             </div>
+
+            <!-- SIDE-BY-SIDE CALLOUT: FROM THIS (CONFUSING/LETHAL) TO THIS (CLAMPED/SAFE) -->
+            <div class="mt-4 pt-4 border-t border-red-500/30 space-y-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30">
+                  Frontline Clinical Reality
+                </span>
+                <span class="text-xs font-bold text-white">From Multi-Output Confusion &rarr; To Clamped Safety Floor</span>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+                
+                <!-- FROM THIS: Raw Output Flood & Naive LLM (LETHAL) -->
+                <div class="p-4 rounded-xl bg-red-950/20 border-2 border-red-500/50 space-y-3">
+                  <div class="flex items-center justify-between pb-2 border-b border-red-500/30">
+                    <span class="font-bold text-red-400 flex items-center gap-1.5">
+                      <i class="fa-solid fa-triangle-exclamation"></i> FROM THIS: Raw Multi-Output Flood
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/30 text-red-200 font-bold uppercase">Deadly Confusion</span>
+                  </div>
+
+                  <div class="space-y-1.5 text-[11px]">
+                    <div class="p-2 rounded bg-black/60 border border-amber-500/30 text-amber-200">
+                      <strong>Card 1 (Pneumonia):</strong> <em>"Dispense oral Amoxicillin DT (250mg). Dissolve in 5mL clean water and ensure child swallows completely."</em>
+                    </div>
+                    <div class="p-2 rounded bg-black/60 border border-amber-500/30 text-amber-200">
+                      <strong>Card 2 (Malaria):</strong> <em>"Administer oral Artemether-Lumefantrine (AL) immediately with milk or fatty meal."</em>
+                    </div>
+                    <div class="p-2 rounded bg-black/60 border border-red-500/30 text-red-300">
+                      <strong>Card 3 (Emergency):</strong> <em>"Danger sign: Convulsions detected. Immediate referral to sub-county hospital!"</em>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-red-900/30 border border-red-500/40 text-red-200 space-y-1">
+                    <div class="font-bold text-[11px] text-red-300">❌ Naive SLM Merge (Fatal Compromise):</div>
+                    <p class="italic text-[11px] leading-relaxed">
+                      "Dissolve the amoxicillin in water and give the malaria pills with milk to the child now. Once swallowed, arrange transport to the sub-county hospital."
+                    </p>
+                    <div class="text-[10px] text-red-300 pt-1 font-semibold">
+                      &bull; Lethal Risk: Forcing oral fluids/pills into a post-ictal/lethargic infant causes <strong>fatal pulmonary aspiration</strong>.
+                    </div>
+                  </div>
+                </div>
+
+                <!-- TO THIS: aCDU Deontic Clamping + Edge SLM (SAFE) -->
+                <div class="p-4 rounded-xl bg-emerald-950/20 border-2 border-emerald-500/50 space-y-3">
+                  <div class="flex items-center justify-between pb-2 border-b border-emerald-500/30">
+                    <span class="font-bold text-emerald-400 flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-check"></i> TO THIS: aCDU Clamped 3-Bullet Script
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 font-bold uppercase">100% Safety Floor</span>
+                  </div>
+
+                  <div class="p-2 rounded bg-black/60 border border-emerald-500/30 text-[11px] text-emerald-300 font-mono space-y-0.5">
+                    <div><strong>Box 1 Deontic Veto:</strong> <code>N_emergency = {STOP: NO ORAL FLUIDS/MEDS}</code></div>
+                    <div class="text-slate-400">&bull; Oral Amox &amp; Oral AL are deterministically pruned from prompt.</div>
+                  </div>
+
+                  <div class="p-2.5 rounded-lg bg-emerald-900/30 border border-emerald-500/40 text-emerald-100 space-y-1.5">
+                    <div class="font-bold text-[11px] text-emerald-300">✅ 2B Edge SLM Clamped Output:</div>
+                    <ul class="space-y-1 text-[11px] list-disc list-inside leading-relaxed text-slate-200">
+                      <li><strong>Positioning &amp; Airway:</strong> Turn the infant onto their left side (recovery position) with neck slightly extended to keep airway clear; loosen tight clothing.</li>
+                      <li><strong>Strict Oral Prohibition:</strong> Do <strong>NOT</strong> put anything in the mouth&mdash;no water, milk, oral tablets, or herbs. Forcing oral pills into a drowsy child causes choking and death.</li>
+                      <li><strong>Urgent Transport:</strong> Accompany caregiver immediately to sub-county hospital for injectable anticonvulsants (diazepam) and IV antibiotics.</li>
+                    </ul>
+                    <div class="text-[10px] text-emerald-300 pt-1 font-semibold">
+                      &bull; Clinical Outcome: Zero cognitive confusion for CHW; 0% aspiration risk; rapid facility transfer.
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
 
         </div>
