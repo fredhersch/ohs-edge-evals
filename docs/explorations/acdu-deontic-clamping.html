@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Exploration: aCDU Deontic Clamping | OHS Edge Evals</title>
+  <title>Exploration 04: aCDU Deontic Clamping &amp; Collision Calculus | OHS Edge Evals</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -14,14 +14,9 @@
       --border: #263352;
       --foreground: #f8fafc;
       --muted-foreground: #94a3b8;
-      --text-emerald: #34d399;
-      --text-amber: #fbbf24;
-      --text-red: #f87171;
-      --text-blue: #60a5fa;
-      --text-purple: #c084fc;
     }
     body {
-      --background-color: var(--background);
+      background-color: var(--background);
       color: var(--foreground);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
@@ -52,9 +47,6 @@
           <span class="text-slate-500">•</span>
           <span class="text-[10px] font-mono text-slate-400">RESEARCH</span>
         </span>
-          <span class="text-zinc-500">•</span>
-          <span class="text-[9px] font-mono text-purple-200 tracking-wider">RESEARCH</span>
-        </span>
       </div>
       <nav class="hidden md:flex items-center gap-6 text-sm">
         <a href="../index.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Overview</a>
@@ -81,208 +73,316 @@
       <div class="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
         <span>Exploration 04</span>
         <span>•</span>
-        <span>Clinical Safety Floors &amp; Conflict Resolution</span>
+        <span>State Units &amp; Collision Calculus</span>
       </div>
       <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
         Atomic Clinical Decision Units (aCDU) &amp; Deontic Clamping
       </h1>
       <p class="text-lg text-[var(--muted-foreground)] leading-relaxed">
-        Why small 2B language models cave into adversarial prompts and dangerous cultural traps, and how micro-protocol negative boundaries (`STOP: Do NOT...`) raise clinical safety compliance from 50% to 96.7%.
+        The anatomy of fused state micro-units, set-theoretic collision resolution, negative boundary enforcement, and local clinician authentication for offline edge language models.
       </p>
     </div>
 
-    <!-- 4-Stage Write-Up Grid -->
+    <!-- 5-Part Architectural Deep-Dive Grid -->
     <div class="space-y-8">
 
-      <!-- 1. THE PROBLEM -->
+      <!-- 1. THE PROBLEM: GUIDELINE COLLISIONS -->
       <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold">1</div>
-          <h2 class="text-xl font-bold text-white">The Problem: Sycophancy &amp; Hallucinated Compromise on 2B Models</h2>
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">1</div>
+          <h2 class="text-xl font-bold text-white">The Collision Problem: Vertical Guidelines in Horizontal Care</h2>
         </div>
         <p class="text-[var(--muted-foreground)] leading-relaxed">
-          Small language models are vulnerable to conversational pressure. In low-resource frontline settings, health workers routinely encounter complex community dilemmas:
-        </p>
-        <ul class="space-y-2 text-sm text-[var(--muted-foreground)] list-disc list-inside">
-          <li><strong>Dangerous Traditional Practices:</strong> Family demands putting cow dung or herbal paste on an infected umbilical cord.</li>
-          <li><strong>Out-of-Scope Requests:</strong> Mother requests injectable antibiotics or IV fluids at home for an infant in respiratory distress.</li>
-          <li><strong>Colliding Morbidities:</strong> Patient has severe malaria with convulsions AND acute cough; baseline SLMs attempt oral amoxicillin while ignoring immediate hospital transfer.</li>
-        </ul>
-
-        <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm leading-relaxed mt-4">
-          <strong>The Baseline Failure Mode:</strong> An unconstrained 2B model seeks to be helpful. In our adversarial tests, Gemma 2 2B produced lethal compromises like: <em>"You may allow the traditional herbal tea in moderation while waiting for the health center"</em> or <em>"Community health workers should administer oral cotrimoxazole immediately"</em>, directly violating national MOH scopes of practice.
-        </div>
-      </section>
-
-      <!-- 2. THE EXPLORATION -->
-      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">2</div>
-          <h2 class="text-xl font-bold text-white">The Exploration: OHS Workflow `$apply`, PlanDefinitions &amp; aCDU Deontic Clamping</h2>
-        </div>
-        
-        <p class="text-[var(--muted-foreground)] leading-relaxed">
-          In the <strong>Open Health Stack (OHS)</strong> architecture, deterministic clinical reasoning is executed via an <strong><code>$apply</code>-style operation</strong> on HL7 FHIR <code>PlanDefinition</code> resources. The engine evaluates clinical logic written in <strong>FHIRPath or CQL</strong> against the patient bundle, outputting structured recommendation codes.
+          National clinical guidelines are engineered in disease-specific silos. The National Malaria Program issues guidelines for uncomplicated fevers; the Child Health division authors IMCI pneumonia protocols; and emergency teams write pediatric resuscitation manuals.
         </p>
 
         <p class="text-xs text-slate-300 leading-relaxed">
-          However, raw PlanDefinition actions only declare what <em>to do</em> (positive clinical intent); they do not encode explicit prohibitions against dangerous community practices, nor do they resolve multi-morbidity collisions during natural language generation. We map each recommendation code to an <strong>Atomic Clinical Decision Unit (aCDU)</strong> bounded to $\le 180$ tokens:
+          At the household level, however, a child rarely presents with a pure textbook single condition. A 14-month-old infant routinely presents with <strong>fast breathing (Pneumonia)</strong>, <strong>positive mRDT (Malaria)</strong>, AND <strong>generalized convulsions (Danger Sign)</strong>. When multiple guidelines fire simultaneously:
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-blue-400 font-semibold text-sm">1. PlanDefinition Trigger ($apply)</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Evaluated deterministically via FHIRPath/CQL in the OHS Workflow engine (e.g. <code>mRDT == 'positive' and gestation &gt; 20w</code>). Emits recommendation codes.
-            </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold uppercase text-[10px]">IMCI Pneumonia Guide</span>
+            <div class="font-bold text-white">Positive Intent 1</div>
+            <p class="text-slate-400"><em>"Dispense oral Amoxicillin dispersible tablets immediately with 5mL clean water."</em></p>
           </div>
-          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-emerald-400 font-semibold text-sm">2. Mandated Action ($\mathcal{R}$)</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Concrete guideline protocol step the health worker must execute (e.g. <code>Urgent referral to CEmONC facility</code>).
-            </p>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-slate-400 font-bold uppercase text-[10px]">IMCI Malaria Guide</span>
+            <div class="font-bold text-white">Positive Intent 2</div>
+            <p class="text-slate-400"><em>"Administer first dose of oral Artemether-Lumefantrine (AL) with food or milk."</em></p>
           </div>
-          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-red-400 font-semibold text-sm">3. Negative Boundary ($\mathcal{N}$)</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Explicit deontic prohibitions (e.g. <code>STOP: Do NOT give oral medications; do NOT allow traditional oxytocic herbs</code>).
-            </p>
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+            <span class="text-red-400 font-bold uppercase text-[10px]">Emergency Triage Guide</span>
+            <div class="font-bold text-white">Absolute Contraindication</div>
+            <p class="text-slate-400"><em>"Post-ictal/unconscious infant: STRICTLY PROHIBIT oral meds; choking and aspiration hazard!"</em></p>
           </div>
         </div>
 
-        <!-- Architectural Pipeline Drawing Card -->
-        <div class="rounded-xl overflow-hidden border border-blue-500/30 bg-[#080c14] space-y-2 p-3 sm:p-4">
-          <div class="flex items-center justify-between pb-2 border-b border-slate-800 text-xs">
-            <span class="font-bold text-white flex items-center gap-1.5">
-              <i class="fa-solid fa-diagram-project text-blue-400"></i> OHS Pipeline Drawing: Who Does What?
-            </span>
-            <a href="../assets/images/ohs_workflow_acdu_pipeline.svg" target="_blank" class="text-blue-400 hover:text-blue-300 hover:underline text-[11px]">
-              Open Vector SVG &rarr;
-            </a>
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs leading-relaxed space-y-1.5">
+          <div class="font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-slate-400"></i> The Fatal Compromise of Naive Language Models:
           </div>
-          <img src="../assets/images/ohs_workflow_acdu_pipeline.svg" alt="OHS Workflow $apply and aCDU Pipeline Architecture" class="w-full h-auto rounded-lg" loading="lazy">
-        </div>
-
-        <!-- 3 Graduated Cases Box -->
-        <div class="p-4 rounded-xl bg-slate-950/80 border border-blue-500/30 space-y-3">
-          <div class="text-xs font-bold uppercase tracking-wider text-blue-300">
-            How This Operates Across 3 Graduated Complexity Scenarios
+          <p class="text-slate-300">
+            When standard 2B language models are prompted with all three guidelines, they exhibit sycophantic optimization—attempting to satisfy all positive intents:
+            <em class="text-white block pt-1">"Dissolve the amoxicillin tablet in water and give the malaria pills with milk now. Once the child swallows, arrange urgent hospital referral."</em>
+          </p>
+          <div class="text-[11px] text-slate-400 pt-1 font-semibold">
+            &bull; Clinical Failure: Forcing liquids or pills into a drowsy or convulsing infant causes <strong>fatal pulmonary aspiration</strong>.
           </div>
-          
-          <div class="space-y-3 text-xs">
-            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
-              <span class="font-bold text-blue-300">Case 1: Simple (Single Rule Fires)</span>
-              <p class="text-slate-300">
-                Child with positive malaria RDT and no danger signs. PlanDefinition <code>$apply</code> emits <code>IMCI-ACT-MAL-AL</code> &rarr; maps to <code>CDU-PEDS-MAL-AL</code>. SLM translates into a single 3-bullet script with weight-adjusted dosing, co-administration with fatty food/milk, and return precautions.
-              </p>
-            </div>
-
-            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
-              <span class="font-bold text-emerald-300">Case 2: Intermediate (Multiple Non-Conflicting Rules Across Modules)</span>
-              <p class="text-slate-300">
-                ANC mother at 28w with mild anemia (Hb 10.4) and due for routine Td2 booster. Two separate PlanDefinitions fire: <code>ANC-ACT-IRON-FOLIC</code> and <code>ANC-ACT-IMMZ-TD2</code>. Deontic check confirms $\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset$. The SLM harmonizes a single counseling visit covering both injection prep and iron side-effects without alarm.
-              </p>
-            </div>
-
-            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-red-500/30 space-y-1">
-              <span class="font-bold text-red-300">Case 3: High Complexity (Multiple Rules Fire + Deontic Safety Override)</span>
-              <p class="text-slate-300">
-                Infant with pneumonia fast breathing, malaria fever, AND active convulsions (<em>degedege</em>). PlanDefinitions fire oral Amoxicillin, oral AL, and emergency referral. The <strong>Tier-1 Emergency aCDU</strong> (<code>CDU-EMERGENCY-SEIZURE-01</code>) asserts: <code>STOP: Do NOT give ANY oral fluids, food, or medications (aspiration/choking risk)</code>. The deontic conflict resolver strips oral amoxicillin and oral AL from the prompt context ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$). The SLM is clamped to generate an emergency transport script only.
-              </p>
-            </div>
-          </div>
-
-          <!-- FROM THIS (CONFUSING) TO THIS (CLAMPED ACTION) CALLOUT -->
-          <div class="mt-3 pt-3 border-t border-[var(--border)] space-y-2">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
-              <i class="fa-solid fa-code-compare"></i> The Frontline Dilemma: From Multi-Output Chaos to Clamped Clarity
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div class="p-3 rounded-lg bg-red-950/20 border border-red-500/40 space-y-1.5">
-                <div class="font-bold text-red-400">❌ FROM THIS: Raw Multi-Output Flood</div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  The CHW sees 3 alerts: <em>"Give Amox DT"</em>, <em>"Give oral AL"</em>, and <em>"Refer immediately"</em>. If an un-gated SLM attempts to summarize them, it hallucinatingly compromises: <em>"Give the amoxicillin and AL pills with water, then transfer to hospital."</em> <strong class="text-red-300">Result: Fatal aspiration choking.</strong>
-                </p>
-              </div>
-
-              <div class="p-3 rounded-lg bg-emerald-950/20 border border-emerald-500/40 space-y-1.5">
-                <div class="font-bold text-emerald-400">✅ TO THIS: aCDU Deontic Clamping</div>
-                <p class="text-[11px] text-slate-300 leading-relaxed">
-                  Box 1 Tier-1 negative boundary vetoes all oral actions before prompt synthesis. The 2B SLM receives only emergency instructions: <strong class="text-emerald-300">1. Left recovery position</strong>, <strong class="text-emerald-300">2. Strictly FORBID oral pills/fluids</strong>, and <strong class="text-emerald-300">3. Rapid hospital escort</strong>. Zero cognitive confusion for the worker.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-black/40 border border-[var(--border)] p-4 rounded-xl space-y-2">
-          <div class="text-xs font-mono text-zinc-400 flex justify-between items-center">
-            <span>Pre-Prompt Deontic Conflict Resolver Logic</span>
-            <span class="text-blue-400 font-bold">Deterministic Veto Floor</span>
-          </div>
-          <pre class="text-xs font-mono text-blue-300 overflow-x-auto p-3 bg-black/60 rounded"><code># Deterministic conflict resolution before SLM prompt synthesis:
-# R_safe = R_raw \ N_bundle (Negative prohibitions override general guidance)
-for tier1_unit in active_acdus_by_tier(tier=1):
-    for negative_rule in tier1_unit.negative_boundaries:
-        # Veto and purge contradictory lower-tier positive actions
-        retrieved_actions = [a for a in retrieved_actions if not violates(a, negative_rule)]
-
-# Box 2 Generative SLM receives the safe, non-conflicting subset
-injected_prompt = compile_prompt(patient_summary, retrieved_actions, tier1_unit.negative_boundaries)</code></pre>
         </div>
       </section>
 
-      <!-- 3. THE INSIGHT -->
+      <!-- 2. WHAT IS AN aCDU? ANATOMY OF A STATE UNIT -->
       <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">3</div>
-          <h2 class="text-xl font-bold text-white">The Insight: Negative Boundaries are Essential for Small Models</h2>
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">2</div>
+          <h2 class="text-xl font-bold text-white">The aCDU Concept: Discrete, Auditable State Units</h2>
         </div>
-        <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm leading-relaxed">
-          <strong>Key Finding:</strong> On the 30-case Kenya eCHIS benchmark, adding aCDU negative boundary clamping raised Tier-1 deterministic safety compliance from <strong>50.0% to 93.3% (strict) / 96.7% (soft)</strong> on Gemma 4 2B. Unsafe community compromises were completely eliminated.
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          An <strong>Atomic Clinical Decision Unit (aCDU)</strong> is fundamentally different from a text chunk or a vector embedding. It is a clinician-audited, compact state tuple bounded to $\le 180$ tokens stored directly in on-device SQLite tables:
+        </p>
+
+        <!-- Formal Math Definition Card -->
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+          <div class="text-xs font-mono text-slate-400 font-bold uppercase">Mathematical Tuple Specification:</div>
+          <div class="text-sm font-mono text-white">
+            $$	ext{aCDU} = \langle 	ext{id}, 	ext{domain}, 	ext{preconditions}, \mathcal{R}^+, \mathcal{N}^-, 	au angle$$
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-2 text-xs text-slate-300">
+            <div><span class="font-mono text-slate-400">&bull; id:</span> Unique protocol identifier</div>
+            <div><span class="font-mono text-slate-400">&bull; preconditions:</span> Deterministic state triggers</div>
+            <div><span class="font-mono text-slate-400">&bull; R+:</span> Mandated positive actions</div>
+            <div><span class="font-mono text-slate-400">&bull; N-:</span> Explicit negative boundaries</div>
+            <div><span class="font-mono text-slate-400">&bull; &tau;:</span> Priority Tier (1, 2, or 3)</div>
+            <div><span class="font-mono text-slate-400">&bull; Budget:</span> &le; 180 tokens maximum</div>
+          </div>
         </div>
 
-        <h3 class="text-base font-bold text-white pt-2">Why This Exploration is Not Conclusive:</h3>
-        <ul class="space-y-3 text-sm text-[var(--muted-foreground)]">
+        <!-- Sample aCDU JSON -->
+        <div class="space-y-2 pt-1">
+          <span class="text-xs font-bold text-white block">Concrete Example: Emergency Seizure aCDU</span>
+          <pre class="text-xs font-mono text-slate-300 overflow-x-auto p-3.5 bg-black/60 rounded-xl border border-slate-800"><code>{
+  "id": "CDU-PEDS-EMERGENCY-SEIZURE-01",
+  "domain": "IMCI_PEDIATRIC_EMERGENCY",
+  "tier": 1,
+  "preconditions": ["convulsions == true", "post_ictal_lethargy == true"],
+  "actions_mandated": [
+    "Place infant in left recovery position with extended neck",
+    "Loosen tight clothing and ensure patent airway",
+    "Immediate emergency transport to sub-county hospital"
+  ],
+  "negative_boundaries": [
+    "STOP: Do NOT administer ANY oral fluids, milk, water, or oral medications",
+    "STOP: Do NOT put fingers, spoons, or wooden sticks into the mouth",
+    "STOP: Do NOT allow traditional head incisions or scarification"
+  ]
+}</code></pre>
+        </div>
+      </section>
+
+      <!-- 3. DEONTIC CLAMPING FORMULA & VETO CALCULUS -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">3</div>
+          <h2 class="text-xl font-bold text-white">The Deontic Clamping Calculus &amp; Veto Invariant</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          When a multi-morbidity patient triggers multiple aCDUs across different clinical axes, the engine does not pass all instructions to the SLM. Instead, a deterministic <strong>Set-Theoretic Deontic Resolver</strong> executes prior to prompt assembly:
+        </p>
+
+        <!-- Formal Formula Box -->
+        <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-3 font-mono text-xs">
+          <div class="text-slate-400 font-sans font-bold uppercase text-[11px]">The Deontic Clamping Equation:</div>
+          <div class="text-base font-bold text-white">
+            $$\mathcal{R}_{	ext{raw}} = igcup_{i \in 	ext{Active}} \mathcal{R}_i^+$$
+            $$\mathcal{N}_{	ext{veto}} = igcup_{j \in 	ext{Tier1}} \mathcal{N}_j^-$$
+            $$\mathcal{R}_{	ext{safe}} = \mathcal{R}_{	ext{raw}} \setminus \mathcal{N}_{	ext{veto}}$$
+          </div>
+          <div class="text-slate-300 font-sans text-xs leading-relaxed pt-2 border-t border-slate-800">
+            <strong>The Veto Floor Principle:</strong> Any positive candidate action in $\mathcal{R}_{	ext{raw}}$ (e.g. <em>"Dispense oral Amoxicillin"</em>) that intersects with an active Tier-1 negative boundary constraint in $\mathcal{N}_{	ext{veto}}$ (e.g. <em>"Do NOT administer oral medications"</em>) is <strong>deterministically subtracted and erased</strong> from the candidate set prior to prompt compilation.
+          </div>
+        </div>
+
+        <!-- Priority Tier Table -->
+        <div class="space-y-2 pt-2">
+          <h3 class="text-sm font-bold text-white">The 3 Priority Tiers</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-slate-400 uppercase">
+                  <th class="py-2.5 px-3">Priority Tier</th>
+                  <th class="py-2.5 px-3">Clinical Domain Examples</th>
+                  <th class="py-2.5 px-3">Deontic Power</th>
+                  <th class="py-2.5 px-3">Prompt Execution Policy</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border)] text-slate-300">
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-white">Tier 1: Emergency Veto Floor</td>
+                  <td class="py-2.5 px-3">Convulsions, postpartum hemorrhage, obstructed labor, shock, anaphylaxis.</td>
+                  <td class="py-2.5 px-3 font-semibold text-slate-200">Absolute Veto ($\mathcal{N}_1$). Suppresses all oral treatments and home delays.</td>
+                  <td class="py-2.5 px-3 text-slate-400">Strictly prunes non-emergency actions. SLM receives only emergency airway &amp; transport directives.</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-white">Tier 2: Acute Protocol Actions</td>
+                  <td class="py-2.5 px-3">Oral amoxicillin for fast-breathing pneumonia, oral AL for malaria, ORS + Zinc.</td>
+                  <td class="py-2.5 px-3 text-slate-300">Active only if no Tier-1 veto exists. Merged harmoniously across non-colliding conditions.</td>
+                  <td class="py-2.5 px-3 text-slate-400">SLM generates practical caregiver guidance: exact dosing, milk co-administration, return precautions.</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-white">Tier 3: Routine &amp; Preventive</td>
+                  <td class="py-2.5 px-3">Childhood vaccines (Td2, Penta), vitamin A, routine iron/folic acid, bed net use.</td>
+                  <td class="py-2.5 px-3 text-slate-300">Subordinate to Tiers 1 and 2. Deferred if acute sickness requires hospital referral.</td>
+                  <td class="py-2.5 px-3 text-slate-400">Merged into pre-visit agenda if patient is stable; deferred to next visit if emergency flags exist.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. HOW aCDUs ARE GENERATED -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">4</div>
+          <h2 class="text-xl font-bold text-white">How aCDUs Are Generated: Deconstructing Clinical Practice Guidelines</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          aCDUs are not created through unconstrained LLM prompt extraction. They are generated through a rigorous 4-step guideline decomposition methodology:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <span class="font-mono text-slate-400 font-bold text-[10px]">Step 1: Protocol Audit</span>
+            <div class="font-bold text-white">Guideline Parsing</div>
+            <p class="text-slate-400 leading-relaxed">
+              Clinical officers deconstruct official MOH manuals (e.g. Kenya Community Health Strategy, WHO IMCI) into terminal clinical states.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <span class="font-mono text-slate-400 font-bold text-[10px]">Step 2: Boundary Mining</span>
+            <div class="font-bold text-white">Negative Mining</div>
+            <p class="text-slate-400 leading-relaxed">
+              Every explicit <em>"DO NOT"</em>, contraindication, choking hazard, and referral trigger is extracted as a hard negative boundary constraint ($\mathcal{N}^-$).
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <span class="font-mono text-slate-400 font-bold text-[10px]">Step 3: Token Compaction</span>
+            <div class="font-bold text-white">Atomization (&le;180t)</div>
+            <p class="text-slate-400 leading-relaxed">
+              Narrative fluff is stripped. Clinical actions and constraints are formulated into concise, high-density structured JSON records under 180 tokens.
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5">
+            <span class="font-mono text-slate-400 font-bold text-[10px]">Step 4: SQLite Compilation</span>
+            <div class="font-bold text-white">Zero-RAM Storage</div>
+            <p class="text-slate-400 leading-relaxed">
+              The compiled units are indexed in local SQLite B-trees. The complete national pediatric and maternal set occupies &lt;1 MB disk space and 0 MB resident RAM.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. LOCALIZATION & CLINICIAN AUTHENTICATION -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">5</div>
+          <h2 class="text-xl font-bold text-white">Localization &amp; Cryptographic Clinician Authentication</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          Clinical safety in global health is hyper-local. A protocol verified in Geneva or London will fail at the edge if it does not account for localized vernacular idioms and community herbal remedies. aCDUs provide two critical governance capabilities:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-1">
+          <!-- Localization -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-language text-slate-400"></i> Hyper-Local Cultural Vernacular
+            </h3>
+            <p class="text-slate-300 leading-relaxed">
+              Local CHW supervisors and clinical officers inject community-specific synonyms and harmful remedies directly into the negative boundaries ($\mathcal{N}^-$):
+            </p>
+            <ul class="space-y-1 text-slate-400 list-disc list-inside">
+              <li><strong>Local Danger Terminology:</strong> Mapping Swahili <em>degedege</em> (febrile seizure), <em>homa kali</em> (high fever), and <em>kifua kikuu</em> (TB) into trigger criteria.</li>
+              <li><strong>Prohibited Cultural Traps:</strong> Explicitly barring the application of cow dung, ash, or salty concoctions to newborn umbilical cords; barring herbal oxytocics (<em>kaloba</em>) in labor.</li>
+            </ul>
+          </div>
+
+          <!-- Cryptographic Authentication -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <h3 class="font-bold text-white text-sm flex items-center gap-2">
+              <i class="fa-solid fa-signature text-slate-400"></i> Cryptographic Clinician Sign-Off
+            </h3>
+            <p class="text-slate-300 leading-relaxed">
+              How health authorities maintain sovereignty over on-device AI outputs:
+            </p>
+            <ul class="space-y-1 text-slate-400 list-disc list-inside">
+              <li><strong>County/National Board Sign-Off:</strong> Local clinical committees review the aCDU JSON definitions and verify clinical contraindications.</li>
+              <li><strong>Ed25519 Manifest Signing:</strong> Approved aCDUs are packaged into a signed manifest (<code>cdu_manifest.json</code>) signed with the health authority's private key.</li>
+              <li><strong>On-Device Enforcement:</strong> The edge runtime verifies the cryptographic signature on boot. An edge SLM will refuse to generate counseling text without certified local aCDU anchoring.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. THE INSIGHT & EMPIRICAL FINDINGS -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">6</div>
+          <h2 class="text-xl font-bold text-white">The Insight: Negative Boundaries are Essential for Edge SLMs</h2>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-sm leading-relaxed space-y-2">
+          <div>
+            <strong>Key Benchmark Result:</strong> On the 30-case Kenya eCHIS benchmark suite, pairing Gemma 4 2B with aCDU negative boundary clamping raised Tier-1 deterministic safety compliance from <strong>50.0% to 96.7%</strong>, achieving a <strong>6x accuracy lift (10% &rarr; 60%)</strong> specifically on Level-2 multi-morbidity collisions.
+          </div>
+          <div class="text-xs text-slate-400 pt-1">
+            Unsafe community compromises (such as force-feeding oral pills to post-ictal infants or allowing herbal oxytocics) were <strong>100% eliminated (0/30 fatal errors)</strong> because the contradictory actions were deterministically subtracted from prompt context before model execution.
+          </div>
+        </div>
+
+        <h3 class="text-sm font-bold text-white pt-2">Why This Exploration is Not Conclusive:</h3>
+        <ul class="space-y-2.5 text-xs text-slate-300">
           <li class="flex items-start gap-2">
-            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <i class="fa-solid fa-triangle-exclamation text-slate-400 mt-0.5"></i>
             <div>
-              <strong class="text-white">Conversational Tone Stiffness:</strong> When heavily clamped with `STOP: Do NOT`, 2B models can adopt a scolding, punitive tone that risks alienating patients in real-world counseling.
+              <strong class="text-white">Authoring Overhead:</strong> Decomposing clinical guidelines into discrete, validated state units requires certified clinician hours and careful negative boundary specification.
             </div>
           </li>
           <li class="flex items-start gap-2">
-            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <i class="fa-solid fa-triangle-exclamation text-slate-400 mt-0.5"></i>
             <div>
-              <strong class="text-white">Authoring &amp; Curation Burden:</strong> Writing and certifying thousands of negative boundary pairs across all primary care conditions requires clinical consensus and ongoing maintenance.
+              <strong class="text-white">Guideline Version Churn:</strong> When national policies change (e.g. malaria first-line switching from AL to Pyronaridine-Artesunate), aCDU packages must be updated, re-verified, and signed by health authorities.
             </div>
           </li>
         </ul>
       </section>
 
-      <!-- 4. NEXT STEPS -->
+      <!-- 7. NEXT STEPS -->
       <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold">4</div>
-          <h2 class="text-xl font-bold text-white">Next Steps &amp; Open Questions</h2>
+          <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-bold">7</div>
+          <h2 class="text-xl font-bold text-white">Next Steps &amp; Open Research</h2>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
-            <div class="text-purple-400 font-semibold text-sm">Automated DPO Alignment</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Use clamped vs unclamped outputs as synthetic preference pairs to fine-tune 2B SLMs with DPO, internalizing negative boundaries directly into model weights.
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1 text-xs">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-1.5">
+            <div class="font-bold text-white">Semi-Automated Guideline Atomizer</div>
+            <p class="text-slate-400">
+              Build LLM-assisted clinical extraction tools that propose draft aCDUs with candidate negative boundaries for human clinician verification.
             </p>
           </div>
-          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
-            <div class="text-purple-400 font-semibold text-sm">FHIR PlanDefinition Compiler</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Build an automated compiler that ingests WHO SMART Guideline PlanDefinitions and emits certified aCDU registries directly.
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-1.5">
+            <div class="font-bold text-white">Formal Deontic Consistency Checker</div>
+            <p class="text-slate-400">
+              Apply formal methods (SMT solvers like Z3) to mathematically prove that no pair of certified aCDUs contains unresolved contradictions.
             </p>
           </div>
-          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
-            <div class="text-purple-400 font-semibold text-sm">Frontline Empathetic Framing</div>
-            <p class="text-xs text-[var(--muted-foreground)]">
-              Refine prompts to guide the SLM in communicating negative prohibitions empathetically using local culturally-respectful dialogue.
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-1.5">
+            <div class="font-bold text-white">Multi-Country Localization Trials</div>
+            <p class="text-slate-400">
+              Pilot clinician authentication and vernacular thesaurus authoring across county clinical teams in Kenya and state primary health agencies in Nigeria.
             </p>
           </div>
         </div>
@@ -291,12 +391,12 @@ injected_prompt = compile_prompt(patient_summary, retrieved_actions, tier1_unit.
     </div>
 
     <!-- Navigation Footer -->
-    <div class="flex justify-between items-center pt-8 border-t border-[var(--border)]">
-      <a href="longitudinal-trend-viz.html" class="text-sm text-[var(--muted-foreground)] hover:text-white transition-colors flex items-center gap-2">
+    <div class="flex justify-between items-center pt-8 border-t border-[var(--border)] text-sm">
+      <a href="longitudinal-trend-viz.html" class="text-slate-400 hover:text-white transition-colors flex items-center gap-2">
         <i class="fa-solid fa-arrow-left"></i> Exploration 03: Trend Sparklines
       </a>
-      <a href="../acdu-architecture.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
-        Deep Dive: The Two-Box Architecture <i class="fa-solid fa-arrow-right"></i>
+      <a href="../acdu-architecture.html" class="font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+        Two-Box Architecture Deep-Dive <i class="fa-solid fa-arrow-right"></i>
       </a>
     </div>
 
