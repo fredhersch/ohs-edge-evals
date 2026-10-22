@@ -6,6 +6,20 @@
   <title>Exploration 04: aCDU Deontic Clamping &amp; Collision Calculus | OHS Edge Evals</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- KaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '\\[', right: '\\]', display: true},
+        {left: '\\(', right: '\\)', display: false}
+      ],
+      throwOnError: false
+    });"></script>
+
   <style>
     :root {
       --background: #090d16;
@@ -142,7 +156,7 @@
           <h2 class="text-xl font-bold text-white">The aCDU Concept: Discrete, Auditable State Units</h2>
         </div>
         <p class="text-[var(--muted-foreground)] leading-relaxed">
-          An <strong>Atomic Clinical Decision Unit (aCDU)</strong> is fundamentally different from a text chunk or a vector embedding. It is a clinician-audited, compact state tuple bounded to $\le 180$ tokens stored directly in on-device SQLite tables:
+          An <strong>Atomic Clinical Decision Unit (aCDU)</strong> is fundamentally different from a text chunk or a vector embedding. It is a clinician-audited, compact state tuple bounded to &le; 180 tokens stored directly in on-device SQLite tables:
         </p>
 
         <!-- Plain Terms Callout -->
@@ -153,15 +167,15 @@
         <!-- Formal Math Definition Card -->
         <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
           <div class="text-xs font-mono text-slate-400 font-bold uppercase">Mathematical Tuple Specification:</div>
-          <div class="text-sm font-mono text-white">
-            $$	ext{aCDU} = \langle 	ext{id}, 	ext{domain}, 	ext{preconditions}, \mathcal{R}^+, \mathcal{N}^-, 	au angle$$
+          <div class="text-base text-white py-1">
+            $$\text{aCDU} = \langle \text{id}, \text{domain}, \text{preconditions}, \mathcal{R}^+, \mathcal{N}^-, \tau \rangle$$
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-2 text-xs text-slate-300">
             <div><span class="font-mono text-slate-400">&bull; id:</span> Unique protocol identifier</div>
             <div><span class="font-mono text-slate-400">&bull; preconditions:</span> Deterministic state triggers</div>
-            <div><span class="font-mono text-slate-400">&bull; R+:</span> Mandated positive actions</div>
-            <div><span class="font-mono text-slate-400">&bull; N-:</span> Explicit negative boundaries</div>
-            <div><span class="font-mono text-slate-400">&bull; &tau;:</span> Priority Tier (1, 2, or 3)</div>
+            <div><span class="font-mono text-slate-400">&bull; \(\mathcal{R}^+\):</span> Mandated positive actions</div>
+            <div><span class="font-mono text-slate-400">&bull; \(\mathcal{N}^-\):</span> Explicit negative boundaries</div>
+            <div><span class="font-mono text-slate-400">&bull; &tau; (Priority Tier):</span> Tier 1, 2, or 3</div>
             <div><span class="font-mono text-slate-400">&bull; Budget:</span> &le; 180 tokens maximum</div>
           </div>
         </div>
@@ -206,13 +220,13 @@
         <!-- Formal Formula Box -->
         <div class="p-5 rounded-xl bg-slate-900 border border-slate-800 space-y-3 font-mono text-xs">
           <div class="text-slate-400 font-sans font-bold uppercase text-[11px]">The Deontic Clamping Equation:</div>
-          <div class="text-base font-bold text-white">
-            $$\mathcal{R}_{	ext{raw}} = igcup_{i \in 	ext{Active}} \mathcal{R}_i^+$$
-            $$\mathcal{N}_{	ext{veto}} = igcup_{j \in 	ext{Tier1}} \mathcal{N}_j^-$$
-            $$\mathcal{R}_{	ext{safe}} = \mathcal{R}_{	ext{raw}} \setminus \mathcal{N}_{	ext{veto}}$$
+          <div class="text-base text-white space-y-1 py-1 font-mono">
+            $$\mathcal{R}_{\text{raw}} = \bigcup_{i \in \text{Active}} \mathcal{R}_i^+$$
+            $$\mathcal{N}_{\text{veto}} = \bigcup_{j \in \text{Tier1}} \mathcal{N}_j^-$$
+            $$\mathcal{R}_{\text{safe}} = \mathcal{R}_{\text{raw}} \setminus \mathcal{N}_{\text{veto}}$$
           </div>
           <div class="text-slate-300 font-sans text-xs leading-relaxed pt-2 border-t border-slate-800">
-            <strong>The Veto Floor Principle:</strong> Any positive candidate action in $\mathcal{R}_{	ext{raw}}$ (e.g. <em>"Dispense oral Amoxicillin"</em>) that intersects with an active Tier-1 negative boundary constraint in $\mathcal{N}_{	ext{veto}}$ (e.g. <em>"Do NOT administer oral medications"</em>) is <strong>deterministically subtracted and erased</strong> from the candidate set prior to prompt compilation.
+            <strong>The Veto Floor Principle:</strong> Any positive candidate action in \(\mathcal{R}_{\text{raw}}\) (e.g. <em>"Dispense oral Amoxicillin"</em>) that intersects with an active Tier-1 negative boundary constraint in \(\mathcal{N}_{\text{veto}}\) (e.g. <em>"Do NOT administer oral medications"</em>) is <strong>deterministically subtracted and erased</strong> from the candidate set prior to prompt compilation.
           </div>
         </div>
 
@@ -233,7 +247,7 @@
                 <tr>
                   <td class="py-2.5 px-3 font-bold text-white">Tier 1: Emergency Veto Floor</td>
                   <td class="py-2.5 px-3">Convulsions, postpartum hemorrhage, obstructed labor, shock, anaphylaxis.</td>
-                  <td class="py-2.5 px-3 font-semibold text-slate-200">Absolute Veto ($\mathcal{N}_1$). Suppresses all oral treatments and home delays.</td>
+                  <td class="py-2.5 px-3 font-semibold text-slate-200">Absolute Veto (\(\mathcal{N}_1\)). Suppresses all oral treatments and home delays.</td>
                   <td class="py-2.5 px-3 text-slate-400">Strictly prunes non-emergency actions. SLM receives only emergency airway &amp; transport directives.</td>
                 </tr>
                 <tr>
@@ -277,7 +291,7 @@
             <span class="font-mono text-slate-400 font-bold text-[10px]">Step 2: Boundary Mining</span>
             <div class="font-bold text-white">Negative Mining</div>
             <p class="text-slate-400 leading-relaxed">
-              Every explicit <em>"DO NOT"</em>, contraindication, choking hazard, and referral trigger is extracted as a hard negative boundary constraint ($\mathcal{N}^-$).
+              Every explicit <em>"DO NOT"</em>, contraindication, choking hazard, and referral trigger is extracted as a hard negative boundary constraint (\(\mathcal{N}^-\)).
             </p>
           </div>
 
@@ -316,7 +330,7 @@
               <i class="fa-solid fa-language text-slate-400"></i> Hyper-Local Cultural Vernacular
             </h3>
             <p class="text-slate-300 leading-relaxed">
-              Local CHW supervisors and clinical officers inject community-specific synonyms and harmful remedies directly into the negative boundaries ($\mathcal{N}^-$):
+              Local CHW supervisors and clinical officers inject community-specific synonyms and harmful remedies directly into the negative boundaries (\(\mathcal{N}^-\)):
             </p>
             <ul class="space-y-1 text-slate-400 list-disc list-inside">
               <li><strong>Local Danger Terminology:</strong> Mapping Swahili <em>degedege</em> (febrile seizure), <em>homa kali</em> (high fever), and <em>kifua kikuu</em> (TB) into trigger criteria.</li>
@@ -431,7 +445,7 @@
           </div>
 
           <p class="text-xs text-slate-300 leading-relaxed">
-            Evaluating community health workers has historically been fraught with subjectivity—relying on periodic paper logbook audits or superficial checklist completions. Because an aCDU mathematically defines both the positive mandates ($\mathcal{R}^+$) and the negative boundary constraints ($\mathcal{N}^-$), it provides a <strong>rigorous, dual-axis evaluation rubric</strong>:
+            Evaluating community health workers has historically been fraught with subjectivity—relying on periodic paper logbook audits or superficial checklist completions. Because an aCDU mathematically defines both the positive mandates (\(\mathcal{R}^+\)) and the negative boundary constraints (\(\mathcal{N}^-\)), it provides a <strong>rigorous, dual-axis evaluation rubric</strong>:
           </p>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -439,7 +453,7 @@
             <!-- Axis 1: R+ Adherence -->
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-white text-xs">Axis 1: Positive Mandate Recall ($\mathcal{R}^+$ Adherence)</span>
+                <span class="font-bold text-white text-xs">Axis 1: Positive Mandate Recall (\(\mathcal{R}^+\) Adherence)</span>
                 <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/30">Action Competency</span>
               </div>
               <p class="text-slate-400 leading-relaxed text-[11px]">
@@ -455,7 +469,7 @@
             <!-- Axis 2: N- Safety -->
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
               <div class="flex items-center justify-between">
-                <span class="font-bold text-white text-xs">Axis 2: Negative Boundary Compliance ($\mathcal{N}^-$ Safety)</span>
+                <span class="font-bold text-white text-xs">Axis 2: Negative Boundary Compliance (\(\mathcal{N}^-\) Safety)</span>
                 <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-red-500/10 text-red-400 border border-red-500/30">Harm Avoidance</span>
               </div>
               <p class="text-slate-400 leading-relaxed text-[11px]">
@@ -501,7 +515,7 @@
 
           <p class="text-xs text-slate-300 leading-relaxed">
             The single most common complaint from rural caregivers is that digital health tools convert empathetic community health workers into detached data-entry clerks who stare at smartphone screens. 
-            Because the aCDU deterministically locks down clinical safety ($\mathcal{R}_{\text{safe}} = \mathcal{R}_{\text{raw}} \setminus \mathcal{N}_{\text{veto}}$), the on-device SLM can be safely unfettered to generate <strong>warm, conversational, vernacular counseling scripts</strong> tailored to the caregiver's household reality:
+            Because the aCDU deterministically locks down clinical safety (\(\mathcal{R}_{\text{safe}} = \mathcal{R}_{\text{raw}} \setminus \mathcal{N}_{\text{veto}}\)), the on-device SLM can be safely unfettered to generate <strong>warm, conversational, vernacular counseling scripts</strong> tailored to the caregiver's household reality:
           </p>
 
           <!-- 3 Concrete Dialogue Transformations -->

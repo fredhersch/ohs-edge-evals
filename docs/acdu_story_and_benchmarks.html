@@ -63,6 +63,18 @@
       color: #34d399;
     }
   </style>
+  <!-- KaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '\\[', right: '\\]', display: true},
+        {left: '\\(', right: '\\)', display: false}
+      ],
+      throwOnError: false
+    });"></script>
 </head>
 <body class="min-h-screen pb-16">
 
@@ -355,7 +367,7 @@
           </div>
           <div class="text-sm font-bold text-[var(--foreground)]">Deterministically Packages Clinical Rules &amp; Vetoes</div>
           <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-            Replaces 200-page MoH/WHO manuals with an indivisible clinical tuple that permanently fuses <strong>Mandated Positive Actions ($\mathcal{R}$)</strong> with <strong>Hard Negative Boundaries ($\mathcal{N}$, <code>"STOP: Do NOT..."</code>)</strong>.
+            Replaces 200-page MoH/WHO manuals with an indivisible clinical tuple that permanently fuses <strong>Mandated Positive Actions (\(\mathcal{R}\))</strong> with <strong>Hard Negative Boundaries (\(\mathcal{N}\), <code>"STOP: Do NOT..."</code>)</strong>.
           </p>
         </div>
       </div>
@@ -389,7 +401,7 @@
               <td class="py-2.5 px-3">
                 <strong>Eliminates Clinical RAG &amp; Safety Failures:</strong><br>
                 1. <em>Severed Contraindications:</em> Keeps dosing &amp; warnings fused.<br>
-                2. <em>Multi-Morbidity Collisions:</em> Enforces cross-disease vetoes ($\mathcal{N}_1 \cup \mathcal{N}_2$).<br>
+                2. <em>Multi-Morbidity Collisions:</em> Enforces cross-disease vetoes (\(\mathcal{N}_1 \cup \mathcal{N}_2\)).<br>
                 3. <em>Folk-Remedy Sycophancy:</em> Clamps explicit refusals (no ash/dung/kaloba).
               </td>
               <td class="py-2.5 px-3">
@@ -474,7 +486,7 @@
               <strong>1. FHIRPath Lab &amp; Med Extraction:</strong> Queries <code>Observation</code> and <code>MedicationRequest</code> to surface: <code>eGFR = 34 mL/min</code>, <code>Serum K+ = 4.9 mmol/L</code>, <code>LVEF = 32%</code>, <code>Metformin 1000mg BD</code>, <code>Spironolactone 25mg</code>.
             </p>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. Composable aCDU Union ($\mathcal{N}_1 \cup \mathcal{N}_2 \cup \mathcal{N}_3$):</strong> Quantitative FHIRPath thresholds fire <code>CDU-ACR-GOUT</code> + <code>CDU-KDIGO-CKD3B</code>:
+              <strong>2. Composable aCDU Union (\(\mathcal{N}_1 \cup \mathcal{N}_2 \cup \mathcal{N}_3\)):</strong> Quantitative FHIRPath thresholds fire <code>CDU-ACR-GOUT</code> + <code>CDU-KDIGO-CKD3B</code>:
               <em>"🛑 VETO 1: Avoid all oral NSAIDs (use Prednisolone 30mg x 5d). 🛑 VETO 2: Halve Metformin to &le;1000mg/day (eGFR 30–44). 🛑 VETO 3: Do not escalate Spironolactone with K+ 4.9."</em>
             </p>
           </div>

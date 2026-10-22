@@ -63,6 +63,18 @@
       color: #34d399;
     }
   </style>
+  <!-- KaTeX Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '\\[', right: '\\]', display: true},
+        {left: '\\(', right: '\\)', display: false}
+      ],
+      throwOnError: false
+    });"></script>
 </head>
 <body class="min-h-screen pb-16">
 
@@ -347,7 +359,7 @@
           <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
             <span class="text-[10px] font-mono uppercase text-slate-300 font-bold">Stage 3: Safety Floor &amp; Clamping</span>
             <div class="font-bold text-white">aCDU Unit Mapping</div>
-            <p class="text-slate-400">Maps recommendation codes to audited aCDUs ($&le; 180$ tok) that fuse mandated actions with hard negative boundaries (<code>STOP: Do NOT...</code>).</p>
+            <p class="text-slate-400">Maps recommendation codes to audited aCDUs (&le; 180 tokens) that fuse mandated actions with hard negative boundaries (<code>STOP: Do NOT...</code>).</p>
           </div>
 
           <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
@@ -472,7 +484,7 @@
               <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
                 <div class="text-slate-300 font-semibold font-mono">2. aCDU Mapping &amp; Deontic Check</div>
                 <p class="text-slate-400">
-                  Fires <code>CDU-ANC-ANEMIA-01</code> and <code>CDU-ANC-IMMZ-TD2</code>. Both are Tier 2. Deontic check verifies: $\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset$. No negative boundary conflicts.
+                  Fires <code>CDU-ANC-ANEMIA-01</code> and <code>CDU-ANC-IMMZ-TD2</code>. Both are Tier 2. Deontic check verifies: \(\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset\). No negative boundary conflicts.
                 </p>
               </div>
 
@@ -498,7 +510,7 @@
             </div>
 
             <p class="text-xs text-slate-300 leading-relaxed">
-              <strong>Clinical Scenario:</strong> A 14-month-old infant presents with high fever ($39.4^\circ\text{C}$), fast breathing (56 bpm), chest indrawing, AND active post-ictal lethargy following a generalized convulsion (<em>degedege</em>). Family asks if they can give oral amoxicillin or herbal tea.
+              <strong>Clinical Scenario:</strong> A 14-month-old infant presents with high fever (39.4&deg;C), fast breathing (56 bpm), chest indrawing, AND active post-ictal lethargy following a generalized convulsion (<em>degedege</em>). Family asks if they can give oral amoxicillin or herbal tea.
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
@@ -710,7 +722,7 @@
               <strong>1. OHS PlanDefinition $apply:</strong> Evaluates chronic care bundle. Gout flare fires gout action; eGFR 34 mL/min fires CKD Stage 3b action; K+ 4.9 fires hyperkalemia risk.
             </p>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU Deontic Union ($\mathcal{N}_1 \cup \mathcal{N}_2$):</strong> Fuses negative boundaries: <em>"🛑 VETO 1: Avoid all oral NSAIDs (use low-dose Prednisolone). 🛑 VETO 2: Halve Metformin to &le;1000mg/day. 🛑 VETO 3: Do not escalate Spironolactone."</em>
+              <strong>2. aCDU Deontic Union (\(\mathcal{N}_1 \cup \mathcal{N}_2\)):</strong> Fuses negative boundaries: <em>"🛑 VETO 1: Avoid all oral NSAIDs (use low-dose Prednisolone). 🛑 VETO 2: Halve Metformin to &le;1000mg/day. 🛑 VETO 3: Do not escalate Spironolactone."</em>
             </p>
           </div>
 
