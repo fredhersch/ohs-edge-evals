@@ -501,11 +501,12 @@ define "BCG Vaccine Contraindicated":
 
               <!-- Why L3 alone breaks at the edge -->
               <div class="p-2.5 rounded-lg bg-red-950/20 border border-red-500/20 text-xs space-y-1">
-                <div class="font-bold text-red-300 flex items-center gap-1.5 text-[11px]">
-                  <i class="fa-solid fa-triangle-exclamation"></i> The Gap in L3 Alone:
+                <div class="font-bold text-red-300 flex items-center justify-between text-[11px]">
+                  <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> The Gap in L3 Alone:</span>
+                  <span class="text-[10px] font-mono text-slate-400">Baseline (Zero-Shot / No RAG)</span>
                 </div>
                 <p class="text-slate-300 text-[11px] leading-relaxed">
-                  A raw boolean (<code>true</code>) gives an LLM no negative guardrails. When un-gated MedGemma 4B evaluated this patient, it rationalized: <em>"Benefits of TB protection outweigh the risk; give BCG carefully"</em> &rarr; <strong>100% lethal contraindication leak</strong> (fatal disseminated BCGitis). In a static UI, it simply shows an isolated error card, leaving the CHW baffled about the other 4 vaccines due today.
+                  A bare boolean (<code>true</code>) gives an LLM no negative guardrails. Under unconstrained evaluation (zero-shot without RAG, relying purely on pre-trained medical priors), MedGemma 4B rationalized: <em>"Benefits of TB protection outweigh the risk; give BCG carefully"</em> &rarr; <strong>100% lethal contraindication leak</strong> (fatal disseminated BCGitis). Under Naive RAG, chunk retrieval fragments contraindication tables and causes the same failure. A static app merely pops up 1 error box alongside 4 routine vaccine cards, confusing the health worker.
                 </p>
               </div>
 
@@ -582,9 +583,21 @@ define "BCG Vaccine Contraindicated":
               </div>
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-[11px] text-slate-400">
-              <span><strong>Evaluation Outcome:</strong> Tier-1 AST Scorer: <span class="text-emerald-400 font-bold">PASS (100%)</span> &bull; Mandatory Anchors: <span class="text-emerald-400 font-bold">5/5 Verified</span></span>
-              <span class="font-mono text-[10px] text-slate-500">Latency: 1.8s &bull; Tokens: 134 &bull; Word Count: 118w (&le;130w limit)</span>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800 text-[11px] text-slate-400">
+              <div>
+                <strong>Evaluation Outcome:</strong> Tier-1 AST Scorer: <span class="text-emerald-400 font-bold">PASS (100%)</span> &bull; Mandatory Anchors: <span class="text-emerald-400 font-bold">5/5 Verified</span>
+                <span class="text-slate-500">•</span>
+                <a href="benchmarks.html" class="text-blue-400 hover:text-blue-300 font-semibold underline inline-flex items-center gap-1">
+                  <span>View Full 30-Case Benchmark Data</span>
+                  <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-[10px] text-slate-500">Latency: 1.8s &bull; Tokens: 134 &bull; Words: 118w (&le;130w)</span>
+                <a href="https://github.com/fredhersch/ohs-edge-evals-suite" target="_blank" class="text-slate-400 hover:text-white text-[10px] font-mono underline" title="Standalone Evaluation Suite Platform on GitHub">
+                  [Eval Suite ↗]
+                </a>
+              </div>
             </div>
           </div>
         </div>
