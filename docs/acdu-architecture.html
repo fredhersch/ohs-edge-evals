@@ -72,54 +72,48 @@
       <div class="flex items-center space-x-3">
         <a href="index.html" class="flex items-center gap-2.5 group" title="OHS Edge • OHS Labs Research">
           <div class="relative w-8 h-8 flex-shrink-0">
-            <svg class="w-8 h-8 drop-shadow transition-transform duration-300 group-hover:scale-105" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="3" width="17" height="17" rx="5" fill="url(#arch-teal)" />
-              <rect x="24" y="3" width="17" height="17" rx="5" fill="url(#arch-blue)" />
-              <rect x="3" y="24" width="17" height="17" rx="5" fill="url(#arch-purple)" />
-              <rect x="24" y="24" width="17" height="17" rx="5" fill="url(#arch-amber)" />
+            <svg class="w-8 h-8 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="3" y="3" width="17" height="17" rx="4" fill="#1e293b" />
+              <rect x="24" y="3" width="17" height="17" rx="4" fill="#2563eb" />
+              <rect x="3" y="24" width="17" height="17" rx="4" fill="#1e3a8a" />
+              <rect x="24" y="24" width="17" height="17" rx="4" fill="#334155" />
               <path d="M22 12V17L17 27C16.3 28.5 17.4 30.5 19.1 30.5H24.9C26.6 30.5 27.7 28.5 27 27L22 17V12" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M19.5 12H24.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
-              <circle cx="21" cy="25.5" r="1.3" fill="#67e8f9" />
-              <circle cx="23.5" cy="22.5" r="1.0" fill="#fde047" />
-              <circle cx="20.5" cy="20" r="0.7" fill="#f472b6" />
-              <defs>
-                <linearGradient id="arch-teal" x1="3" y1="3" x2="20" y2="20" gradientUnits="userSpaceOnUse"><stop stop-color="#059669"/><stop offset="1" stop-color="#06b6d4"/></linearGradient>
-                <linearGradient id="arch-blue" x1="24" y1="3" x2="41" y2="20" gradientUnits="userSpaceOnUse"><stop stop-color="#2563eb"/><stop offset="1" stop-color="#6366f1"/></linearGradient>
-                <linearGradient id="arch-purple" x1="3" y1="24" x2="20" y2="41" gradientUnits="userSpaceOnUse"><stop stop-color="#7c3aed"/><stop offset="1" stop-color="#c026d3"/></linearGradient>
-                <linearGradient id="arch-amber" x1="24" y1="24" x2="41" y2="41" gradientUnits="userSpaceOnUse"><stop stop-color="#ea580c"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
-              </defs>
             </svg>
           </div>
           <span class="font-extrabold text-base tracking-tight text-[var(--foreground)]">OHS Edge Architecture</span>
         </a>
-        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 border border-purple-500/30 text-purple-300">
-          <i class="fa-solid fa-flask text-[10px] text-purple-400"></i>
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-800/80 border border-slate-700/80 text-slate-300">
+          <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
           <span>OHS Labs</span>
+          <span class="text-slate-500">•</span>
+          <span class="text-[10px] font-mono text-slate-400">RESEARCH</span>
+        </span>
           <span class="text-zinc-500">•</span>
           <span class="text-[9px] font-mono text-purple-200 tracking-wider">RESEARCH</span>
         </span>
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <a href="index.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] hover:text-white transition">
+        <a href="index.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-house mr-1"></i> Overview
         </a>
-        <a href="explorations/index.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] hover:text-white transition">
+        <a href="explorations/index.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-flask mr-1"></i> Explorations
         </a>
-        <a href="acdu-architecture.html" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-[var(--text-emerald)] transition">
+        <a href="acdu-architecture.html" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--card-muted)] border border-[var(--border)] text-white transition">
           <i class="fa-solid fa-shield-halved mr-1"></i> Two-Box Architecture
         </a>
-        <a href="benchmarks.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] hover:text-white transition">
+        <a href="benchmarks.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-chart-column mr-1"></i> Benchmarks
         </a>
-        <a href="datasets.html" class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] hover:text-white transition">
+        <a href="datasets.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-database mr-1"></i> Datasets
         </a>
-        <a href="playground.html" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600/20 border border-blue-500/40 text-[var(--text-blue)] hover:text-white transition">
+        <a href="playground.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-play mr-1"></i> Simulator
         </a>
-        <a href="studio.html" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-600/20 border border-purple-500/40 text-purple-300 hover:text-white transition">
+        <a href="studio.html" class="px-3 py-1.5 text-xs font-medium rounded-lg text-slate-400 hover:text-white hover:bg-[var(--card-muted)] transition">
           <i class="fa-solid fa-microchip mr-1"></i> Studio Suite
         </a>
         <button onclick="toggleTheme()" class="p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--card-muted)] text-[var(--muted-foreground)] transition" title="Toggle Light/Dark Mode">
@@ -131,9 +125,9 @@
 
   <!-- Hero Header -->
   <header class="max-w-7xl mx-auto px-6 pt-8 pb-6">
-    <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/60 border border-[var(--border)] shadow-xl relative overflow-hidden">
+    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border border-[var(--border)] rounded-2xl relative">
       <div class="max-w-4xl space-y-3">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-300 text-xs font-semibold">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">
           <i class="fa-solid fa-Lock"></i> Architectural Blueprint &amp; Empirical Proof
         </div>
         <h1 class="text-2xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
@@ -149,22 +143,22 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-slate-800">
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Box 1: SQLite aCDU Recall</div>
-          <div class="text-2xl font-black text-emerald-400 mt-0.5">100.0% <span class="text-xs font-normal text-slate-400">@ 0.6ms</span></div>
+          <div class="text-2xl font-bold text-white mt-0.5">100.0% <span class="text-xs font-normal text-slate-400">@ 0.6ms</span></div>
           <div class="text-xs text-slate-400 mt-0.5">Zero RAM overhead</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Check A: Patient Summary</div>
-          <div class="text-2xl font-black text-blue-400 mt-0.5">95% – 100%</div>
+          <div class="text-2xl font-bold text-white mt-0.5">95% – 100%</div>
           <div class="text-xs text-slate-400 mt-0.5">Gemma4 2B + Tokempic</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Level 2 Collision Lift (2B)</div>
-          <div class="text-2xl font-black text-purple-400 mt-0.5">10% &rarr; 60% <span class="text-xs font-normal text-emerald-400">(6x)</span></div>
+          <div class="text-2xl font-bold text-white mt-0.5">10% &rarr; 60% <span class="text-xs font-normal text-emerald-400">(6x)</span></div>
           <div class="text-xs text-slate-400 mt-0.5">Via aCDU Veto Clamping</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">MedGemma 4B Level-1 eCHIS</div>
-          <div class="text-2xl font-black text-amber-400 mt-0.5">90.0% <span class="text-xs font-normal text-emerald-400">(9/10)</span></div>
+          <div class="text-2xl font-bold text-white mt-0.5">90.0% <span class="text-xs font-normal text-emerald-400">(9/10)</span></div>
           <div class="text-xs text-slate-400 mt-0.5">70% on Tertiary PHC Collisions</div>
         </div>
       </div>
@@ -271,7 +265,7 @@
         </div>
 
         <!-- Step 2 -->
-        <div class="p-5 rounded-xl bg-emerald-950/20 border-2 border-emerald-500/50 flex flex-col justify-between space-y-4 relative">
+        <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] flex flex-col justify-between space-y-4 relative">
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">BOX 1: DETERMINISTIC FLOOR</span>
@@ -309,7 +303,7 @@
     <!-- =================================================================== -->
     <!-- How OHS Workflow Library ($apply), PlanDefinitions & aCDUs Work Together -->
     <!-- =================================================================== -->
-    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border-2 border-blue-500/40 space-y-8">
+    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-8">
       
       <!-- Section Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
@@ -328,7 +322,7 @@
       </div>
 
       <!-- Conceptual Demystification Card: The Pipeline Stages -->
-      <div class="p-5 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-3">
+      <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-blue-500/30 space-y-3">
         <div class="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
           <i class="fa-solid fa-circle-info"></i>
           Demystifying the Pipeline: Who Does What?
@@ -492,7 +486,7 @@
           </div>
 
           <!-- CASE 3: HIGH COMPLEXITY -->
-          <div class="p-5 rounded-xl bg-[var(--card-muted)] border-2 border-red-500/40 space-y-3">
+          <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-red-500/30 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
                 <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/30">
@@ -546,7 +540,7 @@
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
                 
                 <!-- FROM THIS: Raw Output Flood & Naive LLM (LETHAL) -->
-                <div class="p-4 rounded-xl bg-red-950/20 border-2 border-red-500/50 space-y-3">
+                <div class="p-4 rounded-xl bg-red-950/20 border border-red-500/30 space-y-3">
                   <div class="flex items-center justify-between pb-2 border-b border-red-500/30">
                     <span class="font-bold text-red-400 flex items-center gap-1.5">
                       <i class="fa-solid fa-triangle-exclamation"></i> FROM THIS: Raw Multi-Output Flood
@@ -578,7 +572,7 @@
                 </div>
 
                 <!-- TO THIS: aCDU Deontic Clamping + Edge SLM (SAFE) -->
-                <div class="p-4 rounded-xl bg-emerald-950/20 border-2 border-emerald-500/50 space-y-3">
+                <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-3">
                   <div class="flex items-center justify-between pb-2 border-b border-emerald-500/30">
                     <span class="font-bold text-emerald-400 flex items-center gap-1.5">
                       <i class="fa-solid fa-circle-check"></i> TO THIS: aCDU Clamped 3-Bullet Script
@@ -780,7 +774,7 @@
             <div id="sim-patient-box" class="text-xs font-mono bg-slate-950 text-slate-200 p-3 rounded-lg border border-slate-800 whitespace-pre-wrap leading-relaxed"></div>
           </div>
 
-          <div class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-2">
+          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-emerald-500/40 space-y-2">
             <div class="text-xs font-bold uppercase tracking-wider text-emerald-400 flex items-center justify-between">
               <span><i class="fa-solid fa-bolt mr-1"></i> Box 1: Deterministic SQLite Trigger</span>
               <span class="font-mono text-xs bg-emerald-500/20 px-2 py-0.5 rounded">0.6 ms | 100% Recall</span>
@@ -846,7 +840,7 @@
             Standard sliding-window paragraph retrieval. Simulates conventional RAG where positive treatment guidelines are retrieved, but negative warnings/contraindications are often severed into another chunk.
           </p>
         </div>
-        <div class="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-1.5">
+        <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-blue-500/30 space-y-1.5">
           <div class="text-xs font-bold text-blue-300 uppercase">2. Hierarchical Contextual RAG</div>
           <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
             Prepends every retrieved guideline chunk with its <strong>Parent MOH Policy Header</strong> and global scope-of-practice rule (e.g. <em>"CHPs may only give oral first-line meds; Contraindications have absolute veto power"</em>).
@@ -911,7 +905,7 @@
         </div>
 
         <!-- Level 2 Card -->
-        <div class="p-5 rounded-xl bg-purple-950/15 border-2 border-purple-500/50 flex flex-col justify-between space-y-4">
+        <div class="p-5 rounded-xl bg-purple-950/15 border border-[var(--border)] flex flex-col justify-between space-y-4">
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-bold">LEVEL 2 (10 Cases)</span>
@@ -1137,7 +1131,7 @@
     <!-- =================================================================== -->
     <!-- DEEP-DIVE AUDIT: WHERE THE SAFETY FLOOR OR PASS RATE WAS < 100%     -->
     <!-- =================================================================== -->
-    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border-2 border-amber-500/40 space-y-6 shadow-xl">
+    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-6 shadow-xl">
       <div class="space-y-2 border-b border-[var(--border)] pb-4">
         <span class="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold uppercase tracking-wider">Complete Diagnostic Audit</span>
         <h2 class="text-xl md:text-2xl font-bold text-[var(--foreground)]">Where Scores Were &lt;100%: Case-by-Case Breakdown of Every Miss</h2>
@@ -1291,7 +1285,7 @@
     <!-- Hardware Envelope Comparison -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Gemma4 2B Card -->
-      <div class="p-6 rounded-2xl bg-[var(--card)] border-2 border-blue-500/40 space-y-4">
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold">TIER 1: CHW HANDSET ENGINE</span>
@@ -1328,7 +1322,7 @@
       </div>
 
       <!-- MedGemma 4B Card -->
-      <div class="p-6 rounded-2xl bg-[var(--card)] border-2 border-emerald-500/40 space-y-4">
+      <div class="p-6 rounded-2xl bg-[var(--card)] border border-emerald-500/30 space-y-4">
         <div class="flex items-center justify-between">
           <div>
             <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold">TIER 2: RURAL CLINIC TABLET ENGINE</span>
@@ -1417,7 +1411,7 @@
           twobox: {
             badge: "✅ SAFE DE-CONFLICTED BRIEFING (aCDU + Gemma4 2B)",
             badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
-            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            screenClass: "bg-[var(--card-muted)] border-emerald-500/40 text-slate-100",
             output: `<div class="font-bold text-emerald-400 mb-2">🚨 EMERGENCY TRIAGE BRIEFING (Gemma4 2B — 2.1s):</div>
 <ul class="list-disc pl-5 space-y-2">
   <li><strong>🛑 DO NOT GIVE ORAL TABLETS:</strong> Because Baraka had a convulsion and is lethargic, <strong>strictly withhold oral AL and oral Amoxicillin</strong> (high risk of choking/aspiration).</li>
@@ -1470,7 +1464,7 @@
           twobox: {
             badge: "✅ EXPLICIT TETANUS REFUSAL + REFERRAL (aCDU + Gemma4 2B)",
             badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
-            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            screenClass: "bg-[var(--card-muted)] border-emerald-500/40 text-slate-100",
             output: `<div class="font-bold text-emerald-400 mb-2">🛑 POSTNATAL DANGER SIGN BRIEFING (Gemma4 2B — 1.9s):</div>
 <ul class="list-disc pl-5 space-y-2">
   <li><strong>🛑 Stop Cow Dung &amp; Ash Immediately:</strong> Respectfully explain to the grandmother that she must <strong>never apply cow dung or wood ash</strong> to the cord—they carry spores that cause fatal neonatal tetanus.</li>
@@ -1525,7 +1519,7 @@
           twobox: {
             badge: "✅ 100% CHECK A + CHECK B PASS (Tokempic + aCDU + Gemma4 2B)",
             badgeClass: "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40",
-            screenClass: "bg-emerald-950/20 border-emerald-500/40 text-slate-100",
+            screenClass: "bg-[var(--card-muted)] border-emerald-500/40 text-slate-100",
             output: `<div class="space-y-3 text-xs md:text-sm">
   <div class="p-2.5 rounded-lg bg-blue-950/40 border border-blue-500/30">
     <strong class="text-blue-300">Check A — Pre-Visit Trajectory Summary (1.9s):</strong><br>
