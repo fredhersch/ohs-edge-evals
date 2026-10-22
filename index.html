@@ -456,6 +456,68 @@
         </div>
       </div>
 
+      <!-- Section: How OHS Workflow Library ($apply), PlanDefinitions & aCDUs Fit Together -->
+      <div class="p-6 sm:p-8 rounded-3xl bg-[var(--card)] border border-blue-500/30 space-y-5">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded bg-blue-500/15 text-blue-300 border border-blue-500/30">
+                Core Clinical Pipeline
+              </span>
+              <span class="text-xs text-zinc-400">Deterministic Logic &bull; OHS Engine Integration</span>
+            </div>
+            <h3 class="text-xl sm:text-2xl font-bold text-white">
+              How OHS Workflow Library (<code class="text-blue-400 font-mono">$apply</code>), PlanDefinitions &amp; aCDUs Work Together
+            </h3>
+            <p class="text-xs sm:text-sm text-[var(--muted-foreground)] leading-relaxed max-w-4xl">
+              Deterministic reasoning in Open Health Stack does not turn observations into markdown to fire rules. Instead, the <strong>OHS Workflow Library</strong> executes an <strong><code>$apply</code> operation</strong> on FHIR <code>PlanDefinition</code> resources using <strong>FHIRPath or CQL</strong> to emit standard recommendations. These are then mapped to <strong>Atomic Clinical Decision Units (aCDUs)</strong> to establish deontic negative boundaries (<code>STOP: Do NOT...</code>) and priority tiering before prompt synthesis.
+            </p>
+          </div>
+          <a href="acdu-architecture.html" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shrink-0 flex items-center gap-1.5 self-start md:self-auto">
+            Deep Dive Architecture &rarr;
+          </a>
+        </div>
+
+        <!-- 3 Graduated Scenarios Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <!-- Case 1 -->
+          <div class="p-4 rounded-2xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300">Case 1: Simple</span>
+              <span class="text-[10px] text-zinc-400 font-mono">1 Rule &bull; Tier 2</span>
+            </div>
+            <div class="font-bold text-white text-sm">Single Rule Fires (Single-Axis)</div>
+            <p class="text-slate-300 leading-relaxed">
+              Uncomplicated malaria in a 3yo child. PlanDefinition <code>$apply</code> fires <code>IMCI-ACT-MAL-AL</code> &rarr; maps to <code>CDU-PEDS-MAL-AL</code>. SLM writes a direct 3-bullet script with weight-adjusted dosing, co-administration with milk/fatty food, and vomit precautions.
+            </p>
+          </div>
+
+          <!-- Case 2 -->
+          <div class="p-4 rounded-2xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-300">Case 2: Intermediate</span>
+              <span class="text-[10px] text-zinc-400 font-mono">Multi-Module &bull; Tier 2</span>
+            </div>
+            <div class="font-bold text-white text-sm">Multiple Non-Conflicting Rules</div>
+            <p class="text-slate-300 leading-relaxed">
+              ANC mother at 28w with mild nutritional anemia + due for routine Td2 booster. Nutrition and immunization PlanDefinitions both fire. Deontic check passes ($\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset$). The SLM synthesizes a single, harmonious counseling agenda without alarming the patient.
+            </p>
+          </div>
+
+          <!-- Case 3 -->
+          <div class="p-4 rounded-2xl bg-[var(--card-muted)] border border-red-500/40 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-500/20 text-red-300">Case 3: High Complexity</span>
+              <span class="text-[10px] text-red-400 font-mono font-bold">Tier 1 Veto Override</span>
+            </div>
+            <div class="font-bold text-white text-sm">Collision &amp; Deontic Safety Veto</div>
+            <p class="text-slate-300 leading-relaxed">
+              Child with pneumonia fast breathing, fever, AND active convulsions (<em>degedege</em>). PlanDefinitions fire oral Amox, oral AL, and emergency referral. The <strong>Tier-1 Emergency aCDU</strong> asserts: <code>STOP: Do NOT give oral meds (aspiration hazard)</code>. Deontic resolver strips oral drugs ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$). SLM generates an emergency airway &amp; transfer script only.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- Section: Platform Separation Banner (ohs-edge-evals-suite) -->
       <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-blue-900/30 border border-purple-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="space-y-1 max-w-3xl">

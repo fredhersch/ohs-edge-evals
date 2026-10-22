@@ -307,150 +307,271 @@
     </div>
 
     <!-- =================================================================== -->
-    <!-- aCDU vs. FHIRPath (SQL-on-FHIR / Tokempic): How They Complement     -->
+    <!-- How OHS Workflow Library ($apply), PlanDefinitions & aCDUs Work Together -->
     <!-- =================================================================== -->
-    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border-2 border-blue-500/40 space-y-6">
+    <div class="p-6 md:p-8 rounded-2xl bg-[var(--card)] border-2 border-blue-500/40 space-y-8">
+      
+      <!-- Section Header -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
         <div>
-          <span class="text-xs font-bold uppercase tracking-wider text-[var(--text-blue)]">Architectural Deep-Dive</span>
-          <h2 class="text-xl font-bold text-[var(--foreground)] mt-0.5">Is the aCDU the Safety Floor? (aCDU vs. FHIRPath / OHS Player)</h2>
-          <p class="text-xs md:text-sm text-[var(--muted-foreground)] mt-1">
-            <strong class="text-emerald-400">Yes—principally, the aCDU is the safety floor for the generative model.</strong> If the <strong>OHS Player (FHIRPath / CQL)</strong> is the clinical trigger (<em>"which protocols apply to this patient?"</em>), the <strong>aCDU</strong> is the safety-clamped instruction packet that makes it safe to hand those protocols over to a small (2B–4B) language model.
+          <span class="text-xs font-bold uppercase tracking-wider text-[var(--text-blue)]">Clinical Workflow Architecture</span>
+          <h2 class="text-xl sm:text-2xl font-bold text-[var(--foreground)] mt-0.5">
+            How OHS Workflow Library (<code class="text-blue-400 font-mono">$apply</code>), PlanDefinitions &amp; aCDUs Work Together
+          </h2>
+          <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-1 max-w-4xl leading-relaxed">
+            Clarifying the deterministic pipeline: how FHIR observations become structured CarePlan recommendations, why PlanDefinition actions require aCDU deontic wrapping, and how tiered conflicts are resolved before prompting edge SLMs.
           </p>
         </div>
-        <span class="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono text-[var(--text-emerald)] shrink-0">Patient State + Guideline Floor</span>
+        <span class="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-xs font-mono text-[var(--text-emerald)] shrink-0">
+          OHS Engine &bull; Deterministic &rarr; Generative
+        </span>
       </div>
 
-      <!-- 3 Ways aCDU Serves as the Safety Floor Beyond Standard FHIRPath / PlanDefinition -->
-      <div class="p-5 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-4">
-        <div class="text-xs font-bold uppercase tracking-wider text-emerald-300">
-          3 Specific Ways the aCDU Serves as the Safety Floor (Where Standard FHIRPath / PlanDefinition Rules Do Not)
+      <!-- Conceptual Demystification Card: The Pipeline Stages -->
+      <div class="p-5 rounded-xl bg-blue-950/20 border border-blue-500/30 space-y-3">
+        <div class="text-xs font-bold uppercase tracking-wider text-blue-300 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info"></i>
+          Demystifying the Pipeline: Who Does What?
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1.5">
-            <div class="font-bold text-emerald-400">1. Explicit "Do Not" Guardrails (<code>negative_boundaries</code>)</div>
-            <p class="text-slate-300 leading-relaxed">
-              Standard CQL/FHIRPath rules are almost entirely positive (<em>"If fast breathing &rarr; give oral Amoxicillin"</em>). They rarely encode explicit prohibitions against folk remedies, out-of-scope procedures, or dangerous drug combinations. The aCDU permanently fuses every positive action with its hard red lines (<code>STOP: Do NOT...</code>) so they can never be separated during retrieval.
-            </p>
-          </div>
-          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1.5">
-            <div class="font-bold text-purple-400">2. Collision Veto Hierarchy (<code>priority_tier</code>)</div>
-            <p class="text-slate-300 leading-relaxed">
-              When two conditions collide (e.g., <em>Pneumonia</em> requiring oral tablets + <em>Convulsions</em> forbidding anything by mouth), a standard rules engine just fires both alerts. The aCDU establishes a strict safety floor where a <strong>Tier-1 Veto</strong> overrides routine treatments before the SLM writes a single word.
-            </p>
-          </div>
-          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1.5">
-            <div class="font-bold text-blue-400">3. A Token-Budgeted "Prompt Contract" (<code>&le; 180 tokens</code>)</div>
-            <p class="text-slate-300 leading-relaxed">
-              Instead of feeding raw guideline paragraphs or verbose FHIR <code>PlanDefinition</code> JSON into an edge model (which dilutes attention on a 2B model), the aCDU distills the exact mandated actions and prohibitions into a compact, pre-audited block that a small model can reliably follow and translate into a clear 3-bullet script.
-            </p>
-          </div>
-        </div>
-        <div class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-200">
-          <strong>In One Sentence:</strong> <strong>FHIRPath in the OHS Player</strong> deterministically detects the patient's clinical state, while the <strong>aCDU</strong> acts as the deterministic safety floor and prompt wrapper that guarantees the on-device SLM can summarize, de-conflict, and communicate that state with <strong>zero fatal hallucinations</strong>.
-        </div>
-      </div>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          It is a common misconception that <em>"FHIRPath transforms observations into Markdown and then directly identifies the rules to fire."</em> In the real-world <strong>Open Health Stack (OHS)</strong> engine, there is a clear division of operational responsibility:
+        </p>
 
-      <!-- Visual Handshake Banner -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-        <div class="p-4 rounded-xl bg-blue-500/10 border border-blue-500/30 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-blue-300 uppercase">1. The Patient Side: FHIRPath</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-200">1,847 &rarr; 229 tokens</span>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2 text-xs">
+          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono uppercase text-blue-400 font-bold">Stage 1: Patient Context</span>
+            <div class="font-bold text-white">SQL-on-FHIR Views</div>
+            <p class="text-slate-400">Extracts and projects raw FHIR resources into relational rows and renders compact Markdown pre-visit briefings with normalized relative dates.</p>
           </div>
-          <div class="text-sm font-bold text-[var(--foreground)]">Deterministically Extracts &amp; Normalizes EHR State</div>
-          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-            Queries raw HL7 FHIR R4 JSON bundles (<code>Patient</code>, <code>Observation</code>, <code>Condition</code>, <code>Task</code>) via Tokempic <code>ViewDefinition</code>s. Pre-computes relative age (<code>16m</code>), strips LOINC codes, unifies BP (<code>148/96 mmHg</code>), and emits boolean flags.
-          </p>
-        </div>
 
-        <div class="p-4 rounded-xl bg-slate-950 border border-emerald-500/40 text-center space-y-2">
-          <div class="text-xs font-mono text-emerald-400 uppercase font-bold">&lt; 1 ms Deterministic Handshake</div>
-          <div class="text-sm font-bold text-white">IF <span class="text-blue-400">[FHIRPath Patient State]</span><br>&darr;<br>THEN <span class="text-emerald-400">[Trigger SQLite aCDU(s)]</span></div>
-          <p class="text-[11px] text-slate-400">
-            Combined Prompt: <strong>&lt; 450 tokens (~40 MB KV Cache)</strong> &mdash; leaves &gt;88% of a 4k window free on 3 GB RAM!
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-emerald-300 uppercase">2. The Guideline Side: aCDU</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-200">&le; 180 tokens / unit</span>
+          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono uppercase text-purple-400 font-bold">Stage 2: Deterministic Logic</span>
+            <div class="font-bold text-white">OHS Workflow <code class="text-purple-300">$apply</code></div>
+            <p class="text-slate-400">Applies <code>PlanDefinition</code> logic via <strong>FHIRPath or CQL</strong> over patient resources, outputting standard recommendation codes (<code>CarePlan</code>/<code>RequestGroup</code>).</p>
           </div>
-          <div class="text-sm font-bold text-[var(--foreground)]">Deterministically Packages Clinical Rules &amp; Vetoes</div>
-          <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-            Replaces 200-page MoH/WHO manuals with an indivisible clinical tuple that permanently fuses <strong>Mandated Positive Actions ($\mathcal{R}$)</strong> with <strong>Hard Negative Boundaries ($\mathcal{N}$, <code>"STOP: Do NOT..."</code>)</strong>.
-          </p>
+
+          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono uppercase text-emerald-400 font-bold">Stage 3: Safety Floor &amp; Clamping</span>
+            <div class="font-bold text-white">aCDU Unit Mapping</div>
+            <p class="text-slate-400">Maps recommendation codes to audited aCDUs ($&le; 180$ tok) that fuse mandated actions with hard negative boundaries (<code>STOP: Do NOT...</code>).</p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-slate-950/90 border border-slate-800 space-y-1">
+            <span class="text-[10px] font-mono uppercase text-amber-400 font-bold">Stage 4: Edge Synthesis</span>
+            <div class="font-bold text-white">2B Edge SLM Box 2</div>
+            <p class="text-slate-400">Generates empathetic, personalized 3-bullet talking points within the clamped boundaries, with zero fatal hallucinations.</p>
+          </div>
         </div>
       </div>
 
-      <!-- Comparison Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr class="border-b-2 border-[var(--border)] text-[var(--muted-foreground)] uppercase">
-              <th class="py-2.5 px-3">Dimension</th>
-              <th class="py-2.5 px-3 text-blue-300">FHIRPath (SQL-on-FHIR / Tokempic Views)</th>
-              <th class="py-2.5 px-3 text-emerald-300">Atomic Clinical Decision Unit (aCDU)</th>
-              <th class="py-2.5 px-3 text-amber-300">How They Complement Each Other</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[var(--border)]">
-            <tr>
-              <td class="py-2.5 px-3 font-bold">Primary Domain</td>
-              <td class="py-2.5 px-3"><strong>The Patient EHR:</strong> HL7 FHIR R4 resources (<code>Patient</code>, <code>Observation</code>, <code>Condition</code>, <code>Task</code>, <code>MedicationRequest</code>).</td>
-              <td class="py-2.5 px-3"><strong>The Clinical Guideline Corpus:</strong> Kenya MoH eCHIS &amp; WHO SMART Guidelines (iCCM, ANC, PNC, NCDs, Immunizations).</td>
-              <td class="py-2.5 px-3">FHIRPath extracts the <strong>patient facts</strong>; aCDU supplies the <strong>medical rules</strong> governing those facts.</td>
-            </tr>
-            <tr>
-              <td class="py-2.5 px-3 font-bold">2B SLM Failure Modes Solved</td>
-              <td class="py-2.5 px-3">
-                <strong>Eliminates EHR Arithmetic &amp; Formatting Bugs:</strong><br>
-                1. <em>LOINC Code Bleed:</em> Prevents <code>8480-6</code> leaking into BP.<br>
-                2. <em>Date-Math Hallucination:</em> Pre-computes <code>16m</code> so a 2025 birthdate isn't read as a "25yo adult".<br>
-                3. <em>Resource Blindspots:</em> Surfaces overdue <code>Task</code> referrals &amp; dipsticks.
-              </td>
-              <td class="py-2.5 px-3">
-                <strong>Eliminates Clinical RAG &amp; Safety Failures:</strong><br>
-                1. <em>Severed Contraindications:</em> Keeps dosing &amp; warnings fused.<br>
-                2. <em>Multi-Morbidity Collisions:</em> Enforces cross-disease vetoes ($\mathcal{N}_1 \cup \mathcal{N}_2$).<br>
-                3. <em>Folk-Remedy Sycophancy:</em> Clamps explicit refusals (no ash/dung/kaloba).
-              </td>
-              <td class="py-2.5 px-3">
-                Without FHIRPath, the SLM misreads the patient's age or vitals and triggers the wrong rule.<br>
-                Without the aCDU, the SLM reads the right vitals but hallucinates an unsafe treatment.
-              </td>
-            </tr>
-            <tr>
-              <td class="py-2.5 px-3 font-bold">What Happens If Used Alone?</td>
-              <td class="py-2.5 px-3">Emits clean tables or boolean flags (<code>Proteinuria = true</code>, <code>Contraindicated = true</code>), but has <strong>zero protocol text or negative guardrails</strong> to resolve collisions or guide counseling.</td>
-              <td class="py-2.5 px-3">Cannot parse nested FHIR JSON arrays, cannot calculate a child's age in months from an ISO <code>birthDate</code>, and cannot summarize a 4-visit BP trajectory.</td>
-              <td class="py-2.5 px-3 font-semibold text-emerald-300">Combined: 95%–100% Check A Summarization + 100% True Clinical Safety Floor.</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 3 GRADUATED CASES: Simple -> Intermediate -> Complex -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-emerald-400"></i>
+              The Three Graduated Operational Scenarios
+            </h3>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              How the OHS Workflow Library, PlanDefinitions, and aCDU units interact across increasing levels of clinical complexity.
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+
+          <!-- CASE 1: SIMPLE -->
+          <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  Case 1: Simple
+                </span>
+                <span class="text-sm font-bold text-white">Single Rule Fires (Single-Axis Protocol)</span>
+              </div>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">1 PlanDefinition &bull; 1 aCDU &bull; No Collisions</span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <strong>Clinical Scenario:</strong> A 3-year-old child presents with high fever in an endemic malaria zone. Rapid Diagnostic Test (mRDT) is positive for <em>Plasmodium falciparum</em>. Child is alert, drinking fluids, no danger signs, no chest indrawing.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-blue-400 font-semibold font-mono">1. OHS PlanDefinition $apply</div>
+                <p class="text-slate-400">
+                  Evaluates <code>PlanDefinition/imci-malaria</code>. CQL/FHIRPath rule: <code>mRDT == 'positive' and not(hasDangerSigns())</code> &rarr; fires recommendation: <code>IMCI-ACT-MAL-AL</code>.
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-emerald-400 font-semibold font-mono">2. Mapped aCDU (Tier 2 Acute)</div>
+                <p class="text-slate-400">
+                  Maps to <code>CDU-PEDS-MAL-AL</code>.<br>
+                  &bull; <strong>Mandate:</strong> Weight-based oral Artemether-Lumefantrine (AL) 3-day course.<br>
+                  &bull; <strong>Negative Boundary:</strong> <code>STOP: Do NOT give without food/milk; do NOT use monotherapy.</code>
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-purple-400 font-semibold font-mono">3. Downstream 2B SLM Synthesis</div>
+                <p class="text-slate-400">
+                  SLM writes a clean, focused 3-bullet script: 1st AL dose taken now in clinic with fatty food/milk, instructions for morning/evening doses, and return immediately if child vomits within 30 minutes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CASE 2: INTERMEDIATE -->
+          <div class="p-5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Case 2: Intermediate
+                </span>
+                <span class="text-sm font-bold text-white">Multiple Non-Conflicting Rules Across Modules</span>
+              </div>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">2 PlanDefinitions &bull; Deontic Check: Pass &bull; Harmonized Agenda</span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <strong>Clinical Scenario:</strong> A 24-year-old woman at 28 weeks gestation attends a routine ANC visit. Mild pallor observed, Hb 10.4 g/dL (mild nutritional anemia), BP 114/72 mmHg, asymptomatic. She is also due for her routine second dose of Tetanus Diphtheria (Td2) vaccine.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-blue-400 font-semibold font-mono">1. OHS PlanDefinition $apply</div>
+                <p class="text-slate-400">
+                  Two separate PlanDefinitions fire:<br>
+                  &bull; <code>who-anc-nutrition</code>: <code>Hb &lt; 11.0</code> &rarr; <code>ANC-ACT-IRON-FOLIC</code><br>
+                  &bull; <code>who-anc-immunization</code>: <code>gestation &ge; 28w and Td1 done</code> &rarr; <code>ANC-ACT-IMMZ-TD2</code>
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-emerald-400 font-semibold font-mono">2. aCDU Mapping &amp; Deontic Check</div>
+                <p class="text-slate-400">
+                  Fires <code>CDU-ANC-ANEMIA-01</code> and <code>CDU-ANC-IMMZ-TD2</code>. Both are Tier 2. Deontic check verifies: $\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset$. No negative boundary conflicts.
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-purple-400 font-semibold font-mono">3. Downstream 2B SLM Synthesis</div>
+                <p class="text-slate-400">
+                  Rather than handing the mother two disjointed instruction sheets, the SLM weaves a calm, unified consultation: explains the Td2 booster injection, reassures about expected stool darkening from iron, and advises taking tablets with citrus.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- CASE 3: HIGH COMPLEXITY -->
+          <div class="p-5 rounded-xl bg-[var(--card-muted)] border-2 border-red-500/40 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+                  Case 3: High Complexity
+                </span>
+                <span class="text-sm font-bold text-white">Multiple Rules Fire + Deontic Safety Override Triggered</span>
+              </div>
+              <span class="text-xs font-mono text-red-400 font-bold">Tier-1 Emergency Veto &bull; Oral Treatments Stripped</span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              <strong>Clinical Scenario:</strong> A 14-month-old infant presents with high fever ($39.4^\circ\text{C}$), fast breathing (56 bpm), chest indrawing, AND active post-ictal lethargy following a generalized convulsion (<em>degedege</em>). Family asks if they can give oral amoxicillin or herbal tea.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+              <div class="p-3 rounded-lg bg-black/40 border border-[var(--border)] space-y-1">
+                <div class="text-red-400 font-semibold font-mono">1. OHS PlanDefinition $apply Collision</div>
+                <p class="text-slate-400">
+                  Three independent modules fire at once:<br>
+                  &bull; Pneumonia: <code>IMCI-REC-PNEU-AMOX</code> (Oral Amox)<br>
+                  &bull; Malaria: <code>IMCI-REC-MAL-AL</code> (Oral AL)<br>
+                  &bull; Emergency: <code>IMCI-REC-DANGER-CONVULSIONS</code> (Hospital Referral)
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-red-500/30 space-y-1">
+                <div class="text-amber-400 font-semibold font-mono">2. Tier-1 aCDU Veto Pruning</div>
+                <p class="text-slate-400">
+                  <code>CDU-EMERGENCY-SEIZURE-01</code> (Tier 1) contains hard negative boundary: <code>STOP: Do NOT administer ANY oral fluids or oral medications (aspiration/choking hazard)</code>.<br>
+                  <strong>Deontic Resolver:</strong> Purges oral Amox and oral AL from prompt context!
+                </p>
+              </div>
+
+              <div class="p-3 rounded-lg bg-black/40 border border-emerald-500/30 space-y-1">
+                <div class="text-emerald-400 font-semibold font-mono">3. Clamped 2B SLM Synthesis</div>
+                <p class="text-slate-400">
+                  Because the oral drugs were deterministically pruned, the SLM cannot hallucinate force-feeding pills. It outputs an urgent emergency script: place in recovery position, keep airway clear, do NOT give oral fluids/pills, and coordinate immediate facility transport.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- TIER HIERARCHY REFERENCE TABLE -->
+      <div class="space-y-3 pt-2">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-layer-group text-purple-400"></i>
+          The aCDU Priority Tier Hierarchy
+        </h3>
+        <p class="text-xs text-[var(--muted-foreground)]">
+          When multiple recommendations fire from different PlanDefinitions, the aCDU tier hierarchy resolves deontic conflicts before prompt construction:
+        </p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase">
+                <th class="py-2.5 px-3">Priority Tier</th>
+                <th class="py-2.5 px-3">Clinical Domain &amp; Examples</th>
+                <th class="py-2.5 px-3">Deontic Veto Power</th>
+                <th class="py-2.5 px-3">Behavior on Downstream SLM</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)] text-zinc-300">
+              <tr class="bg-red-500/5">
+                <td class="py-2.5 px-3 font-bold text-red-400">Tier 1: Emergency Veto Floor</td>
+                <td class="py-2.5 px-3">Severe pre-eclampsia, convulsions, lethargy, respiratory distress, postpartum hemorrhage, anaphylaxis.</td>
+                <td class="py-2.5 px-3 font-semibold text-red-300">Overrides and suppresses all lower-tier oral/home actions ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$).</td>
+                <td class="py-2.5 px-3 text-slate-400">Enforces immediate referral messaging; strictly prohibits delays and contra-indicated home remedies.</td>
+              </tr>
+              <tr class="bg-amber-500/5">
+                <td class="py-2.5 px-3 font-bold text-amber-400">Tier 2: Acute Protocol Actions</td>
+                <td class="py-2.5 px-3">Oral amoxicillin for simple pneumonia, oral AL for uncomplicated malaria, ORS + zinc for diarrhea.</td>
+                <td class="py-2.5 px-3">Active only if no Tier 1 veto exists. Merged harmoniously with other non-colliding Tier 2 rules.</td>
+                <td class="py-2.5 px-3 text-slate-400">Synthesizes practical caregiver guidance: exact dosing, food co-administration, and return precautions.</td>
+              </tr>
+              <tr class="bg-blue-500/5">
+                <td class="py-2.5 px-3 font-bold text-blue-400">Tier 3: Routine &amp; Preventive</td>
+                <td class="py-2.5 px-3">Routine childhood immunizations, vitamin A supplementation, bed net distribution, lifestyle nutrition.</td>
+                <td class="py-2.5 px-3">Subordinate to Tiers 1 and 2. Can be deferred or scheduled for follow-up visit.</td>
+                <td class="py-2.5 px-3 text-slate-400">Merged into pre-visit agenda if time/capacity permits, or marked for next scheduled encounter.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- 4 Concrete Complementary Examples -->
       <div class="space-y-3 pt-2">
-        <h3 class="text-base font-bold text-[var(--foreground)]">4 Concrete Examples of FHIRPath + aCDU Working Together in Our Codebase</h3>
+        <h3 class="text-base font-bold text-[var(--foreground)]">4 Concrete Examples of PlanDefinition $apply + aCDU in Action</h3>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           <!-- Example 1 -->
           <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Example 1: Maternal Health (ANC)</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">observations.json &rarr; MNH-02</span>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/anc-pe &rarr; MNH-02</span>
             </div>
             <div class="text-sm font-bold text-[var(--foreground)]">Pre-Eclampsia Dipstick + Malaria Collision (Fatima Bello, 32w)</div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. FHIRPath (<code>chw-views/observations.json</code>):</strong> Raw FHIR buried her urine protein dipstick and overdue referral <code>Task</code>, and LOINC codes corrupted her BP jump (<code>126/82 &rarr; 148/96</code>). FHIRPath extracts:
+              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates maternal bundle. BP 148/96 + Proteinuria 1+ triggers emergency recommendation: <code>ANC-ACT-SEVERE-PRE-ECLAMPSIA</code>. Concurrently, mRDT+ triggers <code>ANC-ACT-MAL-AL</code>.
             </p>
-            <div class="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-blue-300 overflow-x-auto">
-              iif(interpretation.code = 'Abnormal' and display.contains('Protein'), '1+ Abnormal (Proteinuria / Pre-Eclampsia Sign)', ...)
-            </div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU (<code>KENYA-ECHIS-MNH-02</code>):</strong> The <code>Pre-Eclampsia Sign</code> flag fires <code>MNH-02</code>. Even when she tests <code>mRDT+</code> for malaria (<code>L2-002</code>), the aCDU injects the veto: <em>"🛑 STOP: Severe pre-eclampsia overrides routine home oral AL; do NOT give unmonitored home antihypertensives; refer immediately."</em>
+              <strong>2. aCDU Tier-1 Veto (<code>MNH-02</code>):</strong> Severe pre-eclampsia aCDU contains Tier-1 negative boundary: <em>"🛑 STOP: Severe pre-eclampsia overrides routine home oral AL; do NOT give unmonitored home antihypertensives; arrange immediate facility transfer."</em> The oral AL is suppressed.
             </p>
           </div>
 
@@ -458,32 +579,29 @@
           <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Example 2: Pediatric iCCM &amp; Nutrition</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">patient.json &rarr; ICCM-09</span>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/imci-sam &rarr; ICCM-09</span>
             </div>
             <div class="text-sm font-bold text-[var(--foreground)]">Eliminating Age-Math Hallucinations &rarr; Complicated SAM Triage</div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. FHIRPath Pre-Computed Age &amp; MUAC:</strong> On raw FHIR JSON (<code>birthDate: "2025-06-10"</code>), the 2B SLM latched onto <code>"25"</code> and hallucinated 16-month-old Kofi Mensah as a <strong>"25-year-old adult male"</strong>! FHIRPath pre-computes <code>age = 16m</code> and maps his <code>10.5 cm</code> MUAC:
+              <strong>1. OHS PlanDefinition $apply:</strong> Pre-computes age (16m) and MUAC (10.5 cm). Logic identifies severe acute malnutrition + acute fast breathing &rarr; emits <code>IMCI-ACT-COMPLICATED-SAM</code>.
             </p>
-            <div class="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-emerald-300 overflow-x-auto">
-              iif(interpretation.code = 'Red', 'Red (Severe Acute Malnutrition / Danger Sign)', ...)
-            </div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU (<code>KENYA-ECHIS-ICCM-09</code>):</strong> Normalized <code>age = 16m</code> + <code>Red (SAM)</code> + <code>fast breathing</code> triggers Complicated SAM: <em>"Refer to Inpatient Stabilization Center; 🛑 DO NOT give home RUTF (Plumpy'Nut) or routine iron during acute phase."</em>
+              <strong>2. aCDU Deontic Clamping (<code>ICCM-09</code>):</strong> Mandates emergency inpatient referral to stabilization center. Explicit negative boundary: <em>"🛑 DO NOT give home RUTF (Plumpy'Nut) or routine iron during acute complicated phase."</em>
             </p>
           </div>
 
           <!-- Example 3 -->
           <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Example 3: WHO SMART Guidelines (L3)</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">CQL/FHIRPath &rarr; IMMZ-BCG-01</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Example 3: WHO SMART Guidelines (Immunizations)</span>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/immz-hiv &rarr; CDU-IMMZ-BCG</span>
             </div>
             <div class="text-sm font-bold text-[var(--foreground)]">6-Week Symptomatic HIV-Exposed Infant Immunization Collision</div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. WHO SMART FHIRPath / CQL:</strong> Evaluates the infant's FHIR record (6 weeks old, HIV+ mother, oral thrush, failure to thrive) and returns a boolean: <code>BCG Vaccine Contraindicated = true</code>. Alone, a boolean doesn't stop an un-gated SLM: zero-shot MedGemma 4B administered <code>bOPV</code>, <code>Rotavirus</code>, and <code>BCG</code> anyway (<strong>3 lethal leaks</strong>).
+              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates infant record (6w old, HIV+ mother, oral thrush, failure to thrive). Logic returns boolean contraindication: <code>BCG_Contraindicated = true</code>, <code>bOPV_Contraindicated = true</code>.
             </p>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. WHO SMART aCDUs (<code>BCG-01</code>, <code>ROTA-01</code>, <code>POLIO-01</code>):</strong> Our compiler pairs the FHIRPath boolean with the Negative Boundary Union: <strong>give killed vaccines (<code>Penta-1</code>, <code>PCV-1</code>), switch live <code>bOPV</code> &rarr; inactivated <code>IPV</code>, and 🛑 WITHHOLD live <code>BCG</code> &amp; <code>Rotavirus</code></strong> (<strong>0 lethal leaks / 100% safe</strong>).
+              <strong>2. WHO SMART aCDUs:</strong> Pairs the PlanDefinition booleans with explicit vaccine safety rules: <strong>authorize killed vaccines (Penta-1, PCV-1), switch bOPV &rarr; IPV, and 🛑 WITHHOLD live BCG &amp; Rotavirus</strong> (0 lethal leaks / 100% safe).
             </p>
           </div>
 
@@ -491,15 +609,14 @@
           <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Example 4: Facility Multi-Morbidity</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">PHC-CASE-01 (4-Way Collision)</span>
+              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/phc-ncd &rarr; CDU-GOUT-CKD</span>
             </div>
             <div class="text-sm font-bold text-[var(--foreground)]">Acute Gout + Stage 3b CKD (eGFR 34) + HFrEF (EF 32%) + T2DM</div>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. FHIRPath Lab &amp; Med Extraction:</strong> Queries <code>Observation</code> and <code>MedicationRequest</code> to surface: <code>eGFR = 34 mL/min</code>, <code>Serum K+ = 4.9 mmol/L</code>, <code>LVEF = 32%</code>, <code>Metformin 1000mg BD</code>, <code>Spironolactone 25mg</code>.
+              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates chronic care bundle. Gout flare fires gout action; eGFR 34 mL/min fires CKD Stage 3b action; K+ 4.9 fires hyperkalemia risk.
             </p>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. Composable aCDU Union ($\mathcal{N}_1 \cup \mathcal{N}_2 \cup \mathcal{N}_3$):</strong> Quantitative FHIRPath thresholds fire <code>CDU-ACR-GOUT</code> + <code>CDU-KDIGO-CKD3B</code>:
-              <em>"🛑 VETO 1: Avoid all oral NSAIDs (use Prednisolone 30mg x 5d). 🛑 VETO 2: Halve Metformin to &le;1000mg/day (eGFR 30–44). 🛑 VETO 3: Do not escalate Spironolactone with K+ 4.9."</em>
+              <strong>2. aCDU Deontic Union ($\mathcal{N}_1 \cup \mathcal{N}_2$):</strong> Fuses negative boundaries: <em>"🛑 VETO 1: Avoid all oral NSAIDs (use low-dose Prednisolone). 🛑 VETO 2: Halve Metformin to &le;1000mg/day. 🛑 VETO 3: Do not escalate Spironolactone."</em>
             </p>
           </div>
 

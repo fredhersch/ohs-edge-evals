@@ -121,47 +121,85 @@
       </section>
 
       <!-- 2. THE EXPLORATION -->
-      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-6">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">2</div>
-          <h2 class="text-xl font-bold text-white">The Exploration: aCDU Architecture &amp; Pre-Prompt Deontic Pruning</h2>
+          <h2 class="text-xl font-bold text-white">The Exploration: OHS Workflow `$apply`, PlanDefinitions &amp; aCDU Deontic Clamping</h2>
         </div>
+        
         <p class="text-[var(--muted-foreground)] leading-relaxed">
-          We developed the <strong>Atomic Clinical Decision Unit (aCDU)</strong> framework. Rather than injecting broad textbook guidelines, clinical protocols are atomized into strictly formatted units under 180 tokens:
+          In the <strong>Open Health Stack (OHS)</strong> architecture, deterministic clinical reasoning is executed via an <strong><code>$apply</code>-style operation</strong> on HL7 FHIR <code>PlanDefinition</code> resources. The engine evaluates clinical logic written in <strong>FHIRPath or CQL</strong> against the patient bundle, outputting structured recommendation codes.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        <p class="text-xs text-slate-300 leading-relaxed">
+          However, raw PlanDefinition actions only declare what <em>to do</em> (positive clinical intent); they do not encode explicit prohibitions against dangerous community practices, nor do they resolve multi-morbidity collisions during natural language generation. We map each recommendation code to an <strong>Atomic Clinical Decision Unit (aCDU)</strong> bounded to $\le 180$ tokens:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
           <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-blue-400 font-semibold text-sm">1. Trigger Condition</div>
+            <div class="text-blue-400 font-semibold text-sm">1. PlanDefinition Trigger ($apply)</div>
             <p class="text-xs text-[var(--muted-foreground)]">
-              Evaluated deterministically via FHIRPath over the patient bundle (e.g. <code>Obs(BP) &gt; 140/90 AND Gestation &gt; 20w</code>).
+              Evaluated deterministically via FHIRPath/CQL in the OHS Workflow engine (e.g. <code>mRDT == 'positive' and gestation &gt; 20w</code>). Emits recommendation codes.
             </p>
           </div>
           <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-emerald-400 font-semibold text-sm">2. Mandated Action</div>
+            <div class="text-emerald-400 font-semibold text-sm">2. Mandated Action ($\mathcal{R}$)</div>
             <p class="text-xs text-[var(--muted-foreground)]">
-              Concrete protocol step the CHW must execute (e.g. <code>Immediate emergency referral to Level 4 Hospital</code>).
+              Concrete guideline protocol step the health worker must execute (e.g. <code>Urgent referral to CEmONC facility</code>).
             </p>
           </div>
           <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
-            <div class="text-red-400 font-semibold text-sm">3. Negative Boundary</div>
+            <div class="text-red-400 font-semibold text-sm">3. Negative Boundary ($\mathcal{N}$)</div>
             <p class="text-xs text-[var(--muted-foreground)]">
-              Explicit deontic prohibitions (e.g. <code>STOP: Do NOT give oral sedatives; do NOT advise home bedrest</code>).
+              Explicit deontic prohibitions (e.g. <code>STOP: Do NOT give oral medications; do NOT allow traditional oxytocic herbs</code>).
             </p>
+          </div>
+        </div>
+
+        <!-- 3 Graduated Cases Box -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-blue-500/30 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-blue-300">
+            How This Operates Across 3 Graduated Complexity Scenarios
+          </div>
+          
+          <div class="space-y-3 text-xs">
+            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <span class="font-bold text-blue-300">Case 1: Simple (Single Rule Fires)</span>
+              <p class="text-slate-300">
+                Child with positive malaria RDT and no danger signs. PlanDefinition <code>$apply</code> emits <code>IMCI-ACT-MAL-AL</code> &rarr; maps to <code>CDU-PEDS-MAL-AL</code>. SLM translates into a single 3-bullet script with weight-adjusted dosing, co-administration with fatty food/milk, and return precautions.
+              </p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <span class="font-bold text-emerald-300">Case 2: Intermediate (Multiple Non-Conflicting Rules Across Modules)</span>
+              <p class="text-slate-300">
+                ANC mother at 28w with mild anemia (Hb 10.4) and due for routine Td2 booster. Two separate PlanDefinitions fire: <code>ANC-ACT-IRON-FOLIC</code> and <code>ANC-ACT-IMMZ-TD2</code>. Deontic check confirms $\mathcal{N}_{\text{anemia}} \cap \mathcal{R}_{\text{immz}} = \emptyset$. The SLM harmonizes a single counseling visit covering both injection prep and iron side-effects without alarm.
+              </p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-[var(--card-muted)] border border-red-500/30 space-y-1">
+              <span class="font-bold text-red-300">Case 3: High Complexity (Multiple Rules Fire + Deontic Safety Override)</span>
+              <p class="text-slate-300">
+                Infant with pneumonia fast breathing, malaria fever, AND active convulsions (<em>degedege</em>). PlanDefinitions fire oral Amoxicillin, oral AL, and emergency referral. The <strong>Tier-1 Emergency aCDU</strong> (<code>CDU-EMERGENCY-SEIZURE-01</code>) asserts: <code>STOP: Do NOT give ANY oral fluids, food, or medications (aspiration/choking risk)</code>. The deontic conflict resolver strips oral amoxicillin and oral AL from the prompt context ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$). The SLM is clamped to generate an emergency transport script only.
+              </p>
+            </div>
           </div>
         </div>
 
         <div class="bg-black/40 border border-[var(--border)] p-4 rounded-xl space-y-2">
           <div class="text-xs font-mono text-zinc-400 flex justify-between items-center">
             <span>Pre-Prompt Deontic Conflict Resolver Logic</span>
-            <span class="text-blue-400 font-bold">Deterministic Gating</span>
+            <span class="text-blue-400 font-bold">Deterministic Veto Floor</span>
           </div>
           <pre class="text-xs font-mono text-blue-300 overflow-x-auto p-3 bg-black/60 rounded"><code># Deterministic conflict resolution before SLM prompt synthesis:
 # R_safe = R_raw \ N_bundle (Negative prohibitions override general guidance)
-if any(danger_flag in patient.active_flags for danger_flag in CRITICAL_DANGER_SIGNS):
-    # Strip out non-urgent home counseling talking points
-    retrieved_actions = [a for a in retrieved_actions if a.category == "EMERGENCY_REFERRAL"]
-    injected_prompt = build_clamped_prompt(retrieved_actions, negative_boundaries)</code></pre>
+for tier1_unit in active_acdus_by_tier(tier=1):
+    for negative_rule in tier1_unit.negative_boundaries:
+        # Veto and purge contradictory lower-tier positive actions
+        retrieved_actions = [a for a in retrieved_actions if not violates(a, negative_rule)]
+
+# Box 2 Generative SLM receives the safe, non-conflicting subset
+injected_prompt = compile_prompt(patient_summary, retrieved_actions, tier1_unit.negative_boundaries)</code></pre>
         </div>
       </section>
 
