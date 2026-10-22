@@ -503,10 +503,10 @@ define "BCG Vaccine Contraindicated":
               <div class="p-2.5 rounded-lg bg-red-950/20 border border-red-500/20 text-xs space-y-1">
                 <div class="font-bold text-red-300 flex items-center justify-between text-[11px]">
                   <span class="flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> The Gap in L3 Alone:</span>
-                  <span class="text-[10px] font-mono text-slate-400">Baseline (Zero-Shot / No RAG)</span>
+                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30">Zero-Shot (NO RAG)</span>
                 </div>
                 <p class="text-slate-300 text-[11px] leading-relaxed">
-                  A bare boolean (<code>true</code>) gives an LLM no negative guardrails. Under unconstrained evaluation (zero-shot without RAG, relying purely on pre-trained medical priors), MedGemma 4B rationalized: <em>"Benefits of TB protection outweigh the risk; give BCG carefully"</em> &rarr; <strong>100% lethal contraindication leak</strong> (fatal disseminated BCGitis). Under Naive RAG, chunk retrieval fragments contraindication tables and causes the same failure. A static app merely pops up 1 error box alongside 4 routine vaccine cards, confusing the health worker.
+                  A bare boolean (<code>true</code>) gives an LLM no negative guardrails. Under unconstrained evaluation (<strong>Zero-Shot, NO RAG</strong> &mdash; model receives only raw patient context with no retrieved guideline chunks and no aCDU floor, relying purely on pre-trained medical weights), MedGemma 4B rationalized: <em>"Benefits of TB protection outweigh the risk; give BCG carefully"</em> &rarr; <strong>100% lethal contraindication leak</strong> (fatal disseminated BCGitis). Under Naive RAG, chunk retrieval fragments contraindication tables and causes the same failure. A static app merely pops up 1 error box alongside 4 routine vaccine cards, confusing the health worker.
                 </p>
               </div>
 
