@@ -97,54 +97,65 @@
       </p>
     </div>
 
-    <!-- Core Conceptual Framing: Rules vs Advice & Small Model Confusion -->
-    <div class="p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/30 space-y-4">
+    <!-- Core Conceptual Framing: The Problem & Solution in Brief -->
+    <div class="p-5 rounded-2xl bg-gradient-to-r from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/30 space-y-3.5">
       <div class="flex items-center gap-2">
-        <span class="px-2.5 py-0.5 rounded text-[10px] font-bold font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
-          The Core Challenge
+        <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-blue-500/20 text-blue-300 border border-blue-500/30 uppercase tracking-wider">
+          The Problem in Brief
         </span>
-        <span class="text-xs text-slate-400 font-medium">Why Edge AI Needs More Than Just Computable Rules</span>
+        <span class="text-xs text-slate-400 font-medium">Why edge health workers need more than just computable guidelines or raw AI</span>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
         
-        <!-- Left: Computable Guidelines -->
-        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
-          <div class="font-bold text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-calculator text-blue-400"></i>
-            1. Computable Guidelines Process the RULES
+        <!-- 1. Computable Rules -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 flex flex-col justify-between">
+          <div>
+            <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-blue-400">
+              <i class="fa-solid fa-calculator"></i>
+              1. Rules Without Advice
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              Computable guidelines (like WHO SMART in CQL/FHIRPath) execute <strong>deterministic rules</strong>, but stop at raw boolean codes.
+            </p>
           </div>
-          <p class="text-slate-300 leading-relaxed text-xs">
-            Computable clinical guidelines (like WHO SMART Guidelines in CQL/FHIRPath) are designed to process deterministic <strong>RULES</strong>: <em>if age &lt; 5 and fever &ge; 38.5&deg;C &rarr; output recommendation code</em>.
-          </p>
-          <p class="text-slate-400 leading-relaxed text-xs">
-            <strong>The Limitation:</strong> But they stop at raw codes. They don't provide the <strong>Rationale</strong> (<em>why</em> a decision matters) OR the practical <strong>Advice</strong> that a Community Health Worker (CHW) needs to explain a diagnosis, address a mother's fears, or answer family questions with empathy. Crucially, computable rules cannot adapt advice across different operational contexts, translate into local vernacular languages (such as Swahili or Hausa), or communicate in ways that respectfully navigate local cultural beliefs and traditional home practices.
-          </p>
-        </div>
-
-        <!-- Right: Small Language Models -->
-        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2">
-          <div class="font-bold text-white text-sm flex items-center gap-2">
-            <i class="fa-solid fa-brain text-amber-400"></i>
-            2. When Advice Conflicts, SLMs Get Confused
+          <div class="p-2 rounded bg-black/40 border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed mt-2">
+            <strong>The Gap:</strong> They don't provide the <em>clinical rationale</em> or the <em>conversational advice</em> a CHW needs to answer family questions across local languages and cultural beliefs.
           </div>
-          <p class="text-slate-300 leading-relaxed text-xs">
-            Language models (especially small 1B–4B SLMs running offline on low-cost phones) excel at bridging this gap&mdash;generating conversational advice in local languages and framing culturally sensitive family explanations.
-          </p>
-          <p class="text-slate-400 leading-relaxed text-xs">
-            <strong>The Danger:</strong> When multiple clinical guidelines fire simultaneously and their advice conflicts, SLMs get easily confused. Small models attempt dangerous compromises (like trying to force-feed oral pills to an infant who just had a seizure), hallucinate unsafe middle grounds, or capitulate sycophantically to harmful cultural pressures (such as agreeing to apply cow dung or ash to an infected umbilical cord).
-          </p>
         </div>
 
-      </div>
-
-      <!-- The aCDU Bridge Summary Banner -->
-      <div class="p-3.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-xs text-slate-200 leading-relaxed flex items-start gap-3">
-        <i class="fa-solid fa-shield-halved text-blue-400 text-base mt-0.5 shrink-0"></i>
-        <div>
-          <strong class="text-white">The aCDU Solution:</strong> 
-          The <strong>Atomic Clinical Decision Unit (aCDU)</strong> provides a deterministic safety floor between computable rules and edge language models. It mathematically resolves guideline collisions (deontic veto) <em>before</em> the AI sees them, while equipping the model with the exact clinical rationale, hard negative boundaries (what <em>never</em> to do), and localized, culturally respectful talking points needed to support empathetic family counseling.
+        <!-- 2. Small Model Confusion -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 flex flex-col justify-between">
+          <div>
+            <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-amber-400">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              2. SLM Confusion &amp; Conflict
+            </div>
+            <p class="text-slate-300 leading-relaxed">
+              Small on-device models (1B–4B) can generate dialogue, but <strong>easily get confused when guidelines collide</strong>.
+            </p>
+          </div>
+          <div class="p-2 rounded bg-black/40 border border-slate-800/80 text-[11px] text-slate-400 leading-relaxed mt-2">
+            <strong>The Danger:</strong> When advice conflicts (e.g. pneumonia pills vs seizure airway safety), models invent lethal compromises or capitulate to dangerous local home practices.
+          </div>
         </div>
+
+        <!-- 3. The aCDU Bridge -->
+        <div class="p-4 rounded-xl bg-blue-950/30 border border-blue-500/40 space-y-1.5 flex flex-col justify-between">
+          <div>
+            <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-emerald-400">
+              <i class="fa-solid fa-shield-halved"></i>
+              3. The aCDU Safety Floor
+            </div>
+            <p class="text-slate-200 leading-relaxed">
+              <strong>aCDUs bridge this gap:</strong> they deterministically erase guideline contradictions (<em>deontic veto</em>) before prompting the SLM.
+            </p>
+          </div>
+          <div class="p-2 rounded bg-emerald-950/20 border border-emerald-500/30 text-[11px] text-emerald-300/90 leading-relaxed mt-2">
+            <strong>The Outcome:</strong> The model is constrained by strict negative boundaries (what <em>never</em> to do) while equipped with culturally respectful counseling points.
+          </div>
+        </div>
+
       </div>
     </div>
 
