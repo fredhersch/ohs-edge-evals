@@ -96,16 +96,61 @@
     <!-- Global Top Navigation Bar -->
     <nav class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-md font-bold text-sm tracking-wider">
-          OHS
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-base text-[var(--foreground)] tracking-tight">OHS Edge</span>
-            <span class="text-xs font-semibold font-semibold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/10 text-[var(--text-blue)] border border-blue-500/20">AI Commons</span>
+        <!-- OHS Labs Logo Mark -->
+        <a href="index.html" class="flex items-center gap-3 group" title="OHS Edge • OHS Labs Research">
+          <div class="relative w-10 h-10 flex-shrink-0">
+            <svg class="w-10 h-10 drop-shadow-md transition-transform duration-300 group-hover:scale-105" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <!-- 4 OHS Foundation Rounded Squares -->
+              <rect x="3" y="3" width="17" height="17" rx="5" fill="url(#ohs-teal-grad)" />
+              <rect x="24" y="3" width="17" height="17" rx="5" fill="url(#ohs-blue-grad)" />
+              <rect x="3" y="24" width="17" height="17" rx="5" fill="url(#ohs-purple-grad)" />
+              <rect x="24" y="24" width="17" height="17" rx="5" fill="url(#ohs-amber-grad)" />
+              
+              <!-- Research Beaker / Flask Overlay -->
+              <path d="M22 12V17L17 27C16.3 28.5 17.4 30.5 19.1 30.5H24.9C26.6 30.5 27.7 28.5 27 27L22 17V12" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19.5 12H24.5" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+              <!-- Research Bubbles -->
+              <circle cx="21" cy="25.5" r="1.3" fill="#67e8f9" />
+              <circle cx="23.5" cy="22.5" r="1.0" fill="#fde047" />
+              <circle cx="20.5" cy="20" r="0.7" fill="#f472b6" />
+
+              <defs>
+                <linearGradient id="ohs-teal-grad" x1="3" y1="3" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#059669"/>
+                  <stop offset="1" stop-color="#06b6d4"/>
+                </linearGradient>
+                <linearGradient id="ohs-blue-grad" x1="24" y1="3" x2="41" y2="20" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#2563eb"/>
+                  <stop offset="1" stop-color="#6366f1"/>
+                </linearGradient>
+                <linearGradient id="ohs-purple-grad" x1="3" y1="24" x2="20" y2="41" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#7c3aed"/>
+                  <stop offset="1" stop-color="#c026d3"/>
+                </linearGradient>
+                <linearGradient id="ohs-amber-grad" x1="24" y1="24" x2="41" y2="41" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#ea580c"/>
+                  <stop offset="1" stop-color="#f59e0b"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <span class="absolute -top-1 -right-1 flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border border-[#090d16]"></span>
+            </span>
           </div>
-          <p class="text-xs text-[var(--muted-foreground)]">Offline Edge LLM & Tokempic SQL-on-FHIR Suite</p>
-        </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-extrabold text-base text-[var(--foreground)] tracking-tight">OHS Edge</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                <i class="fa-solid fa-flask text-[10px] text-purple-400"></i>
+                <span>OHS Labs</span>
+                <span class="text-zinc-500">•</span>
+                <span class="text-[9px] font-mono text-purple-200 tracking-wider">RESEARCH</span>
+              </span>
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">Frontline SLMs • Offline Evals &amp; Safety Floors</p>
+          </div>
+        </a>
       </div>
 
       <!-- Navigation View Switcher Tabs -->
@@ -167,6 +212,16 @@
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden">
         <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
         <div class="space-y-4 max-w-4xl relative z-10">
+          <!-- OHS Labs Research Badge -->
+          <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-emerald-500/20 text-purple-200 border border-purple-500/40 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+            <span class="font-bold tracking-wide flex items-center gap-1.5">
+              <i class="fa-solid fa-flask text-purple-300"></i> OHS LABS
+            </span>
+            <span class="opacity-40">•</span>
+            <span class="text-[11px] font-mono text-purple-300 uppercase tracking-wider">Experimental Research Initiative</span>
+          </div>
+
           <div class="flex flex-wrap items-center gap-2">
             <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-[var(--text-blue)] border border-blue-500/30">
               Frontline Decision Support

@@ -1,5 +1,11 @@
 # OHS Edge Offline Edge LLM Evaluation Framework (`chw-edge-evals`)
 
+<p align="left">
+  <a href="https://fredhersch.github.io/ohs-edge-evals/"><img src="https://img.shields.io/badge/🧪%20OHS%20Labs-Experimental%20Research-8b5cf6?style=for-the-badge" alt="OHS Labs Research"></a>
+  <a href="https://fredhersch.github.io/ohs-edge-evals/"><img src="https://img.shields.io/badge/Open%20Health%20Stack-Edge%20Commons-06b6d4?style=for-the-badge" alt="Open Health Stack"></a>
+  <a href="https://fredhersch.github.io/ohs-edge-evals/benchmarks.html"><img src="https://img.shields.io/badge/Status-Active%20Exploration-10b981?style=for-the-badge" alt="Status"></a>
+</p>
+
 Evaluation harness, empirical benchmarks, and architectural specifications for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 4 2B, MedGemma 4B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Edge**.
 
 👉 **Live Documentation Hub:** [https://fredhersch.github.io/ohs-edge-evals/](https://fredhersch.github.io/ohs-edge-evals/)
