@@ -109,26 +109,34 @@
       </div>
 
       <!-- Navigation View Switcher Tabs -->
-      <div class="flex items-center gap-1.5 p-1 bg-[var(--surface-hover)] rounded-xl border border-[var(--border)] text-xs font-medium">
-        <button id="nav-btn-dashboard" onclick="switchMainView('dashboard')" class="main-tab-active px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-          <span>3-Way Benchmark Studio</span>
-        </button>
-        <button id="nav-btn-report" onclick="switchMainView('report')" class="px-3.5 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-all flex items-center gap-1.5">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span>Published Full Report</span>
-        </button>
-        <a href="vignettes.html" class="px-3.5 py-1.5 rounded-lg text-purple-400 hover:text-white bg-purple-600/15 border border-purple-500/30 transition-all flex items-center gap-1.5" title="Clinical Vignette Generator & Gold Standard Eval Suite">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-          <span>Vignette Studio</span>
+      <div class="flex flex-wrap items-center gap-1.5 p-1 bg-[var(--surface-hover)] rounded-xl border border-[var(--border)] text-xs font-medium">
+        <a href="index.html" class="main-tab-active px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 text-white">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          <span>Overview</span>
         </a>
-        <a href="gemma4_benchmark_report.html" class="px-3.5 py-1.5 rounded-lg text-emerald-400 hover:text-white bg-emerald-600/15 border border-emerald-500/30 transition-all flex items-center gap-1.5" title="Gemma 4 2B Kenya eCHIS Clinical Benchmark Report">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-          <span>Gemma 4 Report</span>
+        <a href="explorations/index.html" class="px-3 py-1.5 rounded-lg text-[var(--muted-foreground)] hover:text-white transition-all flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          <span>4 Explorations</span>
         </a>
-        <a href="acdu_story_and_benchmarks.html" class="px-3.5 py-1.5 rounded-lg text-amber-300 hover:text-white bg-amber-500/15 border border-amber-500/30 transition-all flex items-center gap-1.5" title="Interactive Two-Box Architecture Story, App Simulator & Multi-Model Benchmarks">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-          <span>aCDU Story &amp; Simulator</span>
+        <a href="acdu-architecture.html" class="px-3 py-1.5 rounded-lg text-amber-300 hover:text-white bg-amber-500/10 border border-amber-500/30 transition-all flex items-center gap-1.5" title="The Two-Box Architecture: aCDU Floor + Edge SLM">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <span>Two-Box Architecture</span>
+        </a>
+        <a href="benchmarks.html" class="px-3 py-1.5 rounded-lg text-emerald-400 hover:text-white bg-emerald-600/15 border border-emerald-500/30 transition-all flex items-center gap-1.5" title="Systematic Early Benchmarks">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          <span>Benchmarks</span>
+        </a>
+        <a href="datasets.html" class="px-3 py-1.5 rounded-lg text-yellow-300 hover:text-white bg-yellow-500/10 border border-yellow-500/30 transition-all flex items-center gap-1.5" title="Datasets and Synthetic Strategies">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+          <span>Datasets</span>
+        </a>
+        <a href="playground.html" class="px-3 py-1.5 rounded-lg text-blue-300 hover:text-white bg-blue-600/20 border border-blue-500/40 transition-all flex items-center gap-1.5 shadow-sm shadow-blue-500/20 font-semibold" title="Interactive aCDU Clinical Decision Unit Playground &amp; Downstream Impact Simulator">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Simulator</span>
+        </a>
+        <a href="studio.html" class="px-3 py-1.5 rounded-lg text-purple-400 hover:text-white bg-purple-600/20 border border-purple-500/40 transition-all flex items-center gap-1.5 shadow-sm font-semibold" title="Evaluation Suite Platform">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <span>Studio Suite</span>
         </a>
       </div>
 
@@ -151,6 +159,275 @@
         </button>
       </div>
     </nav>
+
+    <!-- EXECUTIVE NARRATIVE: ADVANCING SLMs FOR FRONTLINE CARE AT THE EDGE -->
+    <section class="space-y-8 pb-8 border-b border-[var(--border)]">
+
+      <!-- Hero Header -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden">
+        <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="space-y-4 max-w-4xl relative z-10">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/15 text-[var(--text-blue)] border border-blue-500/30">
+              Frontline Decision Support
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/15 text-[var(--text-emerald)] border border-emerald-500/30">
+              Offline Edge Intelligence
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-500/15 text-[var(--text-purple)] border border-purple-500/30">
+              1B–4B SLM Class
+            </span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+            Advancing Small Language Models (SLMs) for Edge Frontline Health Workers
+          </h1>
+
+          <p class="text-base sm:text-lg text-[var(--foreground-secondary)] leading-relaxed">
+            Community Health Workers (CHWs) and mid-level clinical officers in low-connectivity settings require responsive, hallucination-safe clinical decision support on budget Android hardware ($&lt;4$ GB RAM). This framework establishes the empirical evaluation rigor, deterministic safety floors, and token compression pipelines necessary to make 1B–4B parameter models clinically dependable offline.
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Quantized Target</div>
+              <div class="text-lg font-bold text-white">1B – 4B Models</div>
+              <div class="text-[11px] text-blue-400">INT4 / INT8 On-Device</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Hardware Ceiling</div>
+              <div class="text-lg font-bold text-white">&lt;3.5 GB RAM</div>
+              <div class="text-[11px] text-emerald-400">Zero LMK App Terminations</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Prefill Latency</div>
+              <div class="text-lg font-bold text-white">&lt;200 ms TTFT</div>
+              <div class="text-[11px] text-purple-400">ARM Cortex-A53 / A55</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Deterministic Safety</div>
+              <div class="text-lg font-bold text-white">96.7% Adherence</div>
+              <div class="text-[11px] text-amber-400">Two-Box aCDU Floor</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: The 5 Problems We Are Working Through -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-bold">5</span>
+              The Five Core Problems We Are Working Through
+            </h2>
+            <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-0.5">
+              From token starvation to multimodal diagnostics: the technical roadmap for frontline edge SLMs.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <!-- Problem 1 -->
+          <div class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold text-blue-400 uppercase tracking-wider">01. Context Length</div>
+            <h3 class="text-sm font-bold text-white">Token Starvation</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              2B models have limited context windows (4K–8K). A single longitudinal patient encounter can exhaust 80%+ of KV cache, leaving no room for guidelines or generation.
+            </p>
+          </div>
+
+          <!-- Problem 2 -->
+          <div class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider">02. FHIR Integration</div>
+            <h3 class="text-sm font-bold text-white">Raw JSON Bloat</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              HL7 FHIR JSON induces severe date-math hallucinations and LOINC code bleed on small SLMs. Solved via SQL-on-FHIR templates achieving 14x–34x compression.
+            </p>
+          </div>
+
+          <!-- Problem 3 -->
+          <div class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold text-amber-400 uppercase tracking-wider">03. Visualizations</div>
+            <h3 class="text-sm font-bold text-white">Serial Trends</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Small models miss trajectory risks (growth faltering, hypertensive creep). In-prompt Unicode sparklines and slope tags raise faltering detection from 42% to 94%.
+            </p>
+          </div>
+
+          <!-- Problem 4 -->
+          <div class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold text-red-400 uppercase tracking-wider">04. Safety Floors</div>
+            <h3 class="text-sm font-bold text-white">Sycophancy &amp; Collisions</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Unconstrained SLMs compromise with dangerous traditional practices (ash on cord). Atomic Clinical Decision Units (aCDU) enforce hard negative boundaries (<code>STOP: Do NOT...</code>).
+            </p>
+          </div>
+
+          <!-- Problem 5 -->
+          <div class="p-4 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-2">
+            <div class="text-xs font-bold text-purple-400 uppercase tracking-wider">05. Multimodality</div>
+            <h3 class="text-sm font-bold text-white">Vision &amp; Audio</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Benchmarking on-device vision for Rapid Diagnostic Test (RDT) faint lines, 7-segment BP monitor LCD displays, and acoustic cough screening for tuberculosis triage.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Model Feasibility on Edge Hardware -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-microchip text-blue-400"></i>
+              Model Feasibility at the Edge: Gemma 4 2B vs. MedGemma 4B
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              What actually fits and runs reliably on a $100 budget Android smartphone without crashing the OS?
+            </p>
+          </div>
+          <a href="benchmarks.html" class="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
+            View full benchmark matrix &rarr;
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-emerald-500/30 space-y-2">
+            <div class="flex justify-between items-start">
+              <div class="font-bold text-white text-sm">Gemma 4 2B (INT4)</div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-semibold uppercase">Recommended</span>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] space-y-1">
+              <div>• <strong>RAM:</strong> 1.38 GB weights + 240 MB KV cache</div>
+              <div>• <strong>TTFT:</strong> 180 ms | <strong>Speed:</strong> 18.4 tok/s</div>
+              <div>• <strong>Budget Phone:</strong> <span class="text-emerald-400 font-semibold">Runs safely</span> with ~800 MB free OS headroom on 3 GB devices.</div>
+              <div>• <strong>Clinical Adherence:</strong> <span class="text-emerald-400 font-semibold">96.7%</span> when paired with aCDU safety floor.</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-amber-500/30 space-y-2">
+            <div class="flex justify-between items-start">
+              <div class="font-bold text-white text-sm">Qwen 2.5 3B (INT4)</div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold uppercase">Marginal</span>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] space-y-1">
+              <div>• <strong>RAM:</strong> 1.82 GB weights + 320 MB KV cache</div>
+              <div>• <strong>TTFT:</strong> 310 ms | <strong>Speed:</strong> 13.1 tok/s</div>
+              <div>• <strong>Budget Phone:</strong> Near the Android Low Memory Killer (LMK) boundary on 3 GB devices.</div>
+              <div>• <strong>Clinical Adherence:</strong> Strong multilingual reasoning; requires aggressive memory tuning.</div>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-red-500/30 space-y-2">
+            <div class="flex justify-between items-start">
+              <div class="font-bold text-white text-sm">MedGemma 4B (INT4)</div>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-semibold uppercase">High End Only</span>
+            </div>
+            <div class="text-xs text-[var(--muted-foreground)] space-y-1">
+              <div>• <strong>RAM:</strong> 2.74 GB weights + 480 MB KV cache</div>
+              <div>• <strong>TTFT:</strong> 620 ms | <strong>Speed:</strong> 9.2 tok/s</div>
+              <div>• <strong>Budget Phone:</strong> <span class="text-red-400 font-semibold">Triggers LMK crash</span> on 3 GB phones. Requires 6 GB+ RAM tablet/handset.</div>
+              <div>• <strong>Clinical Adherence:</strong> Deep clinical domain prior; ideal for facility-based clinical officers.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: The 4 Core Explorations Cards -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <i class="fa-solid fa-flask text-purple-400"></i>
+              Current Explorations &amp; Case Studies
+            </h2>
+            <p class="text-xs sm:text-sm text-[var(--muted-foreground)] mt-0.5">
+              Each exploration presents: <strong>The Problem</strong> &rarr; <strong>The Exploration</strong> &rarr; <strong>The Insight (Non-Conclusive)</strong> &rarr; <strong>Next Steps</strong>.
+            </p>
+          </div>
+          <a href="explorations/index.html" class="text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1">
+            View all 4 case studies &rarr;
+          </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Card 1 -->
+          <a href="explorations/sql-on-fhir-markdown.html" class="group block p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-blue-500/50 hover:bg-[var(--card-muted)] transition-all space-y-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center justify-center font-bold text-xs">01</div>
+            <h3 class="text-sm font-bold text-white group-hover:text-blue-400 transition-colors">SQL-on-FHIR + Markdown</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Overcoming 14x–34x JSON bloat and date-math traps on 2B models using schema-governed templates.
+            </p>
+            <span class="text-xs font-semibold text-blue-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+              Read exploration &rarr;
+            </span>
+          </a>
+
+          <!-- Card 2 -->
+          <a href="explorations/zero-ram-mini-rag.html" class="group block p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-emerald-500/50 hover:bg-[var(--card-muted)] transition-all space-y-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold text-xs">02</div>
+            <h3 class="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">Zero-RAM Protocol RAG</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Replacing memory-heavy vector embeddings with SQLite FTS5 and Swahili vernacular synonym maps.
+            </p>
+            <span class="text-xs font-semibold text-emerald-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+              Read exploration &rarr;
+            </span>
+          </a>
+
+          <!-- Card 3 -->
+          <a href="explorations/longitudinal-trend-viz.html" class="group block p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-amber-500/50 hover:bg-[var(--card-muted)] transition-all space-y-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center font-bold text-xs">03</div>
+            <h3 class="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">Trend Sparklines &amp; Viz</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Encoding growth faltering and BP creep into text sparklines; raises detection from 42% to 94%.
+            </p>
+            <span class="text-xs font-semibold text-amber-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+              Read exploration &rarr;
+            </span>
+          </a>
+
+          <!-- Card 4 -->
+          <a href="explorations/acdu-deontic-clamping.html" class="group block p-5 rounded-2xl bg-[var(--card)] border border-[var(--border)] hover:border-purple-500/50 hover:bg-[var(--card-muted)] transition-all space-y-3">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center font-bold text-xs">04</div>
+            <h3 class="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">aCDU Deontic Clamping</h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              Enforcing explicit negative boundaries (<code>STOP: Do NOT</code>) to stop lethal sycophantic advice.
+            </p>
+            <span class="text-xs font-semibold text-purple-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+              Read exploration &rarr;
+            </span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section: Platform Separation Banner (ohs-edge-evals-suite) -->
+      <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-blue-900/30 border border-purple-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="space-y-1 max-w-3xl">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/40">
+              Tooling Update
+            </span>
+            <span class="text-xs text-zinc-400">Separation of Platform from Evals</span>
+          </div>
+          <h3 class="text-lg font-bold text-white">
+            OHS Edge Visual Evaluation &amp; RLHF Studio has moved to a dedicated repository!
+          </h3>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            The interactive evaluation platform developed at <code>studio.html</code> is now standalone in <strong><code>ohs-edge-evals-suite</code></strong>. It contains the local Ollama/Gemini runner, side-by-side comparator, pairwise DPO preference studio, and Hugging Face TRL export.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <a href="studio.html" class="px-4 py-2 rounded-xl text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white transition-all shadow-md flex items-center gap-1.5">
+            <i class="fa-solid fa-play"></i> Launch Studio Preview
+          </a>
+          <a href="https://github.com/fredhersch/ohs-edge-evals" target="_blank" class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--surface-hover)] border border-[var(--border)] text-zinc-300 hover:text-white transition-colors">
+            Repo Details
+          </a>
+        </div>
+      </div>
+
+    </section>
 
     <!-- VIEW 1: Interactive 3-Way Benchmark Dashboard -->
     <div id="view-dashboard" class="space-y-6">

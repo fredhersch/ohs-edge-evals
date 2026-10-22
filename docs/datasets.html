@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dataset Catalog &amp; Synthetic Data Strategies | OHS Edge Evals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --card-muted: #172033;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased bg-[#090d16] text-[#f8fafc]">
+
+  <!-- Header -->
+  <header class="border-b border-[#263352] bg-[#111827]/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-2 text-white font-bold text-lg hover:text-blue-400 transition-colors">
+          <i class="fa-solid fa-microchip text-blue-500"></i>
+          <span>OHS Edge Evals</span>
+        </a>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium">Data Catalog</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="index.html" class="text-zinc-400 hover:text-white transition-colors">Overview</a>
+        <a href="explorations/index.html" class="text-zinc-400 hover:text-white transition-colors">Explorations</a>
+        <a href="acdu-architecture.html" class="text-zinc-400 hover:text-white transition-colors">Two-Box Architecture</a>
+        <a href="benchmarks.html" class="text-zinc-400 hover:text-white transition-colors">Benchmarks</a>
+        <a href="datasets.html" class="text-amber-400 font-semibold">Datasets</a>
+        <a href="studio.html" class="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1.5 font-medium">
+          <i class="fa-solid fa-flask"></i> Studio Suite
+        </a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/fredhersch/ohs-edge-evals" target="_blank" class="text-xs px-3 py-1.5 rounded-lg border border-[#263352] bg-[#172033] hover:bg-[#263352] text-white transition-colors flex items-center gap-2">
+          <i class="fa-brands fa-github"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
+
+    <!-- Hero Title -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-semibold text-amber-400 uppercase tracking-wider">
+        <span>Data Assets &amp; Methodology</span>
+        <span>•</span>
+        <span>Catalog &amp; Synthetic Pipeline</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+        Relevant Dataset Catalog &amp; Synthetic Boosting
+      </h1>
+      <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed">
+        A curated compendium of frontline primary care evaluation datasets across clinical text, computer vision, and audio, accompanied by scalable strategies to boost synthetic clinical text data for edge SLM evaluation and alignment.
+      </p>
+    </div>
+
+    <!-- Section 1: Frontline Clinical Text Datasets -->
+    <section class="bg-[#111827] border border-[#263352] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-notes-medical text-blue-400"></i>
+          1. Frontline Health Worker Clinical Datasets
+        </h2>
+        <p class="text-xs text-zinc-400">
+          Curated benchmarks capturing protocol adherence, syndromic triage, and linguistic nuances in low-resource primary care.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-white text-base">MamaBench &amp; MamaRetrieval</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">434 Narratives</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Maternal, neonatal, and pediatric primary care narratives from Sub-Saharan Africa. Introduces <strong>Bias Trap Rate (BTR)</strong> via matched counterfactual pairs (e.g. normal pregnancy vs sudden severe headache and vision changes) to test diagnostic stability.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-white text-base">Iy&agrave;w&oacute;Bench (v1.0 &amp; v2.0)</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">West Africa PHC</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Synthesized vignettes based on clinic distributions in Nigeria. Features an asymmetric loss evaluation: specifically penalizes dangerous down-triaging (where a case requiring immediate hospital referral is mistakenly triaged as home care).
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-white text-base">Rwandan CHW Clinical Questions</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">5,609 Questions</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Real inquiries collected from 101 rural community health workers across Rwanda in English and Kinyarwanda. Evaluates whether LLMs provide safe guidance within local scope vs general practitioners.
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-white text-base">WHO IMCI &amp; TIMCI Graph Benchmarks</h3>
+            <span class="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono">Graph Traversal</span>
+          </div>
+          <p class="text-xs text-zinc-400 leading-relaxed">
+            Synthetic and nurse-collected scenarios structured against WHO Integrated Management of Childhood Illness (IMCI) decision trees, testing exact algorithmic adherence on pediatric fever, cough, and dehydration.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Computer Vision & Audio Datasets -->
+    <section class="bg-[#111827] border border-[#263352] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-camera text-emerald-400"></i>
+          2. Edge Computer Vision &amp; Primary Care Audio
+        </h2>
+        <p class="text-xs text-zinc-400">
+          Multimodal datasets for evaluating on-device visual reading of diagnostics and acoustic cough triage.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="font-semibold text-white text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-vial text-emerald-400"></i> Rapid Diagnostic Tests (RDTs)
+          </div>
+          <p class="text-xs text-zinc-400">
+            <strong>Figshare COVID/Malaria LFA &amp; HealthPulse:</strong> Mobile captures under variable ambient light, glare, and shadows to benchmark line detection and weak positive interpretation.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="font-semibold text-white text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-display text-blue-400"></i> Medical Device Displays
+          </div>
+          <p class="text-xs text-zinc-400">
+            <strong>Roboflow Medical OCR:</strong> Labeled bounding boxes and polygon masks isolating 7-segment digital LCD displays on oscillometric BP monitors, pulse oximeters, and thermometers.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="font-semibold text-white text-sm flex items-center gap-1.5">
+            <i class="fa-solid fa-lungs text-purple-400"></i> Cough &amp; Primary Care Audio
+          </div>
+          <p class="text-xs text-zinc-400">
+            <strong>COUGHVID, Coswara &amp; PriMock57:</strong> Acoustic cough recordings for automated TB triage, paired with outpatient primary consultation dialogues for noise-robust ASR benchmarking.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Ideas for Boosting Synthetic Text Data -->
+    <section class="bg-[#111827] border border-[#263352] rounded-2xl p-6 sm:p-8 space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+          3. How to Boost Synthetic Clinical Text Data at Scale
+        </h2>
+        <p class="text-xs text-zinc-400">
+          Four proven methodologies for generating high-fidelity, safety-critical synthetic clinical data without relying on expensive human clinician drafting.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+
+        <!-- Strategy A -->
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex items-center gap-2 text-amber-400 font-semibold text-sm">
+            <i class="fa-solid fa-shuffle"></i>
+            <span>Strategy A: Counterfactual Danger-Sign Perturbation</span>
+          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Take a certified, benign encounter record (e.g. routine ANC visit at 28 weeks) and systematically generate a counterfactual twin by injecting a single high-consequence danger sign (e.g. <code>BP 155/105 mmHg</code>, <code>fetal movements absent x24h</code>, or <code>unilateral leg swelling</code>). This directly isolates whether an SLM reacts to the critical clinical delta or suffers from confirmation bias.
+          </p>
+        </div>
+
+        <!-- Strategy B -->
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex items-center gap-2 text-blue-400 font-semibold text-sm">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Strategy B: Multi-Morbidity Collision Stacking ($k=2..6$)</span>
+          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Real patients rarely have a single textbook illness. Synthetically stack overlapping clinical profiles (e.g. severe malaria + active convulsions + malnutrition; or CKD Stage 3b + acute gout flare + heart failure). Challenge the model to identify the single overriding triage priority and avoid giving contraindicated therapies (e.g. prohibiting NSAIDs in CKD).
+          </p>
+        </div>
+
+        <!-- Strategy C -->
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+            <i class="fa-solid fa-language"></i>
+            <span>Strategy C: Vernacular Dialect &amp; Code-Switching Perturbation</span>
+          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Use high-capacity teacher models (e.g. Gemini 4 Pro / Gemini 3.8 Flash) with structured locale seed files (e.g. <code>kenya_echis.yaml</code>) to rewrite standard clinical questions into rural Swahili, Sheng slang, Nigerian Pidgin, or Indian Hinglish. Incorporate colloquial symptom idioms (e.g. <em>homa kali na degedege</em>, <em>kuharisha maji</em>) to benchmark vernacular retrieval.
+          </p>
+        </div>
+
+        <!-- Strategy D -->
+        <div class="p-5 rounded-xl border border-[#263352] bg-[#172033] space-y-2">
+          <div class="flex items-center gap-2 text-purple-400 font-semibold text-sm">
+            <i class="fa-solid fa-code-compare"></i>
+            <span>Strategy D: Automated DPO Preference Pair Synthesis (RLAIF)</span>
+          </div>
+          <p class="text-xs text-zinc-300 leading-relaxed">
+            Run unconstrained baseline models against the exact same scenario with and without the aCDU safety floor. The clamped completion serves as the <strong>Chosen</strong> gold standard, while the unconstrained completion containing sycophantic compromises (e.g. accepting cow dung cord care) serves as the <strong>Rejected</strong> negative example. This automates the creation of thousands of DPO pairs for offline SLM alignment without human annotation.
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Navigation Footer -->
+    <div class="flex justify-between items-center pt-8 border-t border-[#263352]">
+      <a href="benchmarks.html" class="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Empirical Benchmarks
+      </a>
+      <a href="index.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+        Return to Overview <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+  </main>
+</body>
+</html>

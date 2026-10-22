@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exploration: aCDU Deontic Clamping | OHS Edge Evals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --card-muted: #172033;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+      --text-emerald: #34d399;
+      --text-amber: #fbbf24;
+      --text-red: #f87171;
+      --text-blue: #60a5fa;
+      --text-purple: #c084fc;
+    }
+    body {
+      --background-color: var(--background);
+      color: var(--foreground);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased bg-[#090d16] text-[#f8fafc] selection:bg-blue-500/30">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-[var(--border)] bg-[var(--card)]/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="../index.html" class="flex items-center gap-2 text-white font-bold text-lg hover:text-blue-400 transition-colors">
+          <i class="fa-solid fa-microchip text-blue-500"></i>
+          <span>OHS Edge Evals</span>
+        </a>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-medium">Explorations</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="../index.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Overview</a>
+        <a href="sql-on-fhir-markdown.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">1. FHIR Compression</a>
+        <a href="zero-ram-mini-rag.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">2. Zero-RAM RAG</a>
+        <a href="longitudinal-trend-viz.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">3. Trend Sparklines</a>
+        <a href="acdu-deontic-clamping.html" class="text-blue-400 font-semibold">4. aCDU Clamping</a>
+        <a href="../acdu-architecture.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Two-Box Architecture</a>
+        <a href="../benchmarks.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Benchmarks</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/fredhersch/ohs-edge-evals" target="_blank" class="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-muted)] hover:bg-[var(--border)] text-white transition-colors flex items-center gap-2">
+          <i class="fa-brands fa-github"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+
+    <!-- Header Section -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
+        <span>Exploration 04</span>
+        <span>•</span>
+        <span>Clinical Safety Floors &amp; Conflict Resolution</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+        Atomic Clinical Decision Units (aCDU) &amp; Deontic Clamping
+      </h1>
+      <p class="text-lg text-[var(--muted-foreground)] leading-relaxed">
+        Why small 2B language models cave into adversarial prompts and dangerous cultural traps, and how micro-protocol negative boundaries (`STOP: Do NOT...`) raise clinical safety compliance from 50% to 96.7%.
+      </p>
+    </div>
+
+    <!-- 4-Stage Write-Up Grid -->
+    <div class="space-y-8">
+
+      <!-- 1. THE PROBLEM -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold">1</div>
+          <h2 class="text-xl font-bold text-white">The Problem: Sycophancy &amp; Hallucinated Compromise on 2B Models</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          Small language models are vulnerable to conversational pressure. In low-resource frontline settings, health workers routinely encounter complex community dilemmas:
+        </p>
+        <ul class="space-y-2 text-sm text-[var(--muted-foreground)] list-disc list-inside">
+          <li><strong>Dangerous Traditional Practices:</strong> Family demands putting cow dung or herbal paste on an infected umbilical cord.</li>
+          <li><strong>Out-of-Scope Requests:</strong> Mother requests injectable antibiotics or IV fluids at home for an infant in respiratory distress.</li>
+          <li><strong>Colliding Morbidities:</strong> Patient has severe malaria with convulsions AND acute cough; baseline SLMs attempt oral amoxicillin while ignoring immediate hospital transfer.</li>
+        </ul>
+
+        <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm leading-relaxed mt-4">
+          <strong>The Baseline Failure Mode:</strong> An unconstrained 2B model seeks to be helpful. In our adversarial tests, Gemma 2 2B produced lethal compromises like: <em>"You may allow the traditional herbal tea in moderation while waiting for the health center"</em> or <em>"Community health workers should administer oral cotrimoxazole immediately"</em>, directly violating national MOH scopes of practice.
+        </div>
+      </section>
+
+      <!-- 2. THE EXPLORATION -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">2</div>
+          <h2 class="text-xl font-bold text-white">The Exploration: aCDU Architecture &amp; Pre-Prompt Deontic Pruning</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          We developed the <strong>Atomic Clinical Decision Unit (aCDU)</strong> framework. Rather than injecting broad textbook guidelines, clinical protocols are atomized into strictly formatted units under 180 tokens:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-blue-400 font-semibold text-sm">1. Trigger Condition</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Evaluated deterministically via FHIRPath over the patient bundle (e.g. <code>Obs(BP) &gt; 140/90 AND Gestation &gt; 20w</code>).
+            </p>
+          </div>
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-emerald-400 font-semibold text-sm">2. Mandated Action</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Concrete protocol step the CHW must execute (e.g. <code>Immediate emergency referral to Level 4 Hospital</code>).
+            </p>
+          </div>
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-red-400 font-semibold text-sm">3. Negative Boundary</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Explicit deontic prohibitions (e.g. <code>STOP: Do NOT give oral sedatives; do NOT advise home bedrest</code>).
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-black/40 border border-[var(--border)] p-4 rounded-xl space-y-2">
+          <div class="text-xs font-mono text-zinc-400 flex justify-between items-center">
+            <span>Pre-Prompt Deontic Conflict Resolver Logic</span>
+            <span class="text-blue-400 font-bold">Deterministic Gating</span>
+          </div>
+          <pre class="text-xs font-mono text-blue-300 overflow-x-auto p-3 bg-black/60 rounded"><code># Deterministic conflict resolution before SLM prompt synthesis:
+# R_safe = R_raw \ N_bundle (Negative prohibitions override general guidance)
+if any(danger_flag in patient.active_flags for danger_flag in CRITICAL_DANGER_SIGNS):
+    # Strip out non-urgent home counseling talking points
+    retrieved_actions = [a for a in retrieved_actions if a.category == "EMERGENCY_REFERRAL"]
+    injected_prompt = build_clamped_prompt(retrieved_actions, negative_boundaries)</code></pre>
+        </div>
+      </section>
+
+      <!-- 3. THE INSIGHT -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">3</div>
+          <h2 class="text-xl font-bold text-white">The Insight: Negative Boundaries are Essential for Small Models</h2>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm leading-relaxed">
+          <strong>Key Finding:</strong> On the 30-case Kenya eCHIS benchmark, adding aCDU negative boundary clamping raised Tier-1 deterministic safety compliance from <strong>50.0% to 93.3% (strict) / 96.7% (soft)</strong> on Gemma 4 2B. Unsafe community compromises were completely eliminated.
+        </div>
+
+        <h3 class="text-base font-bold text-white pt-2">Why This Exploration is Not Conclusive:</h3>
+        <ul class="space-y-3 text-sm text-[var(--muted-foreground)]">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <div>
+              <strong class="text-white">Conversational Tone Stiffness:</strong> When heavily clamped with `STOP: Do NOT`, 2B models can adopt a scolding, punitive tone that risks alienating patients in real-world counseling.
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <div>
+              <strong class="text-white">Authoring &amp; Curation Burden:</strong> Writing and certifying thousands of negative boundary pairs across all primary care conditions requires clinical consensus and ongoing maintenance.
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 4. NEXT STEPS -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold">4</div>
+          <h2 class="text-xl font-bold text-white">Next Steps &amp; Open Questions</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">Automated DPO Alignment</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Use clamped vs unclamped outputs as synthetic preference pairs to fine-tune 2B SLMs with DPO, internalizing negative boundaries directly into model weights.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">FHIR PlanDefinition Compiler</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Build an automated compiler that ingests WHO SMART Guideline PlanDefinitions and emits certified aCDU registries directly.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">Frontline Empathetic Framing</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Refine prompts to guide the SLM in communicating negative prohibitions empathetically using local culturally-respectful dialogue.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="flex justify-between items-center pt-8 border-t border-[var(--border)]">
+      <a href="longitudinal-trend-viz.html" class="text-sm text-[var(--muted-foreground)] hover:text-white transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Exploration 03: Trend Sparklines
+      </a>
+      <a href="../acdu-architecture.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+        Deep Dive: The Two-Box Architecture <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+  </main>
+</body>
+</html>

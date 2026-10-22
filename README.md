@@ -1,6 +1,23 @@
 # OHS Edge Offline Edge LLM Evaluation Framework (`chw-edge-evals`)
 
-Evaluation harness and benchmark suite for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 2 2B, Llama 3.2 3B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Edge**.
+Evaluation harness, empirical benchmarks, and architectural specifications for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 4 2B, MedGemma 4B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Edge**.
+
+👉 **Live Documentation Hub:** [https://fredhersch.github.io/ohs-edge-evals/](https://fredhersch.github.io/ohs-edge-evals/)
+
+---
+
+## Technical Explorations & Architecture Pages
+
+1. **[SQL-on-FHIR + Tokempic Markdown](https://fredhersch.github.io/ohs-edge-evals/explorations/sql-on-fhir-markdown.html):** 14x–34x token compression, eliminating date-math breakdowns and LOINC code bleed.
+2. **[Zero-RAM Protocol Mini-RAG](https://fredhersch.github.io/ohs-edge-evals/explorations/zero-ram-mini-rag.html):** SQLite FTS5 guideline retrieval with Swahili vernacular synonym expansion (100% recall).
+3. **[Longitudinal Trend Sparklines](https://fredhersch.github.io/ohs-edge-evals/explorations/longitudinal-trend-viz.html):** Dual-mode text sparklines raising pediatric growth faltering triage from 42% to 94%.
+4. **[aCDU Deontic Clamping](https://fredhersch.github.io/ohs-edge-evals/explorations/acdu-deontic-clamping.html):** Explicit negative boundary enforcement (`STOP: Do NOT...`) raising clinical safety adherence from 50% to 96.7%.
+5. **[The Two-Box Architecture Deep-Dive](https://fredhersch.github.io/ohs-edge-evals/acdu-architecture.html):** How deterministic logic (FHIRPath / PlanDefinitions) and edge SLMs divide clinical decision support.
+6. **[Empirical Benchmarks](https://fredhersch.github.io/ohs-edge-evals/benchmarks.html):** 30-case Kenya eCHIS, AST Scorer vs Regex, and hardware feasibility metrics.
+7. **[Dataset Catalog & Synthetic Strategies](https://fredhersch.github.io/ohs-edge-evals/datasets.html):** Frontline clinical, CV, and audio datasets + 4 strategies to boost synthetic text.
+8. **[Visual Evals & RLHF Suite](ohs-edge-evals-suite/):** The interactive evaluation platform is now housed in its own package/repo `ohs-edge-evals-suite`.
+
+---
 
 ## Overview
 

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exploration: Longitudinal Trends &amp; Sparklines | OHS Edge Evals</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --background: #090d16;
+      --card: #111827;
+      --card-muted: #172033;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
+      --text-emerald: #34d399;
+      --text-amber: #fbbf24;
+      --text-red: #f87171;
+      --text-blue: #60a5fa;
+      --text-purple: #c084fc;
+    }
+    body {
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="min-h-screen antialiased selection:bg-blue-500/30">
+
+  <!-- Navigation Bar -->
+  <header class="border-b border-[var(--border)] bg-[var(--card)]/90 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="../index.html" class="flex items-center gap-2 text-white font-bold text-lg hover:text-blue-400 transition-colors">
+          <i class="fa-solid fa-microchip text-blue-500"></i>
+          <span>OHS Edge Evals</span>
+        </a>
+        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 font-medium">Explorations</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="../index.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Overview</a>
+        <a href="sql-on-fhir-markdown.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">1. FHIR Compression</a>
+        <a href="zero-ram-mini-rag.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">2. Zero-RAM RAG</a>
+        <a href="longitudinal-trend-viz.html" class="text-blue-400 font-semibold">3. Trend Sparklines</a>
+        <a href="acdu-deontic-clamping.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">4. aCDU Clamping</a>
+        <a href="../acdu-architecture.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Two-Box Architecture</a>
+        <a href="../benchmarks.html" class="text-[var(--muted-foreground)] hover:text-white transition-colors">Benchmarks</a>
+      </nav>
+      <div class="flex items-center gap-3">
+        <a href="https://github.com/fredhersch/ohs-edge-evals" target="_blank" class="text-xs px-3 py-1.5 rounded-lg border border-[var(--border)] bg-[var(--card-muted)] hover:bg-[var(--border)] text-white transition-colors flex items-center gap-2">
+          <i class="fa-brands fa-github"></i>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+
+    <!-- Header Section -->
+    <div class="space-y-4">
+      <div class="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider">
+        <span>Exploration 03</span>
+        <span>•</span>
+        <span>Visual Cues &amp; Longitudinal Reasoning</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
+        Longitudinal Trend Interpretation &amp; Text Sparklines
+      </h1>
+      <p class="text-lg text-[var(--muted-foreground)] leading-relaxed">
+        Why 2B edge models miss insidious trajectory risks in raw longitudinal vitals, and how compact Unicode sparklines and deterministic slope cues elevate growth faltering detection from 42% to 94%.
+      </p>
+    </div>
+
+    <!-- 4-Stage Write-Up Grid -->
+    <div class="space-y-8">
+
+      <!-- 1. THE PROBLEM -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 font-bold">1</div>
+          <h2 class="text-xl font-bold text-white">The Problem: Static Point Values Mask Clinical Trajectories</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          Frontline care is fundamentally longitudinal: an infant weighing 7.8 kg at 9 months may look acceptable as an isolated observation, but represents <strong>severe growth faltering</strong> if the child weighed 8.4 kg two months earlier. Similarly, a blood pressure of 138/88 mmHg in pregnancy is insidious if baseline was 105/65 mmHg.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-red-400 font-semibold text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-line"></i> Numerical Derivative Blindness
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Edge SLMs (1B–4B) lack the multi-step mathematical reasoning to compute delta percentages and rates-of-change across scattered timestamps in tabular data.
+            </p>
+          </div>
+
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-red-400 font-semibold text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-bell"></i> False Reassurance Traps
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              When given raw serial values without trajectory markers, baseline Gemma 2 2B models provided false reassurance in 58% of pediatric faltering and hypertensive creep scenarios.
+            </p>
+          </div>
+
+          <div class="bg-[var(--card-muted)] border border-[var(--border)] p-4 rounded-xl space-y-2">
+            <div class="text-red-400 font-semibold text-sm flex items-center gap-1.5">
+              <i class="fa-solid fa-mobile-screen"></i> Heavy UI Libraries on Edge
+            </div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Frontline Android apps cannot bundle heavy web charting frameworks without imposing rendering stutter, UI freeze, and heavy APK download overhead.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. THE EXPLORATION -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">2</div>
+          <h2 class="text-xl font-bold text-white">The Exploration: Dual-Mode Sparklines &amp; `ohs.trend.chart.v1`</h2>
+        </div>
+        <p class="text-[var(--muted-foreground)] leading-relaxed">
+          We developed a dual-mode trajectory pipeline documented in <code>LONGITUDINAL_TREND_INTERPRETATION_SPEC.md</code>:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-terminal text-blue-400"></i> Mode A: In-Prompt Text Sparklines
+            </h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              We compress 5–10 historical observations into a 5-character Unicode block sparkline (<code>[ █ ▆ ▄ ▂   ]</code>) paired with an explicit trajectory label: <code>TRAJECTORY: Critical Decline (-14.3% in 60d)</code>. This feeds high-level visual and semantic cues directly into the SLM prompt with under 25 tokens.
+            </p>
+          </div>
+          <div class="space-y-3">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-chart-area text-emerald-400"></i> Mode B: Cross-Platform Spec (`ohs.trend.chart.v1`)
+            </h3>
+            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
+              The underlying data is structured into a minimal JSON payload consumed by either the web visualizer (HTML5 Canvas) or the Android app (native Canvas/Jetpack Compose) for interactive visual review by the CHW.
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-black/40 border border-[var(--border)] p-4 rounded-xl space-y-2">
+          <div class="text-xs font-mono text-zinc-400 flex justify-between items-center">
+            <span>Example: Pediatric Weight Trend Prompt Injection</span>
+            <span class="text-emerald-400 font-bold">Only 24 tokens</span>
+          </div>
+          <pre class="text-xs font-mono text-emerald-300 overflow-x-auto p-3 bg-black/60 rounded"><code>### Serial Anthropometry (Amina, 8mo Female)
+* Weight History (kg): [ 8.5 ➔ 8.2 ➔ 7.6 ➔ 7.1 ]
+* Visual Trajectory: [ █ ▇ ▄   ] (SHARP DROP -16.5% over 90 days)
+* Clinical Threshold: Crossed 2 major WHO percentiles downward (Z-score &lt; -2 SD)
+* MANDATE: Screen for dehydration, severe acute malnutrition (SAM), initiate ready-to-use therapeutic food (RUTF).</code></pre>
+        </div>
+      </section>
+
+      <!-- 3. THE INSIGHT -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold">3</div>
+          <h2 class="text-xl font-bold text-white">The Insight: Trajectory Cues Bridge the SLM Math Deficit</h2>
+        </div>
+        <div class="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm leading-relaxed">
+          <strong>Key Finding:</strong> Providing explicit textual sparklines and pre-computed delta markers elevated Gemma 4 2B triage accuracy on pediatric growth faltering from <strong>42% to 94%</strong>. The model ceased delivering false reassurance and immediately triggered urgent nutritional referrals.
+        </div>
+
+        <h3 class="text-base font-bold text-white pt-2">Why This Exploration is Not Conclusive:</h3>
+        <ul class="space-y-3 text-sm text-[var(--muted-foreground)]">
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <div>
+              <strong class="text-white">Tokenizer Fragmentation on Unicode:</strong> While Gemma 4 handles Unicode block characters cleanly, other SLMs (e.g. Llama 3.2 1B) fracture characters like `█` or `▄` into multiple UTF-8 byte tokens, doubling the prompt token overhead.
+            </div>
+          </li>
+          <li class="flex items-start gap-2">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 mt-1"></i>
+            <div>
+              <strong class="text-white">Heuristic Threshold Sensitivity:</strong> Defining what constitutes "sharp" vs "gradual" requires rigorous pediatric and maternal guideline calibration across differing clinical contexts (e.g. dehydrated acute diarrhea vs chronic stunting).
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 4. NEXT STEPS -->
+      <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 font-bold">4</div>
+          <h2 class="text-xl font-bold text-white">Next Steps &amp; Open Questions</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">ASCII Fallback Encoding</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Evaluate pure ASCII sparklines (e.g. `[--__\\]`) to ensure uniform 1-byte tokenization across all tokenizer families (Byte-fallback BPE, Unigram, SentencePiece).
+            </p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">Multi-Axis Serial Graphs</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Expand from single-variable curves to correlated dual-variable trends: blood pressure vs proteinuria dipstick over gestational age.
+            </p>
+          </div>
+          <div class="p-4 rounded-xl border border-[var(--border)] bg-[var(--card-muted)] space-y-2">
+            <div class="text-purple-400 font-semibold text-sm">Frontline Visual Usability Testing</div>
+            <p class="text-xs text-[var(--muted-foreground)]">
+              Conduct field usability testing with community health teams in Kisumu and Nairobi to measure whether CHWs comprehend textual sparklines in mobile briefings.
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="flex justify-between items-center pt-8 border-t border-[var(--border)]">
+      <a href="zero-ram-mini-rag.html" class="text-sm text-[var(--muted-foreground)] hover:text-white transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-arrow-left"></i> Exploration 02: Zero-RAM RAG
+      </a>
+      <a href="acdu-deontic-clamping.html" class="text-sm font-semibold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-2">
+        Exploration 04: aCDU Clamping <i class="fa-solid fa-arrow-right"></i>
+      </a>
+    </div>
+
+  </main>
+</body>
+</html>

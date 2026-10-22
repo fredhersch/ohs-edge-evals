@@ -23,5 +23,11 @@ venv/
 .venv/
 env/
 
-# Independent repositories
+# Independent repositories and local heavy checkouts
 phc-evals/
+ohs-edge-evals-suite/
+ohs-edge-demo/
+who_smart_anc/
+who_smart_immunizations/
+scratch_tokempic/
+
