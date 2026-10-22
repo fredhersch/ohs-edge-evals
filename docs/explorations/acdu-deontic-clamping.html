@@ -118,7 +118,7 @@
             Computable clinical guidelines (like WHO SMART Guidelines in CQL/FHIRPath) are designed to process deterministic <strong>RULES</strong>: <em>if age &lt; 5 and fever &ge; 38.5&deg;C &rarr; output recommendation code</em>.
           </p>
           <p class="text-slate-400 leading-relaxed text-xs">
-            <strong>The Limitation:</strong> But they stop at raw codes. They don't provide the <strong>Rationale</strong> (<em>why</em> a decision matters) OR the practical <strong>Advice</strong> that a Community Health Worker (CHW) needs to explain a diagnosis, address a mother's fears, or answer family questions with empathy.
+            <strong>The Limitation:</strong> But they stop at raw codes. They don't provide the <strong>Rationale</strong> (<em>why</em> a decision matters) OR the practical <strong>Advice</strong> that a Community Health Worker (CHW) needs to explain a diagnosis, address a mother's fears, or answer family questions with empathy. Crucially, computable rules cannot adapt advice across different operational contexts, translate into local vernacular languages (such as Swahili or Hausa), or communicate in ways that respectfully navigate local cultural beliefs and traditional home practices.
           </p>
         </div>
 
@@ -129,10 +129,10 @@
             2. When Advice Conflicts, SLMs Get Confused
           </div>
           <p class="text-slate-300 leading-relaxed text-xs">
-            Language models (especially small 1B–4B SLMs running offline on low-cost phones) can generate conversational advice, local Swahili explanations, and empathetic counseling.
+            Language models (especially small 1B–4B SLMs running offline on low-cost phones) excel at bridging this gap&mdash;generating conversational advice in local languages and framing culturally sensitive family explanations.
           </p>
           <p class="text-slate-400 leading-relaxed text-xs">
-            <strong>The Danger:</strong> When multiple clinical guidelines fire at once and their advice conflicts, SLMs get easily confused. Small models attempt dangerous compromises (like trying to give oral pills to a child who just had a seizure), hallucinate unsafe middle grounds, or capitulate to harmful cultural pressures.
+            <strong>The Danger:</strong> When multiple clinical guidelines fire simultaneously and their advice conflicts, SLMs get easily confused. Small models attempt dangerous compromises (like trying to force-feed oral pills to an infant who just had a seizure), hallucinate unsafe middle grounds, or capitulate sycophantically to harmful cultural pressures (such as agreeing to apply cow dung or ash to an infected umbilical cord).
           </p>
         </div>
 
@@ -143,7 +143,7 @@
         <i class="fa-solid fa-shield-halved text-blue-400 text-base mt-0.5 shrink-0"></i>
         <div>
           <strong class="text-white">The aCDU Solution:</strong> 
-          The <strong>Atomic Clinical Decision Unit (aCDU)</strong> provides a deterministic safety floor between computable rules and edge language models. It mathematically resolves guideline collisions (deontic veto) <em>before</em> the AI sees them, while equipping the model with the exact clinical rationale, hard negative boundaries (what <em>never</em> to do), and empathetic talking points needed to support family counseling.
+          The <strong>Atomic Clinical Decision Unit (aCDU)</strong> provides a deterministic safety floor between computable rules and edge language models. It mathematically resolves guideline collisions (deontic veto) <em>before</em> the AI sees them, while equipping the model with the exact clinical rationale, hard negative boundaries (what <em>never</em> to do), and localized, culturally respectful talking points needed to support empathetic family counseling.
         </div>
       </div>
     </div>
