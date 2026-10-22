@@ -364,6 +364,33 @@
         </div>
       </div>
 
+      <!-- Architecture Blueprint Diagram / Drawing -->
+      <div class="p-4 sm:p-6 rounded-2xl bg-slate-950/80 border border-blue-500/30 shadow-2xl space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">
+              <i class="fa-solid fa-diagram-project mr-1"></i> System Blueprint Drawing
+            </span>
+            <span class="text-xs sm:text-sm font-bold text-white">Who Does What in Open Health Stack: The 4-Channel Division of Responsibility</span>
+          </div>
+          <a href="assets/images/ohs_workflow_acdu_pipeline.svg" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 hover:underline">
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> View Raw Vector Graphic (.SVG)
+          </a>
+        </div>
+
+        <div class="overflow-hidden rounded-xl border border-slate-800/80 bg-[#080c14] relative group">
+          <img src="assets/images/ohs_workflow_acdu_pipeline.svg" alt="Open Health Stack: Clinical SLM Pipeline Architecture &amp; Division of Responsibility" class="w-full h-auto object-contain transition duration-300 group-hover:scale-[1.005]" loading="lazy">
+        </div>
+
+        <p class="text-[11px] sm:text-xs text-slate-400 leading-relaxed text-center italic pt-1">
+          <strong>Figure:</strong> Complete division of responsibility in Open Health Stack. 
+          <strong>Channel A</strong> projects context into compact Markdown; 
+          <strong>Channel B</strong> executes <code class="text-blue-300 font-mono">PlanDefinition</code> logic via <code class="text-blue-300 font-mono">$apply</code> (FHIRPath/CQL); 
+          <strong>Channel C</strong> maps <code class="text-purple-300 font-mono">CarePlan</code> codes to audited aCDUs and prunes contradictions via Tier-1 Emergency Veto ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$); 
+          <strong>Channel D</strong> prompts the on-device 2B SLM with strictly clamped boundaries.
+        </p>
+      </div>
+
       <!-- 3 GRADUATED CASES: Simple -> Intermediate -> Complex -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
