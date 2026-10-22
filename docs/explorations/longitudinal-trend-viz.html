@@ -807,64 +807,6 @@
             }
           }
         </script>
-
-        <!-- Clinical Examples Grid -->
-        <div class="space-y-4 pt-2">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-code text-blue-400"></i> Benchmark FHIR Bundles &amp; Evaluated Prompt Formats
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            
-            <!-- Example 1: Pediatric Faltering -->
-            <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-2">
-              <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
-                <span class="font-bold text-white">Example 1: Pediatric Weight Faltering (Baby Juma)</span>
-                <span class="font-mono text-slate-400 text-[10px]">24 prompt tokens</span>
-              </div>
-              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial Anthropometry (Baby Juma, 9mo Male)
-* History: 8.5kg (Jul) &rarr; 8.4kg (Aug) &rarr; 8.1kg (Sep) &rarr; 7.6kg (Today)
-* Trajectory: [ &#9608; &#9608; &#9607; &#9604; ] (DROP -10.6% / -0.9kg over 90 days)
-* Clinical Alert: Crossed WHO -2 SD line; MUAC 11.9cm (Yellow MAM)
-* Action: Screen for Severe Acute Malnutrition (SAM) &amp; dehydration.</code></pre>
-              <div class="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                <strong>Model Impact:</strong> Unconstrained Gemma 2 2B classified isolated 7.6kg as <em>"mild underweight, continue routine home feeding"</em>. With the trajectory cue, it correctly triggered urgent RUTF nutritional triage.
-              </div>
-            </div>
-
-            <!-- Example 2: Chronic Hypertensive Escalation -->
-            <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-2">
-              <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
-                <span class="font-bold text-white">Example 2: Chronic Hypertension Creep (Musa Danladi)</span>
-                <span class="font-mono text-slate-400 text-[10px]">26 prompt tokens</span>
-              </div>
-              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial Blood Pressure (Musa Danladi, 54y Male)
-* History: 124/80 (Jul) &rarr; 134/86 (Aug) &rarr; 148/92 (Sep) &rarr; 168/104 (Today)
-* Trajectory: SBP [ &#9601; &#9603; &#9606; &#9608; ] (+44/+24 mmHg climb over 90 days)
-* Clinical Alert: Stage 2 Hypertensive Urgency exceeding 160/100 threshold
-* Action: Assess medication adherence; initiate immediate physician referral.</code></pre>
-              <div class="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                <strong>Model Impact:</strong> Unconstrained SLMs treated 168/104 as isolated situational elevation. With the sparkline climb, it correctly diagnosed accelerating cardiovascular risk.
-              </div>
-            </div>
-
-          </div>
-
-          <!-- Example 3: ASCII Fallback vs Unicode -->
-          <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-2 text-xs">
-            <span class="font-bold text-white block">Tokenizer Compatibility: Unicode Blocks vs. ASCII Fallback</span>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-mono text-slate-300">
-              <div class="p-2.5 rounded bg-black/50 border border-slate-800">
-                <div class="text-slate-400 font-sans text-xs font-semibold mb-1">Format A: Unicode Blocks (SentencePiece clean)</div>
-                <code>[ &#9608; &#9607; &#9604; &#9601;   ]</code> &rarr; 5 tokens in Gemma 2/4 (1 token per bar)
-              </div>
-              <div class="p-2.5 rounded bg-black/50 border border-slate-800">
-                <div class="text-slate-400 font-sans text-xs font-semibold mb-1">Format B: Pure ASCII Fallback (BPE byte-safe)</div>
-                <code>[^^~~--__..]</code> &rarr; 6 tokens across Llama 3.2 and Qwen 2.5
-              </div>
-            </div>
-          </div>
-        </div>
       </section>
 
       <!-- 3. THE INSIGHT & MODEL EVALUATION MATRIX -->
