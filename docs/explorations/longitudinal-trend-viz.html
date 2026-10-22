@@ -163,10 +163,455 @@
           </div>
         </div>
 
+        <!-- Interactive Trajectory Visualizer Component -->
+        <div class="mt-6 rounded-2xl bg-slate-900/90 border border-slate-700/80 p-5 sm:p-7 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-slate-800">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                  LIVE SPEC RENDERER
+                </span>
+                <span class="text-xs font-mono text-slate-400">ohs.trend.chart.v1</span>
+              </div>
+              <h3 class="text-base font-bold text-white mt-1">Interactive Trajectory Visualizer &amp; Dual-Mode Inspector</h3>
+              <p class="text-xs text-slate-400 mt-0.5">
+                Frontline graphical chart (Mobile CHW Canvas) vs. compressed in-prompt text sparkline (Edge SLM Prompt).
+              </p>
+            </div>
+
+            <!-- Case Switcher Tabs -->
+            <div class="inline-flex rounded-lg bg-slate-950 p-1 border border-slate-800 self-start sm:self-auto">
+              <button id="tab-pediatric" onclick="switchTrendTab('pediatric')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 transition-all flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-baby"></i> Case 1: Baby Juma (Growth Faltering)
+              </button>
+              <button id="tab-hypertension" onclick="switchTrendTab('hypertension')" class="px-3 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-1.5">
+                <i class="fa-solid fa-heart-pulse"></i> Case 2: Musa Danladi (BP Escalation)
+              </button>
+            </div>
+          </div>
+
+          <!-- CASE 1: PEDIATRIC GROWTH FALTERING (WHO STANDARDS) -->
+          <div id="trend-case-pediatric" class="space-y-4">
+            
+            <!-- Metadata & Trajectory Summary Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Patient &amp; Age</div>
+                <div class="font-bold text-white mt-0.5">Baby Juma (9mo Male)</div>
+                <div class="text-[10px] text-slate-400">Kaduna South, Nigeria</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Serial Trajectory</div>
+                <div class="font-bold text-red-400 mt-0.5 font-mono">8.5kg &rarr; 7.6kg</div>
+                <div class="text-[10px] text-red-400/90">&darr; 0.9kg (-10.6% in 90d)</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Z-Score Status</div>
+                <div class="font-bold text-red-400 mt-0.5">Crossed &lt; -2 SD</div>
+                <div class="text-[10px] text-slate-400">MUAC 11.9 cm (Yellow)</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Edge SLM Token Cost</div>
+                <div class="font-bold text-emerald-400 mt-0.5 font-mono">24 tokens</div>
+                <div class="text-[10px] text-slate-400">vs 1,840 FHIR tokens (-98.7%)</div>
+              </div>
+            </div>
+
+            <!-- SVG Chart Viewport -->
+            <div class="relative rounded-xl bg-slate-950 border border-slate-800 p-4 overflow-hidden">
+              <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/60 mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-white">WHO Weight-for-Age Standards (Boys 6&ndash;9 Months)</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">LOINC 29463-7</span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px]">
+                  <span class="flex items-center gap-1.5 text-slate-400">
+                    <span class="w-3 h-0.5 bg-emerald-500 inline-block"></span> WHO Median (50th)
+                  </span>
+                  <span class="flex items-center gap-1.5 text-slate-400">
+                    <span class="w-3 h-0.5 bg-amber-500/80 inline-block" style="border-top: 1px dashed;"></span> -1 SD
+                  </span>
+                  <span class="flex items-center gap-1.5 text-slate-400">
+                    <span class="w-3 h-0.5 bg-red-500 inline-block" style="border-top: 1px dashed;"></span> -2 SD (SAM Alert)
+                  </span>
+                  <span class="flex items-center gap-1.5 text-white font-semibold">
+                    <span class="w-3 h-1 bg-blue-400 inline-block rounded-full"></span> Juma Trajectory
+                  </span>
+                </div>
+              </div>
+
+              <!-- Responsive SVG -->
+              <svg viewBox="0 0 760 330" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit;">
+                <defs>
+                  <!-- Gradient for Malnutrition Danger Zone -->
+                  <linearGradient id="dangerZoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.12"/>
+                    <stop offset="100%" stop-color="#ef4444" stop-opacity="0.02"/>
+                  </linearGradient>
+                  <!-- Gradient for Patient Trajectory Area -->
+                  <linearGradient id="jumaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.25"/>
+                    <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.00"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Grid Horizontal Lines & Y-Axis Labels (6.0kg to 10.0kg) -->
+                <!-- 10.0 kg (y=50) -->
+                <line x1="90" y1="50" x2="680" y2="50" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="54" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">10.0 kg</text>
+
+                <!-- 9.0 kg (y=110) -->
+                <line x1="90" y1="110" x2="680" y2="110" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="114" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">9.0 kg</text>
+
+                <!-- 8.0 kg (y=170) -->
+                <line x1="90" y1="170" x2="680" y2="170" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="174" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">8.0 kg</text>
+
+                <!-- 7.0 kg (y=230) -->
+                <line x1="90" y1="230" x2="680" y2="230" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="234" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">7.0 kg</text>
+
+                <!-- 6.0 kg (y=290, Base Axis) -->
+                <line x1="90" y1="290" x2="680" y2="290" stroke="#334155" stroke-width="1.5"/>
+                <text x="80" y="294" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">6.0 kg</text>
+
+                <!-- WHO Faltering / SAM Zone (< -2 SD Shaded Region) -->
+                <!-- -2 SD Line Points: (140, 248), (300, 224), (460, 206), (620, 194) -->
+                <polygon points="140,248 300,224 460,206 620,194 680,188 680,290 90,290 90,256 140,248" fill="url(#dangerZoneGrad)"/>
+                <text x="670" y="278" fill="#f87171" font-size="10" font-weight="bold" text-anchor="end" letter-spacing="0.5">CRITICAL ZONE (&lt; -2 SD SAM THRESHOLD)</text>
+
+                <!-- WHO Median Standard Curve (+0 SD, Normal Expected Growth) -->
+                <path d="M 90,184 L 140,176 L 300,152 L 460,134 L 620,116 L 680,108" fill="none" stroke="#10b981" stroke-width="1.8" stroke-dasharray="4,3"/>
+                <text x="684" y="111" fill="#10b981" font-size="10" font-weight="600">WHO 50th</text>
+
+                <!-- WHO -1 SD Line -->
+                <path d="M 90,220 L 140,212 L 300,188 L 460,170 L 620,158 L 680,150" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.8"/>
+                <text x="684" y="153" fill="#f59e0b" font-size="10">-1 SD</text>
+
+                <!-- WHO -2 SD Line (Moderate/Severe Acute Malnutrition Border) -->
+                <path d="M 90,256 L 140,248 L 300,224 L 460,206 L 620,194 L 680,188" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,4"/>
+                <text x="684" y="191" fill="#ef4444" font-size="10" font-weight="bold">-2 SD</text>
+
+                <!-- Patient Trajectory Area Fill -->
+                <polygon points="140,140 300,146 460,164 620,194 620,290 140,290" fill="url(#jumaGrad)"/>
+
+                <!-- Patient Trajectory Line (Baby Juma: 8.5kg -> 8.4kg -> 8.1kg -> 7.6kg) -->
+                <path d="M 140,140 L 300,146 L 460,164 L 620,194" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Downward Trajectory Arrow Callout between Point 1 and Point 4 -->
+                <path d="M 330,128 Q 450,135 560,165" fill="none" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <polygon points="565,167 554,162 559,157" fill="#f87171"/>
+                <rect x="360" y="105" width="150" height="22" rx="4" fill="#1e293b" stroke="#f87171" stroke-width="1"/>
+                <text x="435" y="120" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">&darr; -0.9kg (-10.6% Drop)</text>
+
+                <!-- Point 1: 15 Jul 2026 (6mo, 8.5 kg - Normal) -->
+                <line x1="140" y1="50" x2="140" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="140" cy="140" r="6" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                <rect x="100" y="75" width="80" height="28" rx="4" fill="#0f172a" stroke="#38bdf8" stroke-width="1"/>
+                <text x="140" y="88" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">8.5 kg</text>
+                <text x="140" y="99" fill="#94a3b8" font-size="9" text-anchor="middle">6m &bull; Normal</text>
+                <text x="140" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Jul 15 (6m)</text>
+
+                <!-- Point 2: 15 Aug 2026 (7mo, 8.4 kg - Warning: Flat) -->
+                <line x1="300" y1="50" x2="300" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="300" cy="146" r="6" fill="#0284c7" stroke="#ffffff" stroke-width="2"/>
+                <rect x="260" y="82" width="80" height="28" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+                <text x="300" y="95" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">8.4 kg</text>
+                <text x="300" y="106" fill="#fbbf24" font-size="9" text-anchor="middle">-0.1 kg (Flat)</text>
+                <text x="300" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Aug 15 (7m)</text>
+
+                <!-- Point 3: 16 Sep 2026 (8mo, 8.1 kg - Warning: Faltering) -->
+                <line x1="460" y1="50" x2="460" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="460" cy="164" r="6" fill="#ea580c" stroke="#ffffff" stroke-width="2"/>
+                <rect x="420" y="174" width="84" height="28" rx="4" fill="#0f172a" stroke="#f97316" stroke-width="1"/>
+                <text x="462" y="187" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">8.1 kg</text>
+                <text x="462" y="198" fill="#fdba74" font-size="9" text-anchor="middle">-0.4 kg (Faltering)</text>
+                <text x="460" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Sep 16 (8m)</text>
+
+                <!-- Point 4: 18 Oct 2026 (9mo, 7.6 kg - Critical / SAM Threshold Crossed) -->
+                <line x1="620" y1="50" x2="620" y2="290" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="2,2"/>
+                <circle cx="620" cy="194" r="8" fill="#dc2626" stroke="#ffffff" stroke-width="2.5"/>
+                <rect x="560" y="212" width="120" height="34" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+                <text x="620" y="227" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">7.6 kg (CRITICAL)</text>
+                <text x="620" y="240" fill="#fca5a5" font-size="9" font-weight="bold" text-anchor="middle">Crossed &lt; -2 SD Line</text>
+                <text x="620" y="308" fill="#f87171" font-size="10" font-weight="bold" text-anchor="middle" font-family="monospace">Today (9m)</text>
+              </svg>
+            </div>
+
+            <!-- Dual-Mode Side-by-Side: SLM Prompt vs Spec JSON -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs pt-1">
+              
+              <!-- Left: Mode A (In-Prompt Text Sparkline for SLM) -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                  <span class="font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-terminal text-blue-400"></i> Mode A: Edge SLM Prompt Injection
+                  </span>
+                  <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">24 Tokens</span>
+                </div>
+                <pre class="font-mono text-[11px] text-slate-300 p-2.5 bg-black/60 rounded overflow-x-auto leading-relaxed"><code>### Serial Anthropometry (Baby Juma, 9mo Male)
+* Weight History: 8.5kg (Jul) &rarr; 8.4kg (Aug) &rarr; 8.1kg (Sep) &rarr; 7.6kg (Today)
+* Trajectory: [ &#9608; &#9608; &#9607; &#9604; ] (CRITICAL DROP: -0.9kg / -10.6% in 90d)
+* Clinical Alert: Crossed WHO -2 SD line; MUAC 11.9cm (Yellow MAM)
+* Guideline Rule: Trigger immediate RUTF triage &amp; rule out edema.</code></pre>
+                <div class="text-[11px] text-slate-400 pt-1">
+                  <strong>Clinical Impact:</strong> Evaluated Gemma 4 2B jumped from 42% to <strong>94% triage accuracy</strong> when provided this 24-token trajectory cue, immediately issuing urgent malnutrition protocols instead of false reassurance.
+                </div>
+              </div>
+
+              <!-- Right: Mode B (ohs.trend.chart.v1 Payload) -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                  <span class="font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-code text-purple-400"></i> Mode B: Cross-Platform Spec (`ohs.trend.chart.v1`)
+                  </span>
+                  <span class="text-slate-400 font-mono text-[10px]">FHIR Bundle &rarr; Mobile Canvas</span>
+                </div>
+                <pre class="font-mono text-[11px] text-purple-300 p-2.5 bg-black/60 rounded overflow-x-auto leading-relaxed"><code>{
+  "spec": "ohs.trend.chart.v1",
+  "series_id": "pediatric_wt_juma",
+  "display": "Weight-for-Age (Boys 6-9m)",
+  "reference_curves": ["who_wfa_boys_p50", "who_wfa_boys_minus2sd"],
+  "points": [
+    {"t": "2026-07-15", "v": 8.5, "flag": "normal"},
+    {"t": "2026-08-15", "v": 8.4, "flag": "warning_flat"},
+    {"t": "2026-09-16", "v": 8.1, "flag": "warning_faltering"},
+    {"t": "2026-10-18", "v": 7.6, "flag": "critical_sam_threshold"}
+  ],
+  "sparkline_utf8": "[ \u2588 \u2588 \u2587 \u2584 ]",
+  "delta_summary": "-0.9 kg (-10.6%)"
+}</code></pre>
+                <div class="text-[11px] text-slate-400 pt-1">
+                  <strong>Frontline Utility:</strong> The Android app consumes this minimal JSON to render the native Jetpack Compose curve on low-cost devices without relying on network or cloud rendering.
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- CASE 2: HYPERTENSION GRADUAL ESCALATION -->
+          <div id="trend-case-hypertension" class="hidden space-y-4">
+            
+            <!-- Metadata & Trajectory Summary Bar -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Patient &amp; Condition</div>
+                <div class="font-bold text-white mt-0.5">Musa Danladi (54y Male)</div>
+                <div class="text-[10px] text-slate-400">Essential Hypertension &bull; Zaria</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Serial BP Creep</div>
+                <div class="font-bold text-red-400 mt-0.5 font-mono">124/80 &rarr; 168/104</div>
+                <div class="text-[10px] text-red-400/90">&uarr; +44/+24 mmHg (in 90d)</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Clinical Tier</div>
+                <div class="font-bold text-red-400 mt-0.5">Stage 2 Urgency</div>
+                <div class="text-[10px] text-slate-400">Breached 140/90 &amp; 160/100</div>
+              </div>
+              <div class="p-3 rounded-lg bg-slate-950/70 border border-slate-800/80">
+                <div class="text-[10px] uppercase font-mono text-slate-400">Edge SLM Token Cost</div>
+                <div class="font-bold text-emerald-400 mt-0.5 font-mono">26 tokens</div>
+                <div class="text-[10px] text-slate-400">vs 2,120 FHIR tokens (-98.8%)</div>
+              </div>
+            </div>
+
+            <!-- SVG Chart Viewport -->
+            <div class="relative rounded-xl bg-slate-950 border border-slate-800 p-4 overflow-hidden">
+              <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/60 mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="font-semibold text-white">Longitudinal Blood Pressure Trajectory (4 Consecutive Visits)</span>
+                  <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300">LOINC 85354-9</span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px]">
+                  <span class="flex items-center gap-1.5 text-white font-semibold">
+                    <span class="w-3 h-1 bg-red-400 inline-block rounded-full"></span> Systolic (SBP)
+                  </span>
+                  <span class="flex items-center gap-1.5 text-blue-300 font-semibold">
+                    <span class="w-3 h-1 bg-blue-400 inline-block rounded-full"></span> Diastolic (DBP)
+                  </span>
+                  <span class="flex items-center gap-1.5 text-slate-400">
+                    <span class="w-3 h-0.5 bg-amber-500/80 inline-block" style="border-top: 1px dashed;"></span> 140/90 Stage 1
+                  </span>
+                  <span class="flex items-center gap-1.5 text-slate-400">
+                    <span class="w-3 h-0.5 bg-red-500/80 inline-block" style="border-top: 1px dashed;"></span> 160 Stage 2
+                  </span>
+                </div>
+              </div>
+
+              <!-- Responsive SVG -->
+              <svg viewBox="0 0 760 330" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg" style="font-family: inherit;">
+                <defs>
+                  <!-- Gradient for Stage 2 Danger Zone -->
+                  <linearGradient id="bpStage2Grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.14"/>
+                    <stop offset="100%" stop-color="#ef4444" stop-opacity="0.02"/>
+                  </linearGradient>
+                </defs>
+
+                <!-- Grid Horizontal Lines & Y-Axis Labels (60 to 180 mmHg) -->
+                <!-- 180 mmHg (y=50) -->
+                <line x1="90" y1="50" x2="680" y2="50" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="54" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">180</text>
+
+                <!-- 160 mmHg (y=90, Stage 2 Cutoff) -->
+                <line x1="90" y1="90" x2="680" y2="90" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,4"/>
+                <text x="80" y="94" fill="#f87171" font-size="11" text-anchor="end" font-family="monospace">160</text>
+                <text x="684" y="94" fill="#f87171" font-size="10" font-weight="bold">Stage 2 SBP</text>
+
+                <!-- Stage 2 Danger Fill (> 160 mmHg) -->
+                <rect x="90" y="50" width="590" height="40" fill="url(#bpStage2Grad)"/>
+
+                <!-- 140 mmHg (y=130, Stage 1 Cutoff) -->
+                <line x1="90" y1="130" x2="680" y2="130" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3"/>
+                <text x="80" y="134" fill="#fbbf24" font-size="11" text-anchor="end" font-family="monospace">140</text>
+                <text x="684" y="134" fill="#fbbf24" font-size="10">Stage 1 SBP</text>
+
+                <!-- 120 mmHg (y=170) -->
+                <line x1="90" y1="170" x2="680" y2="170" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="174" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">120</text>
+
+                <!-- 100 mmHg (y=210) -->
+                <line x1="90" y1="210" x2="680" y2="210" stroke="#1e293b" stroke-width="1"/>
+                <text x="80" y="214" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">100</text>
+
+                <!-- 90 mmHg (y=230, Stage 1 DBP Cutoff) -->
+                <line x1="90" y1="230" x2="680" y2="230" stroke="#f59e0b" stroke-width="1" stroke-dasharray="2,2"/>
+                <text x="80" y="234" fill="#fbbf24" font-size="10" text-anchor="end" font-family="monospace">90 DBP</text>
+
+                <!-- 60 mmHg (y=290, Base Axis) -->
+                <line x1="90" y1="290" x2="680" y2="290" stroke="#334155" stroke-width="1.5"/>
+                <text x="80" y="294" fill="#64748b" font-size="11" text-anchor="end" font-family="monospace">60 mmHg</text>
+
+                <!-- Systolic Line (124 -> 134 -> 148 -> 168) -->
+                <!-- Coordinates: (140, 162), (300, 142), (460, 114), (620, 74) -->
+                <path d="M 140,162 L 300,142 L 460,114 L 620,74" fill="none" stroke="#f87171" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Diastolic Line (80 -> 86 -> 92 -> 104) -->
+                <!-- Coordinates: (140, 250), (300, 238), (460, 226), (620, 202) -->
+                <path d="M 140,250 L 300,238 L 460,226 L 620,202" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+                <!-- Upward SBP Escalation Arrow Callout -->
+                <path d="M 280,118 Q 450,85 570,72" fill="none" stroke="#f87171" stroke-width="1.5" stroke-dasharray="2,2"/>
+                <polygon points="575,72 565,68 568,76" fill="#f87171"/>
+                <rect x="360" y="60" width="165" height="22" rx="4" fill="#1e293b" stroke="#f87171" stroke-width="1"/>
+                <text x="442" y="75" fill="#fca5a5" font-size="10" font-weight="bold" text-anchor="middle">&uarr; +44 mmHg SBP Creep</text>
+
+                <!-- Visit 1: 10 Jul (124/80) -->
+                <line x1="140" y1="50" x2="140" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="140" cy="162" r="6" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="140" cy="250" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                <rect x="100" y="174" width="80" height="26" rx="4" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                <text x="140" y="191" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">124 / 80</text>
+                <text x="140" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Jul 10 (M1)</text>
+
+                <!-- Visit 2: 12 Aug (134/86) -->
+                <line x1="300" y1="50" x2="300" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="300" cy="142" r="6" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="300" cy="238" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                <rect x="260" y="154" width="80" height="26" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1"/>
+                <text x="300" y="171" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">134 / 86</text>
+                <text x="300" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Aug 12 (M2)</text>
+
+                <!-- Visit 3: 14 Sep (148/92) -->
+                <line x1="460" y1="50" x2="460" y2="290" stroke="#334155" stroke-width="1" stroke-dasharray="2,2"/>
+                <circle cx="460" cy="114" r="6" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                <circle cx="460" cy="226" r="5" fill="#3b82f6" stroke="#ffffff" stroke-width="1.5"/>
+                <rect x="420" y="126" width="80" height="26" rx="4" fill="#0f172a" stroke="#f97316" stroke-width="1"/>
+                <text x="460" y="143" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">148 / 92</text>
+                <text x="460" y="308" fill="#94a3b8" font-size="10" text-anchor="middle" font-family="monospace">Sep 14 (M3)</text>
+
+                <!-- Visit 4: 18 Oct (168/104 - Urgency) -->
+                <line x1="620" y1="50" x2="620" y2="290" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="2,2"/>
+                <circle cx="620" cy="74" r="8" fill="#dc2626" stroke="#ffffff" stroke-width="2.5"/>
+                <circle cx="620" cy="202" r="6" fill="#2563eb" stroke="#ffffff" stroke-width="2"/>
+                <rect x="555" y="18" width="130" height="34" rx="5" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+                <text x="620" y="33" fill="#ffffff" font-size="12" font-weight="bold" text-anchor="middle">168 / 104 mmHg</text>
+                <text x="620" y="45" fill="#fca5a5" font-size="9" font-weight="bold" text-anchor="middle">Stage 2 Urgency</text>
+                <text x="620" y="308" fill="#f87171" font-size="10" font-weight="bold" text-anchor="middle" font-family="monospace">Today (M4)</text>
+              </svg>
+            </div>
+
+            <!-- Dual-Mode Side-by-Side: SLM Prompt vs Spec JSON -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs pt-1">
+              
+              <!-- Left: Mode A (In-Prompt Text Sparkline for SLM) -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                  <span class="font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-terminal text-blue-400"></i> Mode A: Edge SLM Prompt Injection
+                  </span>
+                  <span class="px-2 py-0.5 rounded font-mono text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">26 Tokens</span>
+                </div>
+                <pre class="font-mono text-[11px] text-slate-300 p-2.5 bg-black/60 rounded overflow-x-auto leading-relaxed"><code>### Serial Blood Pressure (Musa Danladi, 54y Male)
+* BP History: 124/80 (Jul) &rarr; 134/86 (Aug) &rarr; 148/92 (Sep) &rarr; 168/104 (Today)
+* Trajectory SBP: [ &#9601; &#9603; &#9606; &#9608; ] (+44 mmHg escalation over 90 days)
+* Clinical Alert: Progressive Stage 2 hypertension &amp; refractory elevation
+* Guideline Rule: Medication non-adherence screen; refer for physician review.</code></pre>
+                <div class="text-[11px] text-slate-400 pt-1">
+                  <strong>Clinical Impact:</strong> Evaluated MedGemma 4B leaped to <strong>96% diagnostic accuracy</strong>, recognizing insidious medication failure that isolated single-visit readings obscured.
+                </div>
+              </div>
+
+              <!-- Right: Mode B (ohs.trend.chart.v1 Payload) -->
+              <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
+                  <span class="font-bold text-white flex items-center gap-1.5">
+                    <i class="fa-solid fa-code text-purple-400"></i> Mode B: Cross-Platform Spec (`ohs.trend.chart.v1`)
+                  </span>
+                  <span class="text-slate-400 font-mono text-[10px]">FHIR Bundle &rarr; Mobile Canvas</span>
+                </div>
+                <pre class="font-mono text-[11px] text-purple-300 p-2.5 bg-black/60 rounded overflow-x-auto leading-relaxed"><code>{
+  "spec": "ohs.trend.chart.v1",
+  "series_id": "htn_escalation_danladi",
+  "display": "Longitudinal BP Trajectory (mmHg)",
+  "reference_lines": [{"label": "Stage 1 Cutoff", "sbp": 140, "dbp": 90}],
+  "points": [
+    {"t": "2026-07-10", "sbp": 124, "dbp": 80, "flag": "normal"},
+    {"t": "2026-08-12", "sbp": 134, "dbp": 86, "flag": "warning_pre_htn"},
+    {"t": "2026-09-14", "sbp": 148, "dbp": 92, "flag": "stage1_uncontrolled"},
+    {"t": "2026-10-18", "sbp": 168, "dbp": 104, "flag": "stage2_urgency"}
+  ],
+  "sparkline_utf8": "SBP [ \u2581 \u2583 \u2586 \u2588 ]",
+  "delta_summary": "+44/+24 mmHg"
+}</code></pre>
+                <div class="text-[11px] text-slate-400 pt-1">
+                  <strong>Frontline Utility:</strong> Provides the Android CHW tablet with explicit multi-point vectors, highlighting non-responders for rapid clinical supervision.
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+        <script>
+          function switchTrendTab(caseId) {
+            const petTab = document.getElementById('tab-pediatric');
+            const htnTab = document.getElementById('tab-hypertension');
+            const petCase = document.getElementById('trend-case-pediatric');
+            const htnCase = document.getElementById('trend-case-hypertension');
+
+            if (caseId === 'pediatric') {
+              petTab.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 transition-all flex items-center gap-1.5 shadow-sm';
+              htnTab.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-1.5';
+              petCase.classList.remove('hidden');
+              htnCase.classList.add('hidden');
+            } else {
+              htnTab.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-white bg-blue-600 transition-all flex items-center gap-1.5 shadow-sm';
+              petTab.className = 'px-3 py-1.5 rounded-md text-xs font-semibold text-slate-400 hover:text-white transition-all flex items-center gap-1.5';
+              htnCase.classList.remove('hidden');
+              petCase.classList.add('hidden');
+            }
+          }
+        </script>
+
         <!-- Clinical Examples Grid -->
         <div class="space-y-4 pt-2">
           <h3 class="text-sm font-bold text-white flex items-center gap-2">
-            <i class="fa-solid fa-code text-blue-400"></i> Concrete Implementation Examples &amp; Prompt Injections
+            <i class="fa-solid fa-code text-blue-400"></i> Benchmark FHIR Bundles &amp; Evaluated Prompt Formats
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -174,32 +619,32 @@
             <!-- Example 1: Pediatric Faltering -->
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-2">
               <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
-                <span class="font-bold text-white">Example 1: Pediatric Weight Faltering</span>
+                <span class="font-bold text-white">Example 1: Pediatric Weight Faltering (Baby Juma)</span>
                 <span class="font-mono text-slate-400 text-[10px]">24 prompt tokens</span>
               </div>
-              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial Anthropometry (Amina, 8mo Female)
-* History: 8.5kg (Jan) &rarr; 8.2kg (Feb) &rarr; 7.6kg (Mar) &rarr; 7.1kg (Today)
-* Trajectory: [ &#9608; &#9607; &#9604; &#9601;   ] (DROP -16.5% over 90 days)
-* Clinical Alert: Crossed 2 major WHO Z-score lines (&lt; -2 SD)
+              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial Anthropometry (Baby Juma, 9mo Male)
+* History: 8.5kg (Jul) &rarr; 8.4kg (Aug) &rarr; 8.1kg (Sep) &rarr; 7.6kg (Today)
+* Trajectory: [ &#9608; &#9608; &#9607; &#9604; ] (DROP -10.6% / -0.9kg over 90 days)
+* Clinical Alert: Crossed WHO -2 SD line; MUAC 11.9cm (Yellow MAM)
 * Action: Screen for Severe Acute Malnutrition (SAM) &amp; dehydration.</code></pre>
               <div class="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                <strong>Model Impact:</strong> Unconstrained Gemma 2 2B classified 7.1kg as <em>"mild underweight, continue home porridge"</em>. With the trajectory cue, it correctly triggered urgent RUTF nutritional triage.
+                <strong>Model Impact:</strong> Unconstrained Gemma 2 2B classified isolated 7.6kg as <em>"mild underweight, continue routine home feeding"</em>. With the trajectory cue, it correctly triggered urgent RUTF nutritional triage.
               </div>
             </div>
 
-            <!-- Example 2: Maternal Hypertensive Creep -->
+            <!-- Example 2: Chronic Hypertensive Escalation -->
             <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-2">
               <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
-                <span class="font-bold text-white">Example 2: Maternal Hypertensive Creep</span>
+                <span class="font-bold text-white">Example 2: Chronic Hypertension Creep (Musa Danladi)</span>
                 <span class="font-mono text-slate-400 text-[10px]">26 prompt tokens</span>
               </div>
-              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial ANC Blood Pressure (Halima, 32w Gestation)
-* History: 112/70 (12w) &rarr; 120/76 (20w) &rarr; 132/84 (28w) &rarr; 146/94 (32w)
-* Trajectory: [   &#9601; &#9605; &#9608; ] (STEADY CLIMB +30.4% MAP over 20 wks)
-* Clinical Alert: New-onset hypertension exceeding 140/90 threshold
-* Action: Immediate dipstick proteinuria check; screen for pre-eclampsia.</code></pre>
+              <pre class="font-mono text-[11px] text-slate-300 overflow-x-auto p-2.5 bg-black/60 rounded space-y-1"><code>### Serial Blood Pressure (Musa Danladi, 54y Male)
+* History: 124/80 (Jul) &rarr; 134/86 (Aug) &rarr; 148/92 (Sep) &rarr; 168/104 (Today)
+* Trajectory: SBP [ &#9601; &#9603; &#9606; &#9608; ] (+44/+24 mmHg climb over 90 days)
+* Clinical Alert: Stage 2 Hypertensive Urgency exceeding 160/100 threshold
+* Action: Assess medication adherence; initiate immediate physician referral.</code></pre>
               <div class="text-[11px] text-slate-400 pt-1 leading-relaxed">
-                <strong>Model Impact:</strong> Unconstrained SLMs treated 146/94 as isolated mild elevation. With the sparkline climb, it correctly warned of insidious pre-eclamptic trajectory.
+                <strong>Model Impact:</strong> Unconstrained SLMs treated 168/104 as isolated situational elevation. With the sparkline climb, it correctly diagnosed accelerating cardiovascular risk.
               </div>
             </div>
 
