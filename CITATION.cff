@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this evaluation framework, clinical benchmarks, or datasets, please cite it as below."
+title: "OHS Edge: Offline Edge LLM Evaluation Framework & Clinical Benchmarks"
+abstract: "Evaluation harness, empirical benchmarks, and architectural specifications for offline, on-device Small Language Models (1B–4B parameter class) integrated with Open Health Stack (OHS)."
+authors:
+  - family-names: "Hersch"
+    given-names: "Fred"
+  - name: "Open Health Stack Labs Contributors"
+repository-code: "https://github.com/fredhersch/ohs-edge-evals"
+url: "https://fredhersch.github.io/ohs-edge-evals/"
+keywords:
+  - "clinical decision support"
+  - "small language models"
+  - "open health stack"
+  - "edge computing"
+  - "offline healthcare"
+  - "community health workers"
+  - "fhir"
+  - "ai evaluation"
+license: "Apache-2.0"
+date-released: "2026-10-23"

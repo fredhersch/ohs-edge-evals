@@ -4,6 +4,8 @@
   <a href="https://fredhersch.github.io/ohs-edge-evals/"><img src="https://img.shields.io/badge/🧪%20OHS%20Labs-Experimental%20Research-8b5cf6?style=for-the-badge" alt="OHS Labs Research"></a>
   <a href="https://fredhersch.github.io/ohs-edge-evals/"><img src="https://img.shields.io/badge/Open%20Health%20Stack-Edge%20Commons-06b6d4?style=for-the-badge" alt="Open Health Stack"></a>
   <a href="https://fredhersch.github.io/ohs-edge-evals/benchmarks.html"><img src="https://img.shields.io/badge/Status-Active%20Exploration-10b981?style=for-the-badge" alt="Status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Code-Apache%202.0-blue?style=for-the-badge" alt="Apache 2.0"></a>
+  <a href="https://creativecommons.org/licenses/by/4.0/"><img src="https://img.shields.io/badge/Content-CC%20BY%204.0-lightgrey?style=for-the-badge" alt="CC BY 4.0"></a>
 </p>
 
 Evaluation harness, empirical benchmarks, and architectural specifications for offline, on-device Small Language Models (1B–4B parameter class, e.g., Gemma 4 2B, MedGemma 4B, Qwen 2.5 3B) integrated with **Open Health Stack (OHS)** and **OHS Edge**.
@@ -190,4 +192,35 @@ For open-source framework comparisons (Argilla, Promptfoo, DeepEval, Phoenix, TR
 For a comprehensive landscape of external evaluation datasets and benchmarks across CHW/FHW use cases, healthcare delivery computer vision (RDTs, medical displays, anthropometry), and primary care speech recognition (ASR), see [CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/CHW_AND_PRIMARY_CARE_EVAL_DATASETS.md).
 
 For the full specification, synthetic FHIR data pipeline, Tokempic views, and scoring criteria for serial trend data (weight faltering, blood glucose logs, gestational surges), see [LONGITUDINAL_TREND_INTERPRETATION_SPEC.md](file:///Users/fredhersch/Documents/antigravity/intelligent-hypatia/LONGITUDINAL_TREND_INTERPRETATION_SPEC.md).
+
+---
+
+## Citation & Attribution
+
+If you utilize this evaluation framework, reference the benchmarks, or build upon the clinical datasets in your research, articles, or software, please credit the work:
+
+### BibTeX
+```bibtex
+@software{hersch2026ohsedgeevals,
+  author = {Fred Hersch and Open Health Stack Labs Contributors},
+  title = {OHS Edge: Offline Edge LLM Evaluation Framework \& Clinical Benchmarks},
+  year = {2026},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/fredhersch/ohs-edge-evals}},
+  url = {https://fredhersch.github.io/ohs-edge-evals/}
+}
+```
+
+### APA
+> Hersch, F., & Open Health Stack Labs Contributors. (2026). *OHS Edge: Offline Edge LLM Evaluation Framework & Clinical Benchmarks*. GitHub. https://fredhersch.github.io/ohs-edge-evals/
+
+---
+
+## License
+
+This project is dual-licensed:
+- **Code, Tooling, & Evaluation Harness:** [Apache License 2.0](LICENSE)
+- **Documentation, Benchmarks, & Clinical Datasets:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
+
 

@@ -64,5 +64,33 @@
       This experiment tests whether advanced retrieval techniques (Clinical HyDE, Parent-Child Contextual Chunking, BM25+Dense Hybrid) can rescue domain-specialized models (MedGemma 4B) from context dilution without relying on deterministic a-CDU state units.
     </p>
   </div>
+
+  <!-- Community Comments & Directives (Giscus) -->
+  <section id="comments" class="my-8">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <i class="fa-regular fa-comments text-base"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+              <span>Feedback &amp; Directives</span>
+              <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">GitHub Discussions</span>
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Leave comments on MedGemma embedding evals or direct report changes.</p>
+          </div>
+        </div>
+        <a href="https://github.com/fredhersch/ohs-edge-evals/discussions" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--card-muted)] border border-[var(--border)] text-slate-300 hover:text-white hover:border-slate-400 transition shrink-0">
+          <i class="fa-brands fa-github text-sm"></i>
+          <span>View Discussions ↗</span>
+        </a>
+      </div>
+
+      <div class="giscus"></div>
+    </div>
+  </section>
+  <!-- Giscus Comments & Directives Widget Loader -->
+  <script src="assets/js/giscus-loader.js" defer></script>
 </body>
 </html>

@@ -690,6 +690,30 @@ Select a scenario to view injected prompt.
       </div>
     </div>
 
+    <!-- Community Comments & Directives (Giscus) -->
+    <section id="comments" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 space-y-4 shadow-sm my-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[var(--border)]">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
+            <i class="fa-regular fa-comments text-base"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+              <span>Playground Feedback &amp; Directives</span>
+              <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">GitHub Discussions</span>
+            </h2>
+            <p class="text-xs text-[var(--muted-foreground)]">Share playground test findings, simulation corner cases, or direct improvements.</p>
+          </div>
+        </div>
+        <a href="https://github.com/fredhersch/ohs-edge-evals/discussions" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[var(--card-muted)] border border-[var(--border)] text-slate-300 hover:text-white hover:border-slate-400 transition shrink-0">
+          <i class="fa-brands fa-github text-sm"></i>
+          <span>View Discussions ↗</span>
+        </a>
+      </div>
+
+      <div class="giscus"></div>
+    </section>
+
     <!-- OHS Foundation Footer -->
     <footer class="border-t border-[var(--border)] pt-4 pb-8 text-center text-xs text-[var(--muted-foreground)] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
       <div>Open Health Stack (OHS) Edge &bull; aCDU Clinical Decision Unit Playground</div>
@@ -1477,16 +1501,14 @@ Provide your response in <= ${scenario.word_limit || 120} words.`;
           copySummary();
         });
     }
-  </script>
-</body>
-</html>
 
     const prevInit = window.onload;
     window.onload = function() {
       if (typeof prevInit === 'function') prevInit();
       if (typeof updateCalculator === 'function') updateCalculator();
     };
-
   </script>
+  <!-- Giscus Comments & Directives Widget Loader -->
+  <script src="assets/js/giscus-loader.js" defer></script>
 </body>
 </html>
