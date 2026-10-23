@@ -156,22 +156,22 @@
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Box 1: SQLite aCDU Recall</div>
           <div class="text-2xl font-bold text-white mt-0.5">100.0% <span class="text-xs font-normal text-slate-400">@ 0.6ms</span></div>
-          <div class="text-xs text-slate-400 mt-0.5">Zero RAM overhead</div>
+          <div class="text-xs text-slate-400 mt-0.5">Zero RAM overhead (&lt;1 MB)</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Check A: Patient Summary</div>
           <div class="text-2xl font-bold text-white mt-0.5">95% – 100%</div>
-          <div class="text-xs text-slate-400 mt-0.5">Gemma4 2B + Tokempic</div>
+          <div class="text-xs text-slate-400 mt-0.5">Gemma 4 2B + Tokempic</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
           <div class="text-xs text-slate-400">Level 2 Collision Lift (2B)</div>
           <div class="text-2xl font-bold text-white mt-0.5">10% &rarr; 60% <span class="text-xs font-normal text-slate-300">(6x)</span></div>
-          <div class="text-xs text-slate-400 mt-0.5">Via aCDU Veto Clamping</div>
+          <div class="text-xs text-slate-400 mt-0.5">aCDU Veto Clamping vs Naive RAG</div>
         </div>
         <div class="bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
-          <div class="text-xs text-slate-400">MedGemma 4B Level-1 eCHIS</div>
-          <div class="text-2xl font-bold text-white mt-0.5">90.0% <span class="text-xs font-normal text-slate-300">(9/10)</span></div>
-          <div class="text-xs text-slate-400 mt-0.5">70% on Tertiary PHC Collisions</div>
+          <div class="text-xs text-slate-400">MedGemma 4B with aCDU</div>
+          <div class="text-2xl font-bold text-white mt-0.5">90% <span class="text-xs font-normal text-slate-300">L1</span> / 70% <span class="text-xs font-normal text-slate-300">Collisions</span></div>
+          <div class="text-xs text-slate-400 mt-0.5">100% Fatal Safety Floor</div>
         </div>
       </div>
     </div>
@@ -209,7 +209,7 @@
         </div>
         <h3 class="text-lg font-bold text-[var(--foreground)]">Why Standard RAG Breaks on 2B Edge Models</h3>
         <p class="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed">
-          Slicing a 200-page Ministry of Health manual into arbitrary 500-word sliding windows and running vector search causes three clinical failures:
+          Slicing a 200-page Ministry of Health manual into arbitrary 500-word sliding windows and running vector search causes three critical clinical failures:
         </p>
         <ul class="space-y-2.5 text-xs md:text-sm">
           <li class="flex items-start gap-2.5">
@@ -222,9 +222,12 @@
           </li>
           <li class="flex items-start gap-2.5">
             <i class="fa-solid fa-xmark text-slate-400 mt-1"></i>
-            <div><strong>Multi-Condition Confusion:</strong> On Level-2 Multi-Morbidity Collisions, Gemma4 2B with Naive RAG scored only <strong>10% (1/10)</strong>.</div>
+            <div><strong>Multi-Condition Confusion:</strong> On Level-2 Multi-Morbidity Collisions, Gemma 4 2B with Naive RAG scored only <strong>10% (1/10)</strong>.</div>
           </li>
         </ul>
+        <div class="p-3 rounded-xl bg-blue-950/30 border border-blue-500/30 text-xs text-slate-300">
+          <strong class="text-blue-400">Model Capacity vs. Retrieval Architecture:</strong> While naive chunk RAG fails on 2B edge models, <strong>hierarchical / structured RAG</strong> (which injects parent MOH headers and absolute veto rules) worked well for <strong>MedGemma 4B</strong> (achieving 80%–90%). However, on 2B models constrained to &lt;2 GB RAM, embedding index lookup is heavy and prone to semantic priming; deterministic aCDU clamping provides the necessary zero-RAM safety floor.
+        </div>
       </div>
 
       <div class="p-6 rounded-2xl bg-[var(--card)] border border-emerald-500/40 space-y-4">
@@ -234,16 +237,19 @@
         </div>
         <h3 class="text-lg font-bold text-[var(--foreground)]">What is an aCDU?</h3>
         <p class="text-xs md:text-sm text-[var(--muted-foreground)] leading-relaxed">
-          An <strong>aCDU</strong> is not a text paragraph. It is a clinician-audited, 150-token <strong>state unit</strong> stored in SQLite (<code>&lt;1 MB</code>) that permanently fuses <strong>Deterministic Trigger Criteria</strong> with <strong>Mandated Actions</strong> and <strong>Hard Negative Boundaries</strong>:
+          An <strong>aCDU (Atomic Clinical Decision Unit)</strong> is <strong class="text-white">NOT generic decision logic or arbitrary text chunks</strong>. It is a clinician-audited, bounded <strong>clinical state unit with hard negative boundaries</strong> stored in SQLite (<code>&lt;1 MB</code>, zero RAM overhead) that permanently fuses <strong>Deterministic Trigger Criteria</strong> with <strong>Mandated Actions</strong> and <strong>Inviolable Deontic Vetoes</strong>:
         </p>
         <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-200 space-y-1.5 overflow-x-auto">
-          <div class="text-white font-bold">// 1. Deterministic SQLite Trigger Header</div>
+          <div class="text-white font-bold">// 1. Deterministic SQLite Trigger Header (Evaluated via CQL / FHIRPath)</div>
           <div>"id": "KENYA-ECHIS-ICCM-01", "cohort": "child_2_59m",</div>
           <div>"triggers": ["convulsions", "unconscious", "unable_to_drink"],</div>
-          <div class="text-slate-300 font-bold pt-1">// 2. Mandated Positive Actions</div>
-          <div>"actions": ["Insert 100mg Rectal Artesunate", "Immediate Hospital Transfer"],</div>
-          <div class="text-slate-400 font-bold pt-1">// 3. Permanently Fused Negative Boundaries (Veto)</div>
-          <div>"prohibited": ["🛑 STOP: DO NOT give oral AL or oral Amoxicillin (choking risk)"]</div>
+          <div class="text-slate-300 font-bold pt-1">// 2. Mandated Positive Actions (Safety Floor)</div>
+          <div>"actions": ["Insert 100mg Rectal Artesunate", "Immediate Hospital Transfer in recovery position"],</div>
+          <div class="text-slate-400 font-bold pt-1">// 3. Permanently Fused Hard Negative Boundaries (Inviolable Veto)</div>
+          <div>"prohibited": ["🛑 STOP: DO NOT give oral AL or oral Amoxicillin (choking / fatal aspiration risk)"]</div>
+        </div>
+        <div class="p-2.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 text-[11px] text-emerald-200">
+          <i class="fa-solid fa-shield-halved mr-1"></i> <strong>Zero Ambiguity:</strong> Unlike probabilistic text retrieval, an aCDU cannot omit contraindications or hallucinate dosage thresholds.
         </div>
       </div>
     </div>
@@ -253,7 +259,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-[var(--border)] pb-4">
         <div>
           <h2 class="text-xl font-bold text-[var(--foreground)]">How Deterministic Logic &amp; the 2B Edge SLM Divide the Work</h2>
-          <p class="text-xs md:text-sm text-[var(--muted-foreground)]">Why we need BOTH deterministic rules (for safety) AND the on-device SLM (for synthesis &amp; de-confliction)</p>
+          <p class="text-xs md:text-sm text-[var(--muted-foreground)]">Why we need BOTH deterministic rules (safety floor) AND the on-device SLM (empathetic communication and synthesis)</p>
         </div>
         <span class="px-3 py-1 rounded-lg bg-blue-500/10 border border-[var(--border)] text-xs font-mono text-slate-400">Two-Box Pipeline</span>
       </div>
@@ -268,11 +274,11 @@
             </div>
             <h3 class="text-base font-bold text-[var(--foreground)]">Check A: Longitudinal Patient Summary</h3>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              Raw FHIR bundles (1,840 tokens) are compressed <strong>8.8x</strong> by Tokempic into a 210-token table. <strong>Gemma4 2B</strong> summarizes 15 past visits into 3 scannable bullets before the CHW knocks on the door.
+              Raw FHIR bundles (1,840 tokens) are compressed <strong>8.8x</strong> by Tokempic into a 210-token table. <strong>Gemma 4 2B</strong> summarizes 15 past visits into 3 scannable bullets before the CHW knocks on the door.
             </p>
           </div>
           <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
-            <strong class="text-blue-400">Why SLM is needed:</strong> Deterministic rules cannot summarize multi-visit clinical trajectories into natural language.
+            <strong class="text-blue-400">Why SLM is needed:</strong> Deterministic rules cannot synthesize multi-visit clinical trajectories into natural language tailored to the health worker's context.
           </div>
         </div>
 
@@ -283,13 +289,13 @@
               <span class="text-xs font-bold px-2.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">BOX 1: DETERMINISTIC FLOOR</span>
               <span class="text-xs font-mono text-slate-300">100% Recall (0.6ms)</span>
             </div>
-            <h3 class="text-base font-bold text-[var(--foreground)]">Deterministic SQLite aCDU Trigger</h3>
+            <h3 class="text-base font-bold text-[var(--foreground)]">Deterministic CQL / SQLite aCDU Trigger</h3>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              As the CHW records vitals (e.g. <code>BP 148/96</code> or <code>Convulsion + Fast Breathing</code>), deterministic Kotlin/SQLite logic selects the exact certified aCDU(s). <strong>The LLM has zero say in which protocol is selected.</strong>
+              As the CHW records vitals (e.g. <code>BP 148/96</code> or <code>Convulsion + Fast Breathing</code>), deterministic logic using <strong>CQL (Clinical Quality Language)</strong> and <strong>FHIRPath</strong> selects certified aCDUs. <strong>The LLM has zero say in protocol selection.</strong>
             </p>
           </div>
           <div class="p-3 rounded-lg bg-slate-950/80 border border-[var(--border)] text-xs text-slate-300">
-            <strong class="text-slate-300">Why Deterministic Logic is needed:</strong> Guarantees 100% protocol recall and injects hard negative guardrails.
+            <strong class="text-slate-300">Why Deterministic Logic is needed:</strong> Guarantees 100% protocol recall and injects hard negative guardrails that cannot be diluted by prompting.
           </div>
         </div>
 
@@ -302,11 +308,86 @@
             </div>
             <h3 class="text-base font-bold text-[var(--foreground)]">De-Confliction &amp; Last-Mile Script</h3>
             <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              When 2 conditions collide (e.g. Pneumonia + Convulsion) or a family asks about a harmful remedy (e.g. cow dung on cord), <strong>Gemma4 2B</strong> merges the triggered aCDUs and applies the veto rule into a single 3-bullet action script.
+              When 2 conditions collide (e.g. Pneumonia + Convulsion) or a family asks about a harmful remedy (e.g. cow dung on cord), <strong>Gemma 4 2B</strong> merges the triggered aCDUs and enforces the veto into an empathetic 3-bullet action script.
             </p>
           </div>
           <div class="p-3 rounded-lg bg-slate-950/80 border border-slate-800 text-xs text-slate-300">
-            <strong class="text-slate-300">Why Static Cards Fail:</strong> Static rules pop up 2 contradictory cards (Card 1: <em>"Give oral Amox"</em> vs Card 2: <em>"Nothing by mouth"</em>). The SLM resolves the conflict.
+            <strong class="text-purple-300">Why Static Cards Fail:</strong> Static rules dump contradictory cards without prioritization. The SLM translates technical rules into calm, culturally resonant speech.
+          </div>
+        </div>
+      </div>
+
+      <!-- How the SLM Adds Value Sub-Heading & Callout -->
+      <div class="p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-purple-950/20 to-slate-900 border border-blue-500/30 space-y-3">
+        <div class="flex items-center gap-2 text-sm font-bold text-blue-300">
+          <i class="fa-solid fa-sparkles text-amber-400"></i>
+          <span>How the SLM Adds Value: The Human Translation Layer</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Deterministic logic produces <strong>computable assertions</strong> (e.g. <code>REFERRAL_REQUIRED = true</code>, <code>MED_AMOX_ORAL = CONTRAINDICATED</code>). But a community health worker at a caregiver's doorstep cannot read raw JSON flags or disjointed rule cards. <strong>The on-device SLM provides the vital last-mile translation:</strong>
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+          <div class="p-2.5 rounded-lg bg-black/50 border border-slate-800">
+            <strong class="text-white block mb-0.5"><i class="fa-solid fa-comments text-blue-400 mr-1"></i> Empathetic Caregiver Dialogue:</strong>
+            <span class="text-slate-400">Translates frightening clinical terms into calm, reassuring maternal guidance that de-escalates panic and secures consent for transfer.</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-black/50 border border-slate-800">
+            <strong class="text-white block mb-0.5"><i class="fa-solid fa-arrows-split-up-and-left text-purple-400 mr-1"></i> Multi-Protocol Harmonization:</strong>
+            <span class="text-slate-400">Weaves multiple simultaneous guidelines (e.g. malaria, anemia, vaccination) into a single ordered checklist without contradictory instructions.</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-black/50 border border-slate-800">
+            <strong class="text-white block mb-0.5"><i class="fa-solid fa-shield-virus text-emerald-400 mr-1"></i> Local Harmful Myth De-escalation:</strong>
+            <span class="text-slate-400">Addresses dangerous folk practices (e.g. cow dung on cord, herbal teas for seizures) respectfully while firmly upholding MOH safety prohibitions.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Concrete Side-by-Side: Contradictory Static Cards vs Harmonized SLM Output -->
+      <div class="p-4 sm:p-5 rounded-xl bg-slate-950/90 border border-slate-800 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              SIDE-BY-SIDE PROOF
+            </span>
+            <span class="text-xs font-bold text-white">Contradictory Static Cards vs. Harmonized SLM Synthesis</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400">Kenya eCHIS Case L2-001</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <!-- Static Rules Card -->
+          <div class="p-3.5 rounded-lg bg-amber-950/20 border border-amber-500/30 space-y-2">
+            <div class="flex items-center justify-between pb-1 border-b border-amber-500/20">
+              <span class="font-bold text-amber-300"><i class="fa-solid fa-triangle-exclamation mr-1"></i> What Static Rules Produce (Pop-Up Cards)</span>
+              <span class="text-[10px] font-mono text-amber-400">Confuses CHW</span>
+            </div>
+            <div class="space-y-1.5 text-[11px]">
+              <div class="p-2 rounded bg-black/60 border border-amber-500/30 text-amber-200">
+                <strong>Card 1 (Pneumonia Protocol):</strong> "Fast breathing detected (56 bpm). <em>Administer oral Amoxicillin 250mg DT</em> now. Dissolve in clean water."
+              </div>
+              <div class="p-2 rounded bg-black/60 border border-red-500/30 text-red-300">
+                <strong>Card 2 (Emergency Protocol):</strong> "Danger Sign: Convulsion reported. <em>Nil by mouth.</em> Administer rectal artesunate and refer immediately."
+              </div>
+            </div>
+            <div class="text-[11px] text-red-300/90 italic pt-1">
+              <strong>Failure Mode:</strong> CHW sees two valid protocol boxes simultaneously. If they give the oral amox tablet first, the drowsy child chokes and aspirates.
+            </div>
+          </div>
+
+          <!-- Harmonized SLM Output -->
+          <div class="p-3.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-2">
+            <div class="flex items-center justify-between pb-1 border-b border-emerald-500/20">
+              <span class="font-bold text-emerald-300"><i class="fa-solid fa-circle-check mr-1"></i> What Two-Box SLM Produces (De-Conflicted)</span>
+              <span class="text-[10px] font-mono text-emerald-400">Actionable &amp; Safe</span>
+            </div>
+            <div class="p-2 rounded bg-black/60 border border-emerald-500/30 text-[11px] text-slate-200 space-y-1">
+              <div><strong>1. Airway &amp; Positioning:</strong> Place child on left side (recovery position). Loosen clothing and keep airway clear.</div>
+              <div><strong>2. Strict Oral Veto:</strong> Do <strong>NOT</strong> give any oral tablets, water, or amoxicillin—child is post-ictal and will aspirate.</div>
+              <div><strong>3. Emergency Pre-Referral &amp; Transfer:</strong> Insert 100mg Rectal Artesunate suppository and accompany mother immediately to sub-county hospital.</div>
+            </div>
+            <div class="text-[11px] text-emerald-300/90 italic pt-1">
+              <strong>Clinical Value:</strong> Rules supplied the veto floor; SLM synthesized a single, prioritized, life-saving checklist in maternal language.
+            </div>
           </div>
         </div>
       </div>
@@ -444,6 +525,82 @@
           </div>
         </div>
 
+        <!-- DIRECT COMPARISON: Boolean Rules vs Hierarchical RAG vs Level 3.5 aCDU -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-blue-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-code-compare"></i> Paradigm Comparison: Boolean Rules vs. Hierarchical RAG vs. Level 3.5 aCDU
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">Clinical Safety Floor &bull; Synthesis Trade-offs</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-slate-800 text-slate-400 text-[11px] uppercase">
+                  <th class="py-2 px-3">Approach</th>
+                  <th class="py-2 px-3">Retrieval / Execution Mode</th>
+                  <th class="py-2 px-3">Deterministic Safety Floor</th>
+                  <th class="py-2 px-3">Synthesis &amp; Communication</th>
+                  <th class="py-2 px-3">Fatal Leak Rate (Edge 2B)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-slate-300 text-[11px]">
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-slate-300">Boolean Rules (L3 CQL/FHIRPath)</td>
+                  <td class="py-2.5 px-3 font-mono text-slate-400">Deterministic Logic Engine ($apply)</td>
+                  <td class="py-2.5 px-3 text-emerald-400">✅ 100% (Machine flags)</td>
+                  <td class="py-2.5 px-3 text-red-400">❌ None (Disjointed raw codes; unguided LLM overrides)</td>
+                  <td class="py-2.5 px-3 text-red-400 font-bold">100% (When fed unconstrained to SLM)</td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-bold text-blue-300">Hierarchical / Structured RAG</td>
+                  <td class="py-2.5 px-3 font-mono text-slate-400">Vector search with parent policy headers</td>
+                  <td class="py-2.5 px-3 text-amber-300">⚠️ Partial (Contextual headers help 4B, but prone to 2B chunk drops)</td>
+                  <td class="py-2.5 px-3 text-emerald-400">✅ High (Generates free-text narrative)</td>
+                  <td class="py-2.5 px-3 text-amber-300 font-bold">20%–40% (Severed tables or keyword priming)</td>
+                </tr>
+                <tr class="bg-emerald-950/20">
+                  <td class="py-2.5 px-3 font-bold text-emerald-300">Level 3.5 aCDU Semantic Floor</td>
+                  <td class="py-2.5 px-3 font-mono text-emerald-400">SQLite indexed bounded state unit (&lt;1 MB)</td>
+                  <td class="py-2.5 px-3 text-emerald-400 font-bold">✅ 100% (Hard deontic negative boundaries \(\mathcal{N}^-\))</td>
+                  <td class="py-2.5 px-3 text-emerald-400 font-bold">✅ Optimized (SLM synthesizes empathetic counseling within bounds)</td>
+                  <td class="py-2.5 px-3 text-emerald-400 font-bold">0.0% (Inviolable safety floor)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- HOW aCDUs ARE CREATED & VERIFIED (Authoring Lifecycle) -->
+        <div class="p-4 rounded-xl bg-slate-950/80 border border-purple-500/30 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span class="text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-signature"></i> Verifiable AI Authoring: LLM First-Pass + Clinician Sign-Off Lifecycle
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">MOH / WHO Compliance</span>
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            How are Level 3.5 aCDU packages authored and validated? Rather than hand-crafting thousands of state units or trusting unconstrained AI generation at runtime, aCDUs are produced through an <strong>offline verifiable clinical pipeline</strong>:
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs pt-1">
+            <div class="p-3 rounded-lg bg-black/50 border border-slate-800 space-y-1">
+              <span class="text-[10px] font-mono font-bold text-purple-400 uppercase">Phase 1: Automated Ingestion</span>
+              <div class="font-bold text-white">Frontier LLM Extraction</div>
+              <p class="text-slate-400 text-[11px]">Frontier models (Gemini 1.5 Pro / MedLM) ingest narrative Level-1/2 WHO DAK manuals and output candidate aCDU JSON structures containing triggers, positive actions, and candidate negative boundaries (\(\mathcal{N}^-\)).</p>
+            </div>
+            <div class="p-3 rounded-lg bg-black/50 border border-slate-800 space-y-1">
+              <span class="text-[10px] font-mono font-bold text-emerald-400 uppercase">Phase 2: Formal Verification</span>
+              <div class="font-bold text-white">Clinician Review &amp; Sign-Off</div>
+              <p class="text-slate-400 text-[11px]">A multidisciplinary Ministry of Health / WHO expert panel reviews every negative veto boundary and priority tier. Changes are cryptographically signed and locked into immutable release manifests.</p>
+            </div>
+            <div class="p-3 rounded-lg bg-black/50 border border-slate-800 space-y-1">
+              <span class="text-[10px] font-mono font-bold text-blue-400 uppercase">Phase 3: Edge Packaging</span>
+              <div class="font-bold text-white">Verifiable APK Artifact</div>
+              <p class="text-slate-400 text-[11px]">The signed aCDU SQLite catalog (&lt;1 MB) ships directly inside the Android app bundle. At runtime, the on-device SLM cannot hallucinate new medical rules—it only communicates certified boundaries.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- THE CLEAR EXAMPLE: CQL / FHIRPath Rule -> The Value of the aCDU -->
         <div class="space-y-4 pt-2">
           <div class="flex items-center justify-between">
@@ -457,7 +614,7 @@
           <!-- Pure Code vs Value Grid -->
           <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
             
-            <!-- LEFT (5 Cols): The Exact L3 Rule in CQL and FHIRPath (NO EXPLANATION) -->
+            <!-- LEFT (5 Cols): The Exact L3 Rule in CQL and FHIRPath -->
             <div class="lg:col-span-5 flex flex-col justify-between p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
               <div class="flex items-center justify-between pb-1.5 border-b border-slate-800">
                 <span class="font-mono text-xs font-bold text-blue-400">1. WHO SMART L3: Pure Rule Code</span>
@@ -547,39 +704,61 @@ define "BCG Vaccine Contraindicated":
 
           </div>
 
-          <!-- THE ACTUAL LLM + aCDU OUTPUT CARD -->
-          <div class="mt-4 p-4 rounded-xl bg-slate-950 border border-emerald-500/40 space-y-2.5">
+          <!-- SCROLLABLE SIDE-BY-SIDE COMPARISON PANEL FOR IMMUNIZATION ADVICE -->
+          <div class="mt-4 p-4 rounded-xl bg-slate-950 border border-[var(--border)] space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-bold text-white text-xs">Actual Edge SLM Output (MedGemma 4B / Gemma 2 2B with aCDU Clamping)</span>
+                <i class="fa-solid fa-arrows-left-right text-blue-400"></i>
+                <span class="font-bold text-white text-xs">Side-by-Side Comparison: Unconstrained/Static vs. Clamped aCDU Advice</span>
               </div>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                100% Safety Floor &bull; 0% Lethal Contraindication Leaks
-              </span>
+              <span class="text-[10px] font-mono text-slate-400">Swipe or scroll horizontally on mobile</span>
             </div>
 
-            <div class="p-3.5 rounded-lg bg-black/70 border border-slate-800 text-xs text-slate-200 leading-relaxed space-y-2.5">
-              <div class="text-[11px] font-bold text-emerald-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-clipboard-check"></i>
-                Frontline Guidance Script Generated for Community Health Worker:
-              </div>
-              
-              <div class="space-y-2 pl-1 text-[11px]">
-                <div>
-                  <strong class="text-white">1. Administer Safe Inactivated Vaccines Today:</strong>
-                  <span class="text-slate-300">Give Pentavalent-1 (DTP-HepB-Hib) intramuscularly in the left outer thigh and PCV-1 in the right outer thigh. Substitute live oral polio (bOPV) with injectable Inactivated Polio Vaccine (IPV) to prevent vaccine-associated paralytic disease.</span>
+            <div class="overflow-x-auto pb-1">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-[620px]">
+                
+                <!-- Card A: Without aCDU / Unconstrained -->
+                <div class="p-3.5 rounded-lg bg-red-950/20 border border-red-500/30 space-y-2">
+                  <div class="flex items-center justify-between pb-1 border-b border-red-500/20">
+                    <span class="font-bold text-red-300 text-xs flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-xmark"></i> Without aCDU / Raw L3
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-red-500/20 text-red-300">Lethal Failure</span>
+                  </div>
+                  <div class="text-[11px] text-slate-300 space-y-2 leading-relaxed">
+                    <p class="text-red-200">
+                      <strong>Model Output (Unconstrained):</strong> <em>"Administer all 5 scheduled vaccines today including BCG and oral polio. Ensure the infant receives BCG carefully, as tuberculosis protection is vital for immunocompromised children."</em>
+                    </p>
+                    <div class="p-2 rounded bg-black/60 border border-red-500/30 text-[10px] text-red-300">
+                      <strong>Clinical Hazard:</strong> Live BCG bacteria cause fatal disseminated BCGitis in infants with severe symptomatic HIV immunodeficiency. A bare boolean <code>BCG_Contraindicated = true</code> without negative veto boundaries failed to block the model from recommending it.
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <strong class="text-red-400">2. Strictly Withhold Live-Attenuated Vaccines:</strong>
-                  <span class="text-slate-300">Do <strong>NOT</strong> administer BCG or Oral Rotavirus today. Because the infant exhibits persistent oral thrush and failure to thrive (symptomatic immunodeficiency), live vaccines carry a severe risk of fatal disseminated infection (BCGitis) and must be safely deferred.</span>
+                <!-- Card B: With Level 3.5 aCDU Floor -->
+                <div class="p-3.5 rounded-lg bg-emerald-950/20 border border-emerald-500/30 space-y-2">
+                  <div class="flex items-center justify-between pb-1 border-b border-emerald-500/20">
+                    <span class="font-bold text-emerald-300 text-xs flex items-center gap-1.5">
+                      <i class="fa-solid fa-circle-check"></i> With Level 3.5 aCDU Floor
+                    </span>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">100% Safe</span>
+                  </div>
+                  <div class="text-[11px] text-slate-200 space-y-2 leading-relaxed">
+                    <div>
+                      <strong class="text-white">1. Administer Inactivated:</strong> Give Penta-1 and PCV-1. Substitute oral polio (bOPV) with injectable IPV.
+                    </div>
+                    <div>
+                      <strong class="text-red-300">2. Strictly Withhold Live:</strong> Do <strong>NOT</strong> administer BCG or Oral Rotavirus today due to fatal disseminated infection hazard.
+                    </div>
+                    <div>
+                      <strong class="text-blue-300">3. Empathetic Dialogue:</strong> <em>"Mama, baby is receiving 2 protective shots today against pneumonia and chest infections. We are postponing the BCG arm shot and oral drops until the doctor at the clinic reviews baby's mouth and weight."</em>
+                    </div>
+                    <div class="p-2 rounded bg-black/60 border border-emerald-500/30 text-[10px] text-emerald-300">
+                      <strong>Clinical Outcome:</strong> 0% lethal leaks; safe multi-vaccine coordination; caregiver reassured without clinic dropout.
+                    </div>
+                  </div>
                 </div>
 
-                <div>
-                  <strong class="text-blue-300">3. Empathetic Caregiver Dialogue &amp; CCC Referral:</strong>
-                  <span class="text-slate-300">Reassure the mother using supportive language: <em>"Mama, baby is receiving two essential protective injections today against severe chest infections and pneumonia. We are safely postponing the BCG arm injection and oral drops until the doctor at the clinic reviews baby's mouth and weight."</em> Refer immediately to the Comprehensive Care Clinic (CCC) for pediatric HIV staging and cotrimoxazole prophylaxis.</span>
-                </div>
               </div>
             </div>
 
@@ -600,6 +779,53 @@ define "BCG Vaccine Contraindicated":
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- TIER HIERARCHY REFERENCE TABLE (MOVED UP FOR CLARITY BEFORE EXAMPLES) -->
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-layer-group text-blue-400"></i>
+            The aCDU Priority Tier Hierarchy
+          </h3>
+          <span class="text-xs font-mono text-slate-400">Deterministic Conflict Resolution</span>
+        </div>
+        <p class="text-xs text-[var(--muted-foreground)]">
+          When multiple recommendations fire from different PlanDefinitions, the aCDU priority tier hierarchy deterministically resolves deontic conflicts before prompt construction:
+        </p>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase">
+                <th class="py-2.5 px-3">Priority Tier</th>
+                <th class="py-2.5 px-3">Clinical Domain &amp; Examples</th>
+                <th class="py-2.5 px-3">Deontic Veto Power</th>
+                <th class="py-2.5 px-3">Behavior on Downstream SLM</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[var(--border)] text-zinc-300">
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-red-400">Tier 1: Emergency Veto Floor</td>
+                <td class="py-2.5 px-3">Severe pre-eclampsia, convulsions, lethargy, respiratory distress, postpartum hemorrhage, anaphylaxis.</td>
+                <td class="py-2.5 px-3 font-semibold text-red-300">Overrides and suppresses all lower-tier oral/home actions ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$).</td>
+                <td class="py-2.5 px-3 text-slate-400">Enforces immediate referral messaging; strictly prohibits oral drugs and contra-indicated home remedies.</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-amber-400">Tier 2: Acute Protocol Actions</td>
+                <td class="py-2.5 px-3">Oral amoxicillin for simple pneumonia, oral AL for uncomplicated malaria, ORS + zinc for diarrhea.</td>
+                <td class="py-2.5 px-3">Active only if no Tier 1 veto exists. Merged harmoniously with other non-colliding Tier 2 rules.</td>
+                <td class="py-2.5 px-3 text-slate-400">Synthesizes practical caregiver guidance: exact dosing, food co-administration, and return precautions.</td>
+              </tr>
+              <tr>
+                <td class="py-2.5 px-3 font-bold text-blue-400">Tier 3: Routine &amp; Preventive</td>
+                <td class="py-2.5 px-3">Routine childhood immunizations, vitamin A supplementation, bed net distribution, lifestyle nutrition.</td>
+                <td class="py-2.5 px-3">Subordinate to Tiers 1 and 2. Can be deferred or scheduled for follow-up visit.</td>
+                <td class="py-2.5 px-3 text-slate-400">Merged into pre-visit agenda if time/capacity permits, or marked for next scheduled encounter.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -823,115 +1049,59 @@ define "BCG Vaccine Contraindicated":
         </div>
       </div>
 
-      <!-- TIER HIERARCHY REFERENCE TABLE -->
+      <!-- Streamlined Cross-Domain Reference Grid (PlanDefinition -> aCDU Mapping) -->
       <div class="space-y-3 pt-2">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i class="fa-solid fa-layer-group text-slate-300"></i>
-          The aCDU Priority Tier Hierarchy
-        </h3>
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-[var(--foreground)] flex items-center gap-2">
+            <i class="fa-solid fa-network-wired text-purple-400"></i>
+            Cross-Domain OHS Integration Matrix (PlanDefinition &rarr; aCDU)
+          </h3>
+          <span class="text-xs font-mono text-slate-400">4 Reference Specializations</span>
+        </div>
         <p class="text-xs text-[var(--muted-foreground)]">
-          When multiple recommendations fire from different PlanDefinitions, the aCDU tier hierarchy resolves deontic conflicts before prompt construction:
+          Summary mapping showing how diverse clinical modules transition from computable FHIRPath/CQL PlanDefinition outputs into deontic aCDU state units:
         </p>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase">
-                <th class="py-2.5 px-3">Priority Tier</th>
-                <th class="py-2.5 px-3">Clinical Domain &amp; Examples</th>
-                <th class="py-2.5 px-3">Deontic Veto Power</th>
-                <th class="py-2.5 px-3">Behavior on Downstream SLM</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-[var(--border)] text-zinc-300">
-              <tr class="">
-                <td class="py-2.5 px-3 font-bold text-slate-400">Tier 1: Emergency Veto Floor</td>
-                <td class="py-2.5 px-3">Severe pre-eclampsia, convulsions, lethargy, respiratory distress, postpartum hemorrhage, anaphylaxis.</td>
-                <td class="py-2.5 px-3 font-semibold text-red-300">Overrides and suppresses all lower-tier oral/home actions ($R_{\text{safe}} = R_{\text{raw}} \setminus N_{\text{Tier1}}$).</td>
-                <td class="py-2.5 px-3 text-slate-400">Enforces immediate referral messaging; strictly prohibits delays and contra-indicated home remedies.</td>
-              </tr>
-              <tr class="">
-                <td class="py-2.5 px-3 font-bold text-slate-300">Tier 2: Acute Protocol Actions</td>
-                <td class="py-2.5 px-3">Oral amoxicillin for simple pneumonia, oral AL for uncomplicated malaria, ORS + zinc for diarrhea.</td>
-                <td class="py-2.5 px-3">Active only if no Tier 1 veto exists. Merged harmoniously with other non-colliding Tier 2 rules.</td>
-                <td class="py-2.5 px-3 text-slate-400">Synthesizes practical caregiver guidance: exact dosing, food co-administration, and return precautions.</td>
-              </tr>
-              <tr class="">
-                <td class="py-2.5 px-3 font-bold text-blue-400">Tier 3: Routine &amp; Preventive</td>
-                <td class="py-2.5 px-3">Routine childhood immunizations, vitamin A supplementation, bed net distribution, lifestyle nutrition.</td>
-                <td class="py-2.5 px-3">Subordinate to Tiers 1 and 2. Can be deferred or scheduled for follow-up visit.</td>
-                <td class="py-2.5 px-3 text-slate-400">Merged into pre-visit agenda if time/capacity permits, or marked for next scheduled encounter.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 4 Concrete Complementary Examples -->
-      <div class="space-y-3 pt-2">
-        <h3 class="text-base font-bold text-[var(--foreground)]">4 Concrete Examples of PlanDefinition $apply + aCDU in Action</h3>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          <!-- Example 1 -->
-          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <!-- Item 1: ANC -->
+          <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Example 1: Maternal Health (ANC)</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/anc-pe &rarr; MNH-02</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">1. Maternal ANC</span>
+              <span class="font-mono text-[10px] text-slate-400">MNH-02</span>
             </div>
-            <div class="text-sm font-bold text-[var(--foreground)]">Pre-Eclampsia Dipstick + Malaria Collision (Fatima Bello, 32w)</div>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates maternal bundle. BP 148/96 + Proteinuria 1+ triggers emergency recommendation: <code>ANC-ACT-SEVERE-PRE-ECLAMPSIA</code>. Concurrently, mRDT+ triggers <code>ANC-ACT-MAL-AL</code>.
-            </p>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU Tier-1 Veto (<code>MNH-02</code>):</strong> Severe pre-eclampsia aCDU contains Tier-1 negative boundary: <em>"🛑 STOP: Severe pre-eclampsia overrides routine home oral AL; do NOT give unmonitored home antihypertensives; arrange immediate facility transfer."</em> The oral AL is suppressed.
-            </p>
+            <div class="font-bold text-white text-[11px]">Severe Pre-Eclampsia + Malaria</div>
+            <div class="text-slate-400 text-[11px]"><code>PlanDefinition/anc-pe</code> fires emergency action; aCDU Tier-1 Veto suppresses home oral AL and enforces immediate facility referral.</div>
           </div>
 
-          <!-- Example 2 -->
-          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
+          <!-- Item 2: SAM -->
+          <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Example 2: Pediatric iCCM &amp; Nutrition</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/imci-sam &rarr; ICCM-09</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">2. Pediatric iCCM</span>
+              <span class="font-mono text-[10px] text-slate-400">ICCM-09</span>
             </div>
-            <div class="text-sm font-bold text-[var(--foreground)]">Eliminating Age-Math Hallucinations &rarr; Complicated SAM Triage</div>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. OHS PlanDefinition $apply:</strong> Pre-computes age (16m) and MUAC (10.5 cm). Logic identifies severe acute malnutrition + acute fast breathing &rarr; emits <code>IMCI-ACT-COMPLICATED-SAM</code>.
-            </p>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU Deontic Clamping (<code>ICCM-09</code>):</strong> Mandates emergency inpatient referral to stabilization center. Explicit negative boundary: <em>"🛑 DO NOT give home RUTF (Plumpy'Nut) or routine iron during acute complicated phase."</em>
-            </p>
+            <div class="font-bold text-white text-[11px]">Complicated SAM + Pneumonia</div>
+            <div class="text-slate-400 text-[11px]"><code>PlanDefinition/imci-sam</code> identifies MUAC &lt;11.5cm + fast breathing; aCDU blocks routine home RUTF and iron, directing urgent stabilization center transfer.</div>
           </div>
 
-          <!-- Example 3 -->
-          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
+          <!-- Item 3: IMMZ -->
+          <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">Example 3: WHO SMART Guidelines (Immunizations)</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/immz-hiv &rarr; CDU-IMMZ-BCG</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300">3. WHO SMART IMMZ</span>
+              <span class="font-mono text-[10px] text-slate-400">IMMZ-BCG</span>
             </div>
-            <div class="text-sm font-bold text-[var(--foreground)]">6-Week Symptomatic HIV-Exposed Infant Immunization Collision</div>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates infant record (6w old, HIV+ mother, oral thrush, failure to thrive). Logic returns boolean contraindication: <code>BCG_Contraindicated = true</code>, <code>bOPV_Contraindicated = true</code>.
-            </p>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. WHO SMART aCDUs:</strong> Pairs the PlanDefinition booleans with explicit vaccine safety rules: <strong>authorize killed vaccines (Penta-1, PCV-1), switch bOPV &rarr; IPV, and 🛑 WITHHOLD live BCG &amp; Rotavirus</strong> (0 lethal leaks / 100% safe).
-            </p>
+            <div class="font-bold text-white text-[11px]">HIV-Exposed Infant Immunization</div>
+            <div class="text-slate-400 text-[11px]"><code>PlanDefinition/immz-hiv</code> emits contraindication booleans; aCDU safely authorizes killed vaccines (Penta/PCV), swaps bOPV&rarr;IPV, and vetoes live BCG/Rotavirus.</div>
           </div>
 
-          <!-- Example 4 -->
-          <div class="p-4 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2.5">
+          <!-- Item 4: NCD -->
+          <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-2">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">Example 4: Facility Multi-Morbidity</span>
-              <span class="text-xs font-mono text-[var(--muted-foreground)]">PlanDefinition/phc-ncd &rarr; CDU-GOUT-CKD</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">4. Facility NCD</span>
+              <span class="font-mono text-[10px] text-slate-400">GOUT-CKD</span>
             </div>
-            <div class="text-sm font-bold text-[var(--foreground)]">Acute Gout + Stage 3b CKD (eGFR 34) + HFrEF (EF 32%) + T2DM</div>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>1. OHS PlanDefinition $apply:</strong> Evaluates chronic care bundle. Gout flare fires gout action; eGFR 34 mL/min fires CKD Stage 3b action; K+ 4.9 fires hyperkalemia risk.
-            </p>
-            <p class="text-xs text-[var(--muted-foreground)] leading-relaxed">
-              <strong>2. aCDU Deontic Union (\(\mathcal{N}_1 \cup \mathcal{N}_2\)):</strong> Fuses negative boundaries: <em>"🛑 VETO 1: Avoid all oral NSAIDs (use low-dose Prednisolone). 🛑 VETO 2: Halve Metformin to &le;1000mg/day. 🛑 VETO 3: Do not escalate Spironolactone."</em>
-            </p>
+            <div class="font-bold text-white text-[11px]">Gout + Stage 3b CKD + HFrEF</div>
+            <div class="text-slate-400 text-[11px]"><code>PlanDefinition/phc-ncd</code> evaluates chronic lab panels; aCDU deontic union (\(\mathcal{N}_1 \cup \mathcal{N}_2\)) vetoes NSAIDs, halves Metformin (&le;1000mg), and caps Spironolactone.</div>
           </div>
-
         </div>
       </div>
     </div>
@@ -1574,6 +1744,76 @@ define "BCG Vaccine Contraindicated":
           <li class="flex items-start gap-2"><i class="fa-solid fa-check text-slate-300 mt-1"></i> <span><strong>Hardware Target:</strong> $250–$320 6GB/8GB RAM tablets deployed at Sub-County Dispensaries and Primary Health Care clinics.</span></li>
           <li class="flex items-start gap-2"><i class="fa-solid fa-triangle-exclamation text-slate-300 mt-1"></i> <span><strong>Limitation:</strong> Too heavy (~3.6 GB RAM) for entry-level 3GB/4GB CHW handsets; ~2x battery draw per inference.</span></li>
         </ul>
+      </div>
+    </div>
+
+    <!-- Direct SLM Output Comparison Table: Gemma 4 2B vs MedGemma 4B -->
+    <div class="p-6 rounded-2xl bg-[var(--card)] border border-[var(--border)] space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-400">Direct SLM Benchmark Comparison</span>
+          <h3 class="text-lg font-bold text-[var(--foreground)] mt-0.5">Gemma 4 2B vs. MedGemma 4B: On-Device Performance &amp; Capability Matrix</h3>
+        </div>
+        <span class="text-xs font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
+          Evaluated with aCDU Gatekeeping
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="border-b border-[var(--border)] text-[var(--muted-foreground)] uppercase text-[11px]">
+              <th class="py-2.5 px-3">Evaluation Axis</th>
+              <th class="py-2.5 px-3">Gemma 4 2B (INT4 Quantized)</th>
+              <th class="py-2.5 px-3">MedGemma 4B (INT4 Quantized)</th>
+              <th class="py-2.5 px-3">Architectural Role &amp; Verdict</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)] text-slate-300 text-[11px]">
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Runtime Footprint</td>
+              <td class="py-2.5 px-3 font-mono text-blue-400">1.6 GB model / 1.9 GB peak RAM</td>
+              <td class="py-2.5 px-3 font-mono text-purple-400">3.3 GB model / 3.6 GB peak RAM</td>
+              <td class="py-2.5 px-3 text-slate-400">2B fits 4GB budget phones; 4B requires 6GB/8GB clinic tablets</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Longitudinal Summary (Check A)</td>
+              <td class="py-2.5 px-3 font-bold text-emerald-400">95% – 100% Pass</td>
+              <td class="py-2.5 px-3 font-bold text-emerald-400">95% – 100% Pass</td>
+              <td class="py-2.5 px-3 text-slate-400">Parity achieved via Tokempic tabular prompt compression</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Level-1 Single Protocols (eCHIS)</td>
+              <td class="py-2.5 px-3 font-mono">80.0% (8/10)</td>
+              <td class="py-2.5 px-3 font-mono text-emerald-400 font-bold">90.0% (9/10)</td>
+              <td class="py-2.5 px-3 text-slate-400">Both reliably execute single-axis clinical guidelines</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Level-2 Collisions &amp; Vetoes</td>
+              <td class="py-2.5 px-3 font-mono text-emerald-400 font-bold">60.0% (6x lift from 10% Naive RAG)</td>
+              <td class="py-2.5 px-3 font-mono text-emerald-400 font-bold">70.0% (7/10)</td>
+              <td class="py-2.5 px-3 text-slate-400">aCDU deontic clamping protects 2B from fatal aspiration errors</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Level-3 Adversarial Traps</td>
+              <td class="py-2.5 px-3 font-mono">66.7% (2/3 regexes on trap refusal)</td>
+              <td class="py-2.5 px-3 font-mono text-emerald-400 font-bold">66.7% – 70.0% (full pathology terms)</td>
+              <td class="py-2.5 px-3 text-slate-400">Both refuse dangerous folk practices; 4B has richer textbook vocabulary</td>
+            </tr>
+            <tr>
+              <td class="py-2.5 px-3 font-bold text-white">Tertiary PHC 4-Drug Titrations</td>
+              <td class="py-2.5 px-3 font-mono text-amber-400">30.0% (fails secondary renal titration)</td>
+              <td class="py-2.5 px-3 font-mono text-emerald-400 font-bold">70.0% (correct multi-drug adjustments)</td>
+              <td class="py-2.5 px-3 text-slate-400">Complex multi-morbidity pharmacology requires 4B parameter capacity</td>
+            </tr>
+            <tr class="bg-emerald-950/20">
+              <td class="py-2.5 px-3 font-bold text-emerald-300">Fatal Contraindication Safety</td>
+              <td class="py-2.5 px-3 font-bold text-emerald-400">100.0% True Safety (0 fatal leaks)</td>
+              <td class="py-2.5 px-3 font-bold text-emerald-400">100.0% True Safety (0 fatal leaks)</td>
+              <td class="py-2.5 px-3 text-emerald-300 font-bold">Zero fatal violations under Box 1 aCDU Gatekeeping</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </section>

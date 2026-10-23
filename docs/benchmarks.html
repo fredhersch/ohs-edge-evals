@@ -140,6 +140,32 @@
         </div>
       </div>
 
+      <!-- Collapsible Complexity Level Explanation (Issue #24) -->
+      <details class="group p-4 rounded-xl bg-slate-950/70 border border-[#263352] text-xs">
+        <summary class="cursor-pointer font-bold text-white flex items-center justify-between select-none">
+          <span class="flex items-center gap-2 text-blue-400">
+            <i class="fa-solid fa-circle-question"></i>
+            <span>Understanding the 3 Complexity Levels in Frontline Primary Care</span>
+          </span>
+          <span class="text-[11px] text-slate-400 group-open:hidden">Explain Levels ▾</span>
+          <span class="text-[11px] text-slate-400 hidden group-open:inline">Collapse ▴</span>
+        </summary>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 text-[11px] text-slate-300">
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <strong class="text-white block font-mono text-xs text-blue-300">Level 1: Single Protocol</strong>
+            <p class="text-slate-400 leading-relaxed">Isolated acute conditions (e.g. malaria, non-severe pneumonia, acute watery diarrhea). Verifies basic guideline recall and correct weight-banded dosing.</p>
+          </div>
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <strong class="text-amber-400 block font-mono text-xs">Level 2: Colliding Morbidities</strong>
+            <p class="text-slate-400 leading-relaxed">Co-occurring conditions where vertical guidelines collide (e.g. high fever + pneumonia + active convulsion). Tests whether the model identifies the overriding contraindication (NEVER give oral meds during a seizure).</p>
+          </div>
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <strong class="text-purple-400 block font-mono text-xs">Level 3: Adversarial Cultural Traps</strong>
+            <p class="text-slate-400 leading-relaxed">Presents dangerous traditional practices (e.g. applying cow dung or ash to an umbilical cord, or administering oxytocic herbal teas during obstructed labor). Tests whether the model rejects harmful practices without sycophancy.</p>
+          </div>
+        </div>
+      </details>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm border-collapse">
           <thead>
@@ -213,11 +239,36 @@
         <p class="text-[10px] text-zinc-500 pt-1 leading-relaxed">
           * <strong>Baseline Definition:</strong> "Zero-Shot, NO RAG" means the model evaluated raw patient context alone without any retrieved clinical guideline chunks (No RAG) and without an aCDU constraint.
         </p>
+
+        <!-- RAG Approaches Comparison (Issue #25) -->
+        <div class="mt-3 pt-3 border-t border-slate-800/80 space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-200">
+            <span class="flex items-center gap-1.5 text-blue-400">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>Comparison Across RAG Approaches on Edge SLMs:</span>
+            </span>
+            <a href="composite_multimodel_rag_report.html" class="text-[10px] text-blue-400 hover:text-blue-300 underline font-mono">Full RAG Report ↗</a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-[11px]">
+            <div class="p-2 rounded bg-black/40 border border-slate-800">
+              <span class="text-white font-bold block">1. No RAG (Zero-Shot)</span>
+              <span class="text-red-400 font-semibold">60.0% Pass Rate</span> &bull; <span class="text-zinc-400">Hallucinates unconstrained compromises.</span>
+            </div>
+            <div class="p-2 rounded bg-black/40 border border-slate-800">
+              <span class="text-white font-bold block">2. Naive Vector RAG</span>
+              <span class="text-amber-400 font-semibold">53.3% – 63.3%</span> &bull; <span class="text-zinc-400">Attention dilution over long chunks, 14s+ latency.</span>
+            </div>
+            <div class="p-2 rounded bg-blue-950/20 border border-blue-500/30">
+              <span class="text-white font-bold block text-emerald-400">3. aCDU / Zero-RAM RAG</span>
+              <span class="text-emerald-400 font-bold">96.7% – 100.0%</span> &bull; <span class="text-zinc-300">Deterministic safety floor, &lt;1ms retrieval.</span>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Section 2: AST Scorer vs Regex -->
-    <section class="bg-[#111827] border border-[#263352] rounded-2xl p-6 sm:p-8 space-y-6">
+    <!-- Section 2: AST Scorer vs Regex (Issue #26 - Clarified & Collapsible) -->
+    <section class="bg-[#111827] border border-[#263352] rounded-2xl p-6 sm:p-8 space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="space-y-1">
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
@@ -225,7 +276,7 @@
             Deterministic Scoring Upgrade: AST Scorer vs. Flat Regex
           </h2>
           <p class="text-xs text-zinc-400">
-            How our upgraded Markdown AST parser and clinical synonym normalizer rescues false-negatives on <strong>Gemma 4 2B (INT4)</strong> while preserving genuine safety flags. Click any case ID to view its complete gold vignette in the eval suite.
+            How Markdown AST parsing and clinical synonym dictionaries prevent false-negative evaluation failures.
           </p>
         </div>
         <a href="https://github.com/fredhersch/ohs-edge-evals-suite/tree/main/chw-edge-evals/vignettes" target="_blank" class="text-xs px-3 py-1.5 rounded-lg border border-[#263352] bg-[#172033] hover:bg-[#263352] text-white transition-colors flex items-center gap-1.5 font-medium shrink-0">
@@ -234,18 +285,39 @@
         </a>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm border-collapse">
-          <thead>
-            <tr class="border-b border-[#263352] text-xs uppercase tracking-wider text-zinc-400">
-              <th class="py-3 px-4 font-semibold">Case ID &amp; Scenario</th>
-              <th class="py-3 px-4 font-semibold">Flat Regex Result</th>
-              <th class="py-3 px-4 font-semibold">Upgraded AST Scorer</th>
-              <th class="py-3 px-4 font-semibold">Scorer Improvement Mechanism</th>
-              <th class="py-3 px-4 font-semibold text-center">Suite Details</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#263352]/60 text-zinc-300">
+      <!-- Plain English Explanation (Issue #26) -->
+      <div class="p-3.5 rounded-xl bg-purple-950/20 border border-purple-500/30 text-xs space-y-1.5">
+        <div class="font-bold text-purple-300 flex items-center gap-2">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Why AST Scoring in Plain English:</span>
+        </div>
+        <p class="text-slate-300 text-[11px] leading-relaxed">
+          Standard regular expressions strictly search for exact word sequences, causing false failures when a model writes clinically accurate advice using synonyms (e.g., <em>"administer dispersible tablet"</em> instead of exact regex string <em>"give tablet"</em>). The AST Scorer parses Markdown bullet points and clinical synonyms, rescuing genuine passes while continuing to strictly fail real clinical safety violations.
+        </p>
+      </div>
+
+      <!-- Collapsible Detailed 30-Case Breakdown Table -->
+      <details class="group p-2 rounded-xl bg-slate-950/40 border border-slate-800 text-xs">
+        <summary class="cursor-pointer font-bold text-white select-none p-2 flex justify-between items-center">
+          <span class="flex items-center gap-2 text-zinc-300">
+            <i class="fa-solid fa-table-list text-purple-400"></i>
+            <span>Detailed Case Breakdown: AST Scorer vs Flat Regex (Click to Expand)</span>
+          </span>
+          <span class="text-zinc-400 text-xs group-open:hidden">Show Cases ▾</span>
+          <span class="text-zinc-400 text-xs hidden group-open:inline">Hide Cases ▴</span>
+        </summary>
+        <div class="overflow-x-auto pt-3">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="border-b border-[#263352] text-xs uppercase tracking-wider text-zinc-400">
+                <th class="py-3 px-4 font-semibold">Case ID &amp; Scenario</th>
+                <th class="py-3 px-4 font-semibold">Flat Regex Result</th>
+                <th class="py-3 px-4 font-semibold">Upgraded AST Scorer</th>
+                <th class="py-3 px-4 font-semibold">Scorer Improvement Mechanism</th>
+                <th class="py-3 px-4 font-semibold text-center">Suite Details</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#263352]/60 text-zinc-300">
             <tr>
               <td class="py-3.5 px-4 font-medium text-white">
                 <a href="https://github.com/fredhersch/ohs-edge-evals-suite/blob/main/chw-edge-evals/vignettes/VIG-ECHIS-L2-005.json" target="_blank" class="font-mono text-blue-400 hover:underline flex items-center gap-1" title="View gold vignette JSON on GitHub">
@@ -334,6 +406,7 @@
           </tbody>
         </table>
       </div>
+      </details>
     </section>
 
     <!-- Section 3: Model Feasibility & Edge Hardware Benchmarks -->
