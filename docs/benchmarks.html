@@ -6,22 +6,21 @@
   <title>Benchmark Results &amp; Evaluation Data | OHS Edge Evals</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/site-theme.css">
   <style>
     :root {
-      --background: #f8fafc;
-      --card: #ffffff;
-      --card-muted: #f1f5f9;
-      --border: #e2e8f0;
-      --foreground: #0f172a;
-      --muted-foreground: #64748b;
+      --background: #090d16;
+      --card: #111827;
+      --card-muted: #172033;
+      --border: #263352;
+      --foreground: #f8fafc;
+      --muted-foreground: #94a3b8;
     }
   </style>
 </head>
-<body class="min-h-screen antialiased bg-[#f8fafc] text-[#0f172a]">
+<body class="min-h-screen antialiased bg-[#090d16] text-[#f8fafc]">
 
   <!-- Header -->
-  <header class="border-b border-slate-200 bg-white/95 backdrop-blur sticky top-0 z-50 text-slate-800">
+  <header class="border-b border-[#263352] bg-[#111827]/90 backdrop-blur sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center gap-3">
         <a href="index.html" class="flex items-center gap-2.5 group" title="OHS Edge • OHS Labs Research">
@@ -70,51 +69,43 @@
 
     <!-- Hero Title -->
     <div class="space-y-4">
-      <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 uppercase tracking-wider font-mono">
+      <div class="flex items-center gap-2 text-xs font-semibold text-emerald-400 uppercase tracking-wider">
         <span>Empirical Verification</span>
         <span>•</span>
         <span>Early Benchmark Data</span>
       </div>
-      <h1 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+      <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
         Early Benchmark Data &amp; Runtime Metrics
       </h1>
-      <p class="text-base sm:text-lg text-slate-600 max-w-3xl leading-relaxed">
+      <p class="text-lg text-zinc-400 max-w-3xl leading-relaxed">
         Systematic empirical results across the 30-case Kenya eCHIS suite, the 10 foundational clinical archetypes, Tier-1 AST scoring evaluations, and on-device runtime measurements.
       </p>
     </div>
 
-    <!-- KPI Summary Row (Matching Screenshot Stat Cards) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="hub-metric-card">
-        <div>
-          <div class="hub-metric-label">aCDU Safety Score</div>
-          <div class="hub-metric-value text-emerald-700">96.7%</div>
-        </div>
-        <div class="hub-metric-subtext">Up from 50.0% unconstrained baseline</div>
+    <!-- KPI Summary Row -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="p-5 rounded-2xl bg-[#111827] border border-[#263352] space-y-2">
+        <div class="text-xs text-zinc-400 uppercase font-semibold">aCDU Safety Score</div>
+        <div class="text-3xl font-extrabold text-emerald-400">96.7%</div>
+        <div class="text-xs text-zinc-400">Up from 50.0% baseline</div>
       </div>
 
-      <div class="hub-metric-card">
-        <div>
-          <div class="hub-metric-label">FHIR Compression</div>
-          <div class="hub-metric-value text-blue-700">29.3x</div>
-        </div>
-        <div class="hub-metric-subtext">4,820 &rarr; 164 avg tokens (SQL-on-FHIR)</div>
+      <div class="p-5 rounded-2xl bg-[#111827] border border-[#263352] space-y-2">
+        <div class="text-xs text-zinc-400 uppercase font-semibold">FHIR Compression</div>
+        <div class="text-3xl font-extrabold text-blue-400">29.3x</div>
+        <div class="text-xs text-zinc-400">4,820 &rarr; 164 avg tokens</div>
       </div>
 
-      <div class="hub-metric-card">
-        <div>
-          <div class="hub-metric-label">Judge Agreement</div>
-          <div class="hub-metric-value text-purple-700">&kappa; = 1.00</div>
-        </div>
-        <div class="hub-metric-subtext">100% fault sensitivity (50/50 calibration)</div>
+      <div class="p-5 rounded-2xl bg-[#111827] border border-[#263352] space-y-2">
+        <div class="text-xs text-zinc-400 uppercase font-semibold">Judge Agreement</div>
+        <div class="text-3xl font-extrabold text-purple-400">&kappa; = 1.0</div>
+        <div class="text-xs text-zinc-400">100% fault sensitivity (50/50)</div>
       </div>
 
-      <div class="hub-metric-card">
-        <div>
-          <div class="hub-metric-label">Gemma 4 2B TTFT</div>
-          <div class="hub-metric-value text-amber-700">180 ms</div>
-        </div>
-        <div class="hub-metric-subtext">INT4 on budget ARM Cortex-A53/A55 CPU</div>
+      <div class="p-5 rounded-2xl bg-[#111827] border border-[#263352] space-y-2">
+        <div class="text-xs text-zinc-400 uppercase font-semibold">Gemma 4 2B TTFT</div>
+        <div class="text-3xl font-extrabold text-amber-400">180 ms</div>
+        <div class="text-xs text-zinc-400">INT4 on mobile ARM CPU</div>
       </div>
     </div>
 

@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CHW Edge SLM Evaluation Suite &amp; Benchmark Hub | OHS Edge</title>
+  <title>OHS Edge: Offline Edge LLM &amp; Tokempic 3-Way Benchmark</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/site-theme.css">
   <style>
     :root {
       /* Dark Mode Palette (Default) */
@@ -213,123 +212,65 @@
       </div>
     </nav>
 
-    <!-- CHW EDGE SLM EVALUATION SUITE & BENCHMARK HUB HERO (EXACT SCREENSHOT MATCH) -->
-    <section class="space-y-6 pb-6">
-      
-      <!-- Top Header Row: Title & Subtitle + Meta Box -->
-      <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6 pt-2">
-        <!-- Title & Subtitle -->
-        <div class="space-y-2 max-w-2xl">
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
-            CHW Edge SLM Evaluation Suite &amp; Benchmark Hub
-          </h1>
-          <p class="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-            Systematic Evaluation Framework for Offline Community Health Worker Small Language Models (Gemma 4 / MedGemma Edge)
-          </p>
-        </div>
-
-        <!-- Google3 / Framework Meta Box -->
-        <div class="hub-meta-box lg:max-w-md w-full shrink-0 space-y-2">
-          <div>
-            <span class="font-bold text-slate-800">Google3 Path:</span>
-            <div class="mt-0.5"><code class="text-[11px] text-slate-700">//experimental/users/fredhersch/chw_edge_evals/</code></div>
-          </div>
-          <div class="text-xs">
-            <span class="font-bold text-slate-800">Lead / PM:</span>
-            <span class="text-slate-600">Fred Hersch ( <code class="text-[11px]">fredhersch@</code> )</span>
-          </div>
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200">
-            <div class="text-xs">
-              <span class="font-bold text-slate-800">Tech Lead Handoff:</span>
-              <span class="text-slate-600">Ali Afshar ( <code class="text-[11px]">afshar@</code> )</span>
-            </div>
-            <div class="hub-pill-passed">
-              <span>Blaze Tests:</span>
-              <span>7/7 PASSED</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab Bar (Matching Screenshot) -->
-      <div class="hub-tab-bar">
-        <a href="index.html" class="hub-tab-item active">
-          1. Architecture &amp; Framework Plan
-        </a>
-        <a href="datasets.html" class="hub-tab-item">
-          2. Datasets &amp; External Catalog (12 In-Repo + 9 External)
-        </a>
-        <a href="explorations/longitudinal-trend-viz.html" class="hub-tab-item">
-          3. On-Device Trend Visualization &amp; Sparklines
-        </a>
-        <a href="acdu-architecture.html" class="hub-tab-item">
-          4. Two-Box aCDU Safety Floors &amp; Deontic Clamping
-        </a>
-        <a href="benchmarks.html" class="hub-tab-item">
-          5. Multi-Model Edge Benchmarks
-        </a>
-      </div>
-
-      <!-- 6-Metric Stat Grid (Exact Screenshot Match) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 pt-1">
-        <!-- Card 1 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">Stage 1 Vibe-Evals</div>
-            <div class="hub-metric-value">110 Cases</div>
-          </div>
-          <div class="hub-metric-subtext">7 Active JSON Packs (PACK 01–07)</div>
-        </div>
-
-        <!-- Card 2 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">Gemma 4 2B Pass Rate</div>
-            <div class="hub-metric-value">93.3%</div>
-          </div>
-          <div class="hub-metric-subtext">+13.3% rescue via AST + Synonym Scorer</div>
-        </div>
-
-        <!-- Card 3 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">SQL-on-FHIR Compression</div>
-            <div class="hub-metric-value">3.1x – 4.1x</div>
-          </div>
-          <div class="hub-metric-subtext">329 vs 1,029 tokens (100% clinical recall)</div>
-        </div>
-
-        <!-- Card 4 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">Two-Box aCDU Store</div>
-            <div class="hub-metric-value">32 Units</div>
-          </div>
-          <div class="hub-metric-subtext">SQLite FTS5 + 100% Swahili Recall</div>
-        </div>
-
-        <!-- Card 5 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">Gemini 4 Judge Holdout</div>
-            <div class="hub-metric-value">κ = 1.00</div>
-          </div>
-          <div class="hub-metric-subtext">N=100 Calibration (100% Fault Sensitivity)</div>
-        </div>
-
-        <!-- Card 6 -->
-        <div class="hub-metric-card">
-          <div>
-            <div class="hub-metric-label">ORPO / DPO Pairs</div>
-            <div class="hub-metric-value">255 Pairs</div>
-          </div>
-          <div class="hub-metric-subtext">Actionability, Grounding, Conciseness</div>
-        </div>
-      </div>
-    </section>
-
     <!-- EXECUTIVE NARRATIVE: ADVANCING SLMs FOR FRONTLINE CARE AT THE EDGE -->
     <section class="space-y-8 pb-8 border-b border-[var(--border)]">
+
+      <!-- Hero Header -->
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden">
+        
+        <div class="space-y-4 max-w-4xl relative z-10">
+          <!-- OHS Labs Research Badge -->
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-800 text-slate-300 border border-slate-700">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+            <span class="font-semibold text-white">OHS Labs</span>
+            <span class="text-slate-500">•</span>
+            <span class="text-[11px] font-mono text-slate-400">RESEARCH WORKING PAPER</span>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+              Frontline Decision Support
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+              Offline Edge Intelligence
+            </span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 border border-slate-700">
+              1B–4B SLM Class
+            </span>
+          </div>
+
+          <h1 class="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+            Advancing Small Language Models (SLMs) for Edge Frontline Health Workers
+          </h1>
+
+          <p class="text-base sm:text-lg text-[var(--foreground-secondary)] leading-relaxed">
+            Community Health Workers (CHWs) and mid-level clinical officers in low-connectivity settings require responsive, hallucination-safe clinical decision support on budget Android hardware ($&lt;4$ GB RAM). This framework establishes the empirical evaluation rigor, deterministic safety floors, and token compression pipelines necessary to make 1B–4B parameter models clinically dependable offline.
+          </p>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Quantized Target</div>
+              <div class="text-lg font-bold text-white">1B – 4B Models</div>
+              <div class="text-[11px] text-slate-400">INT4 / INT8 On-Device</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Hardware Ceiling</div>
+              <div class="text-lg font-bold text-white">&lt;3.5 GB RAM</div>
+              <div class="text-[11px] text-slate-400">Zero LMK App Terminations</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Prefill Latency</div>
+              <div class="text-lg font-bold text-white">&lt;200 ms TTFT</div>
+              <div class="text-[11px] text-slate-400">ARM Cortex-A53 / A55</div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1">
+              <div class="text-xs text-[var(--muted-foreground)]">Deterministic Safety</div>
+              <div class="text-lg font-bold text-white">96.7% Adherence</div>
+              <div class="text-[11px] text-slate-400">Two-Box aCDU Floor</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Section: The 5 Problems We Are Working Through -->
       <div class="space-y-4">

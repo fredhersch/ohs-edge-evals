@@ -6,41 +6,8 @@
   <title>OHS Edge: Clinical Vignette Generator & Gold Standard Eval Suite</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="assets/css/site-theme.css">
   <style>
     :root {
-      --background: #f8fafc;
-      --card: #ffffff;
-      --card-muted: #f1f5f9;
-      --border: #e2e8f0;
-      --border-subtle: #edf2f7;
-      --foreground: #0f172a;
-      --foreground-secondary: #334155;
-      --muted-foreground: #64748b;
-      --surface-hover: #f1f5f9;
-      --code-bg: #f8fafc;
-      --code-text: #0f172a;
-
-      --text-blue: #1d4ed8;
-      --text-emerald: #047857;
-      --text-amber: #b45309;
-      --text-red: #b91c1c;
-      --text-purple: #6d28d9;
-      --text-pink: #be185d;
-
-      --badge-blue-bg: #eff6ff;
-      --badge-blue-border: #bfdbfe;
-      --badge-emerald-bg: #ecfdf5;
-      --badge-emerald-border: #a7f3d0;
-      --badge-amber-bg: #fffbeb;
-      --badge-amber-border: #fde68a;
-      --badge-red-bg: #fef2f2;
-      --badge-red-border: #fecaca;
-      --badge-purple-bg: #faf5ff;
-      --badge-purple-border: #e9d5ff;
-    }
-
-    html.dark {
       --background: #090d16;
       --card: #111827;
       --card-muted: #172033;
@@ -59,6 +26,49 @@
       --text-red: #f87171;
       --text-purple: #c084fc;
       --text-pink: #f472b6;
+
+      --badge-blue-bg: rgba(59, 130, 246, 0.18);
+      --badge-blue-border: rgba(59, 130, 246, 0.4);
+      --badge-emerald-bg: rgba(16, 185, 129, 0.18);
+      --badge-emerald-border: rgba(16, 185, 129, 0.4);
+      --badge-amber-bg: rgba(245, 158, 11, 0.18);
+      --badge-amber-border: rgba(245, 158, 11, 0.4);
+      --badge-red-bg: rgba(239, 68, 68, 0.18);
+      --badge-red-border: rgba(239, 68, 68, 0.4);
+      --badge-purple-bg: rgba(168, 85, 247, 0.18);
+      --badge-purple-border: rgba(168, 85, 247, 0.4);
+    }
+
+    html.light {
+      --background: #f8fafc;
+      --card: #ffffff;
+      --card-muted: #f1f5f9;
+      --border: #cbd5e1;
+      --border-subtle: #e2e8f0;
+      --foreground: #0f172a;
+      --foreground-secondary: #334155;
+      --muted-foreground: #475569;
+      --surface-hover: #e2e8f0;
+      --code-bg: #0f172a;
+      --code-text: #f8fafc;
+
+      --text-blue: #1d4ed8;
+      --text-emerald: #047857;
+      --text-amber: #b45309;
+      --text-red: #b91c1c;
+      --text-purple: #6b21a8;
+      --text-pink: #be185d;
+
+      --badge-blue-bg: #dbeafe;
+      --badge-blue-border: #93c5fd;
+      --badge-emerald-bg: #d1fae5;
+      --badge-emerald-border: #6ee7b7;
+      --badge-amber-bg: #fef3c7;
+      --badge-amber-border: #fcd34d;
+      --badge-red-bg: #fee2e2;
+      --badge-red-border: #fca5a5;
+      --badge-purple-bg: #f3e8ff;
+      --badge-purple-border: #d8b4fe;
     }
 
     body {
