@@ -403,6 +403,48 @@
         <!-- Populated by JS -->
       </div>
 
+      <!-- Terminology & Scoring Legend Card (Issues #40, #51, #52) -->
+      <div class="p-4 rounded-xl border border-blue-500/30 bg-blue-950/20 text-xs space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-blue-500/20">
+          <strong class="text-blue-300 font-bold flex items-center gap-2 text-sm">
+            <i class="fa-solid fa-circle-question text-blue-400"></i>
+            Comparator Terminology &amp; Evaluation Guide
+          </strong>
+          <span class="text-[10px] font-mono text-blue-400 bg-blue-900/40 px-2 py-0.5 rounded border border-blue-500/30">Evaluation Methodology</span>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-[11px] text-zinc-300">
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <span class="text-white font-bold block flex items-center gap-1.5">
+              <i class="fa-solid fa-scale-unbalanced text-purple-400"></i>
+              <span>Baseline Output (Reference Model)</span>
+            </span>
+            <p class="text-zinc-400 leading-relaxed">
+              The benchmark model selected in the left dropdown (e.g. MedGemma 4B or Gemma 4 2B Naive RAG). Serves as the control reference to identify clinical drift.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <span class="text-white font-bold block flex items-center gap-1.5">
+              <i class="fa-solid fa-flask-vial text-blue-400"></i>
+              <span>Candidate Output (Under Test)</span>
+            </span>
+            <p class="text-zinc-400 leading-relaxed">
+              The experimental model or guardrail configuration in the right dropdown (e.g. Gemma 4 E2B with Two-Box aCDU Clamping). Evaluated against the baseline.
+            </p>
+          </div>
+          <div class="p-3 rounded-lg bg-black/40 border border-slate-800 space-y-1">
+            <span class="text-white font-bold block flex items-center gap-1.5">
+              <i class="fa-solid fa-arrow-right-arrow-left text-amber-400"></i>
+              <span>Delta Outcome (Outcome Shift)</span>
+            </span>
+            <ul class="space-y-1 text-[10px] text-zinc-300">
+              <li><span class="badge badge-red font-bold">REGRESSION:</span> <strong>Critical defect</strong> — Passed in Baseline, but failed in Candidate.</li>
+              <li><span class="badge badge-emerald font-bold">IMPROVEMENT:</span> <strong>Safety fix</strong> — Failed in Baseline, but passed in Candidate.</li>
+              <li><span class="badge badge-purple font-bold">UNCHANGED:</span> Both models had the same outcome (both pass or both fail).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- Case Comparison Table -->
       <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
         <div class="p-4 border-b border-[var(--border)] flex flex-wrap items-center justify-between gap-3 bg-[var(--card-muted)]">
@@ -419,11 +461,12 @@
           <table class="w-full text-left text-xs">
             <thead class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider bg-[var(--card)]">
               <tr>
-                <th class="py-3 px-4">Scenario / Clinical Presentation</th>
-                <th class="py-3 px-3">Domain / Level</th>
-                <th class="py-3 px-3">Baseline Output</th>
-                <th class="py-3 px-3">Candidate Output</th>
-                <th class="py-3 px-4">Delta Outcome</th>
+                <th class="py-3 px-4">Scenario &amp; Patient Presentation</th>
+                <th class="py-3 px-3">Complexity Tier</th>
+                <th class="py-3 px-3">Baseline Output<br><span class="text-[10px] font-normal lowercase text-[var(--muted-foreground)]" id="header-baseline-name">(reference)</span></th>
+                <th class="py-3 px-3">Candidate Output<br><span class="text-[10px] font-normal lowercase text-blue-400" id="header-candidate-name">(under test)</span></th>
+                <th class="py-3 px-3 text-center">Delta Shift</th>
+                <th class="py-3 px-3 text-right">Drill Down</th>
               </tr>
             </thead>
             <tbody id="comparator-table-body" class="divide-y divide-[var(--border-subtle)] font-medium">
@@ -458,6 +501,30 @@
       <div class="giscus"></div>
     </section>
 
+    <!-- Modal: Case Detail & Failure Explanation (Issues #51, #52) -->
+    <div id="modal-case-details" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl max-w-4xl w-full p-6 space-y-4 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-[var(--border)]">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span id="detail-modal-vignette-id" class="font-mono text-xs px-2 py-0.5 rounded bg-[var(--card-muted)] text-[var(--muted-foreground)] font-bold"></span>
+              <span id="detail-modal-level" class="badge badge-purple text-[10px]"></span>
+              <span id="detail-modal-domain" class="badge badge-emerald text-[10px]"></span>
+            </div>
+            <h3 id="detail-modal-title" class="text-base font-bold text-[var(--foreground)] mt-1"></h3>
+          </div>
+          <button onclick="closeCaseDetailsModal()" class="text-[var(--muted-foreground)] hover:text-[var(--foreground)] text-lg"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div id="detail-modal-content" class="space-y-4 text-xs">
+          <!-- Populated dynamically by openCaseDetailsModal -->
+        </div>
+
+        <div class="pt-2 flex justify-end border-t border-[var(--border)]">
+          <button onclick="closeCaseDetailsModal()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold">Close</button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- Modal: Generate New Vignette -->
@@ -4376,6 +4443,10 @@
       }
     }
 
+    window.CURRENT_DIFF_ROWS = [];
+    window.CURRENT_BASELINE_RUN = null;
+    window.CURRENT_CANDIDATE_RUN = null;
+
     function executeRunComparison() {
       const baseId = document.getElementById('select-baseline-run').value;
       const candId = document.getElementById('select-candidate-run').value;
@@ -4384,6 +4455,15 @@
       const cand = RUNS.find(r => r.run_id === candId) || (RUNS[1] || RUNS[0]);
 
       if (!base || !cand) return;
+
+      window.CURRENT_BASELINE_RUN = base;
+      window.CURRENT_CANDIDATE_RUN = cand;
+
+      // Update table header labels
+      const baseNameEl = document.getElementById('header-baseline-name');
+      const candNameEl = document.getElementById('header-candidate-name');
+      if (baseNameEl) baseNameEl.textContent = `(${base.model_name || base.model_id})`;
+      if (candNameEl) candNameEl.textContent = `(${cand.model_name || cand.model_id})`;
 
       const deltaPass = cand.summary.pass_rate_pct - base.summary.pass_rate_pct;
       const deltaSafety = cand.summary.safety_clamp_rate_pct - base.summary.safety_clamp_rate_pct;
@@ -4407,6 +4487,9 @@
           improvements++;
         }
 
+        const bFailures = (b && b.metrics && b.metrics.failures && b.metrics.failures.length) ? b.metrics.failures : [];
+        const cFailures = (c && c.metrics && c.metrics.failures && c.metrics.failures.length) ? c.metrics.failures : [];
+
         return {
           vignette_id: c.vignette_id,
           title: c.title,
@@ -4414,11 +4497,19 @@
           level: c.level,
           baseline_pass: bPass,
           baseline_text: b ? b.generated_text : 'N/A',
+          baseline_failures: bFailures,
+          baseline_word_count: b ? (b.word_count || 'N/A') : 'N/A',
+          baseline_latency: b ? (b.latency_ms || 'N/A') : 'N/A',
           candidate_pass: cPass,
           candidate_text: c.generated_text,
+          candidate_failures: cFailures,
+          candidate_word_count: c.word_count || 'N/A',
+          candidate_latency: c.latency_ms || 'N/A',
           type: type
         };
       });
+
+      window.CURRENT_DIFF_ROWS = diffRows;
 
       // Update KPIs
       document.getElementById('count-regressions').textContent = regressions;
@@ -4472,20 +4563,35 @@
       document.getElementById('showing-cases-count').textContent = `Showing ${filtered.length} of ${diffRows.length} scenarios`;
 
       if (!filtered.length) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-[var(--muted-foreground)]">No cases match the '${compareFilter}' filter.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-[var(--muted-foreground)]">No cases match the '${compareFilter}' filter.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = filtered.map(r => {
-        let outcomeBadge = `<span class="badge badge-purple">Unchanged</span>`;
-        if (r.type === 'regression') outcomeBadge = `<span class="badge badge-red"><i class="fa-solid fa-triangle-exclamation text-[9px]"></i> REGRESSION</span>`;
-        if (r.type === 'improvement') outcomeBadge = `<span class="badge badge-emerald"><i class="fa-solid fa-arrow-trend-up text-[9px]"></i> IMPROVEMENT</span>`;
+        let outcomeBadge = `<span class="badge badge-purple font-mono">UNCHANGED</span>`;
+        let outcomeText = r.baseline_pass === r.candidate_pass ? (r.baseline_pass ? 'Both Passed' : 'Both Failed') : '';
+        if (r.type === 'regression') {
+          outcomeBadge = `<span class="badge badge-red font-mono"><i class="fa-solid fa-triangle-exclamation text-[9px]"></i> REGRESSION</span>`;
+          outcomeText = '<span class="text-[10px] text-red-400 block font-medium">Pass &rarr; Fail</span>';
+        }
+        if (r.type === 'improvement') {
+          outcomeBadge = `<span class="badge badge-emerald font-mono"><i class="fa-solid fa-arrow-trend-up text-[9px]"></i> IMPROVEMENT</span>`;
+          outcomeText = '<span class="text-[10px] text-emerald-400 block font-medium">Fail &rarr; Pass</span>';
+        }
+
+        const bFailHtml = (!r.baseline_pass && r.baseline_failures.length) 
+          ? `<div class="text-[10px] text-red-400 font-medium mt-1 p-1 bg-red-500/10 rounded border border-red-500/20 line-clamp-1" title="${r.baseline_failures.join('; ')}"><i class="fa-solid fa-circle-exclamation mr-1"></i>${r.baseline_failures[0]}</div>` 
+          : '';
+
+        const cFailHtml = (!r.candidate_pass && r.candidate_failures.length) 
+          ? `<div class="text-[10px] text-red-400 font-medium mt-1 p-1 bg-red-500/10 rounded border border-red-500/20 line-clamp-1" title="${r.candidate_failures.join('; ')}"><i class="fa-solid fa-circle-exclamation mr-1"></i>${r.candidate_failures[0]}</div>` 
+          : '';
 
         return `
           <tr class="hover:bg-[var(--surface-hover)] transition ${r.type === 'regression' ? 'bg-red-500/5' : ''}">
             <td class="py-3 px-4 max-w-xs">
               <span class="font-mono text-[10px] text-[var(--muted-foreground)] block font-bold">${r.vignette_id}</span>
-              <strong class="text-[var(--foreground)]">${r.title}</strong>
+              <strong class="text-[var(--foreground)] hover:text-blue-400 cursor-pointer block" onclick="openCaseDetailsModal('${r.vignette_id}')">${r.title}</strong>
             </td>
             <td class="py-3 px-3">
               <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--card-muted)] block w-fit mb-0.5">${r.domain}</span>
@@ -4494,22 +4600,159 @@
             <td class="py-3 px-3 max-w-sm">
               <div class="flex items-center space-x-1.5 mb-1">
                 ${r.baseline_pass ? `<span class="badge badge-emerald">PASS</span>` : `<span class="badge badge-red">FAIL</span>`}
+                <span class="text-[10px] text-[var(--muted-foreground)] font-mono">${r.baseline_word_count}w &bull; ${r.baseline_latency}ms</span>
               </div>
               <p class="text-[11px] text-[var(--muted-foreground)] line-clamp-2">${r.baseline_text}</p>
+              ${bFailHtml}
             </td>
             <td class="py-3 px-3 max-w-sm">
               <div class="flex items-center space-x-1.5 mb-1">
                 ${r.candidate_pass ? `<span class="badge badge-emerald">PASS</span>` : `<span class="badge badge-red">FAIL</span>`}
+                <span class="text-[10px] text-[var(--muted-foreground)] font-mono">${r.candidate_word_count}w &bull; ${r.candidate_latency}ms</span>
               </div>
               <p class="text-[11px] text-[var(--foreground)] line-clamp-2">${r.candidate_text}</p>
+              ${cFailHtml}
             </td>
-            <td class="py-3 px-4 whitespace-nowrap">
+            <td class="py-3 px-3 text-center whitespace-nowrap">
               ${outcomeBadge}
+              ${outcomeText ? `<div class="mt-0.5">${outcomeText}</div>` : ''}
+            </td>
+            <td class="py-3 px-3 text-right whitespace-nowrap">
+              <button onclick="openCaseDetailsModal('${r.vignette_id}')" class="px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 text-xs font-semibold inline-flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-magnifying-glass-chart text-[10px]"></i>
+                <span>Inspect</span>
+              </button>
             </td>
           </tr>
         `;
       }).join('');
     }
+
+    function openCaseDetailsModal(vignetteId) {
+      const row = (window.CURRENT_DIFF_ROWS || []).find(r => r.vignette_id === vignetteId);
+      if (!row) return;
+
+      const baseRun = window.CURRENT_BASELINE_RUN || {};
+      const candRun = window.CURRENT_CANDIDATE_RUN || {};
+      const vig = (VIGNETTES || []).find(v => v.id === vignetteId) || {};
+
+      document.getElementById('detail-modal-vignette-id').textContent = row.vignette_id;
+      document.getElementById('detail-modal-level').textContent = row.level;
+      document.getElementById('detail-modal-domain').textContent = row.domain;
+      document.getElementById('detail-modal-title').textContent = row.title;
+
+      let deltaSummaryHtml = '';
+      if (row.type === 'regression') {
+        deltaSummaryHtml = `
+          <div class="p-3 rounded-xl bg-red-950/30 border border-red-500/30 flex items-start gap-2.5 text-xs text-red-200">
+            <i class="fa-solid fa-triangle-exclamation text-red-400 text-base mt-0.5"></i>
+            <div>
+              <strong class="font-bold block text-red-300">REGRESSION DEFECT DETECTED:</strong>
+              This scenario successfully PASSED under the reference baseline model (${baseRun.model_name || 'Baseline'}), but FAILED under the candidate configuration (${candRun.model_name || 'Candidate'}). Failure reason(s): ${row.candidate_failures.join(', ') || 'Protocol criteria violated'}.
+            </div>
+          </div>
+        `;
+      } else if (row.type === 'improvement') {
+        deltaSummaryHtml = `
+          <div class="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/30 flex items-start gap-2.5 text-xs text-emerald-200">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-base mt-0.5"></i>
+            <div>
+              <strong class="font-bold block text-emerald-300">SAFETY / PROTOCOL IMPROVEMENT:</strong>
+              This scenario FAILED under the reference baseline model (${row.baseline_failures.join(', ') || 'Protocol non-adherence'}), but was successfully fixed and PASSED by the candidate model (${candRun.model_name || 'Candidate'}).
+            </div>
+          </div>
+        `;
+      } else {
+        deltaSummaryHtml = `
+          <div class="p-3 rounded-xl bg-purple-950/30 border border-purple-500/30 flex items-start gap-2.5 text-xs text-purple-200">
+            <i class="fa-solid fa-circle-info text-purple-400 text-base mt-0.5"></i>
+            <div>
+              <strong class="font-bold block text-purple-300">OUTCOME UNCHANGED:</strong>
+              Both models yielded identical pass/fail status (${row.candidate_pass ? 'Both PASSED' : 'Both FAILED'}).
+            </div>
+          </div>
+        `;
+      }
+
+      const content = document.getElementById('detail-modal-content');
+      content.innerHTML = `
+        ${deltaSummaryHtml}
+
+        <!-- Clinical Presentation Details -->
+        <div class="p-3.5 rounded-xl bg-[var(--card-muted)] border border-[var(--border)] space-y-1.5">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--muted-foreground)] flex items-center gap-1.5">
+            <i class="fa-solid fa-user-doctor text-blue-400"></i>
+            Clinical Scenario &amp; Frontline Presentation:
+          </span>
+          <p class="text-xs text-[var(--foreground)] leading-relaxed">
+            ${vig.clinical_presentation || (vig.clinical_context ? JSON.stringify(vig.clinical_context.patient || {}) : 'Primary health encounter evaluated against Kenya Ministry of Health Community Health Guidelines.')}
+          </p>
+        </div>
+
+        <!-- Head-to-Head Side-by-Side Outputs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Baseline Column -->
+          <div class="p-3.5 rounded-xl border ${row.baseline_pass ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-red-500/30 bg-red-950/10'} space-y-2">
+            <div class="flex items-center justify-between pb-1.5 border-b border-[var(--border)]">
+              <div class="space-y-0.5">
+                <strong class="text-xs text-[var(--foreground)] block">${baseRun.model_name || 'Baseline Model'}</strong>
+                <span class="text-[10px] text-[var(--muted-foreground)] font-mono">${row.baseline_word_count} words &bull; ${row.baseline_latency} ms</span>
+              </div>
+              ${row.baseline_pass ? `<span class="badge badge-emerald font-bold">PASS</span>` : `<span class="badge badge-red font-bold">FAIL</span>`}
+            </div>
+
+            ${(!row.baseline_pass && row.baseline_failures.length) ? `
+              <div class="p-2 rounded bg-red-500/15 border border-red-500/30 text-[11px] text-red-300 space-y-1">
+                <strong class="block font-bold text-red-200 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Why Baseline Failed:</strong>
+                <ul class="list-disc list-inside space-y-0.5 text-[10px]">
+                  ${row.baseline_failures.map(f => `<li>${f}</li>`).join('')}
+                </ul>
+              </div>
+            ` : (row.baseline_pass ? `<div class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i>All required protocol actions and safety boundaries passed.</div>` : '')}
+
+            <div>
+              <span class="text-[10px] uppercase font-bold text-[var(--muted-foreground)] block mb-1">Full Baseline Generated Output:</span>
+              <pre class="text-[11px] p-2.5 rounded-lg bg-black/40 border border-slate-800 text-zinc-300 whitespace-pre-wrap font-sans leading-relaxed max-h-60 overflow-y-auto select-all">${row.baseline_text}</pre>
+            </div>
+          </div>
+
+          <!-- Candidate Column -->
+          <div class="p-3.5 rounded-xl border ${row.candidate_pass ? 'border-emerald-500/30 bg-emerald-950/10' : 'border-red-500/30 bg-red-950/10'} space-y-2">
+            <div class="flex items-center justify-between pb-1.5 border-b border-[var(--border)]">
+              <div class="space-y-0.5">
+                <strong class="text-xs text-[var(--foreground)] block text-blue-400">${candRun.model_name || 'Candidate Model'}</strong>
+                <span class="text-[10px] text-[var(--muted-foreground)] font-mono">${row.candidate_word_count} words &bull; ${row.candidate_latency} ms</span>
+              </div>
+              ${row.candidate_pass ? `<span class="badge badge-emerald font-bold">PASS</span>` : `<span class="badge badge-red font-bold">FAIL</span>`}
+            </div>
+
+            ${(!row.candidate_pass && row.candidate_failures.length) ? `
+              <div class="p-2 rounded bg-red-500/15 border border-red-500/30 text-[11px] text-red-300 space-y-1">
+                <strong class="block font-bold text-red-200 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i> Why Candidate Failed:</strong>
+                <ul class="list-disc list-inside space-y-0.5 text-[10px]">
+                  ${row.candidate_failures.map(f => `<li>${f}</li>`).join('')}
+                </ul>
+              </div>
+            ` : (row.candidate_pass ? `<div class="text-[10px] text-emerald-400 font-semibold"><i class="fa-solid fa-check mr-1"></i>All required protocol actions and safety boundaries passed.</div>` : '')}
+
+            <div>
+              <span class="text-[10px] uppercase font-bold text-[var(--muted-foreground)] block mb-1">Full Candidate Generated Output:</span>
+              <pre class="text-[11px] p-2.5 rounded-lg bg-black/40 border border-slate-800 text-zinc-300 whitespace-pre-wrap font-sans leading-relaxed max-h-60 overflow-y-auto select-all">${row.candidate_text}</pre>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-case-details').classList.remove('hidden');
+    }
+
+    function closeCaseDetailsModal() {
+      document.getElementById('modal-case-details').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeCaseDetailsModal();
+    });
 
     // Initialize
     window.addEventListener('DOMContentLoaded', loadInitialData);

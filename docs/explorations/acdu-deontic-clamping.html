@@ -90,7 +90,7 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
         
-        <!-- 1. Computable Rules -->
+        <!-- 1. Computable Rules (Issue #41 & #42) -->
         <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 flex flex-col justify-between">
           <div>
             <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-blue-400">
@@ -98,15 +98,16 @@
               1. Rules Without Advice
             </div>
             <p class="text-slate-300 leading-relaxed text-[11px]">
-              Computable guidelines (like WHO SMART in CQL/FHIRPath) execute <strong>deterministic rules</strong>, but stop at raw boolean codes.
+              Computable guidelines (like WHO SMART in CQL/FHIRPath) execute <strong>deterministic rules</strong>, but stop at raw codes and minimal guidance, lacking practical conversational adaptation.
             </p>
           </div>
-          <div class="p-2 rounded bg-black/40 border border-slate-800/80 text-[10px] text-slate-400 leading-relaxed mt-2">
-            <strong>The Gap:</strong> They output raw diagnostic codes without practical guidance or conversational rationale.
+          <div class="p-2.5 rounded-lg bg-blue-950/50 border border-blue-500/40 text-[10px] text-blue-200 leading-relaxed mt-2 shadow-sm">
+            <strong class="text-blue-300 font-bold flex items-center gap-1 mb-0.5"><i class="fa-solid fa-circle-exclamation"></i> The Gap:</strong>
+            They output raw diagnostic codes without practical guidance or conversational rationale.
           </div>
         </div>
 
-        <!-- 2. Contextualized Advice Gap (Issue #6) -->
+        <!-- 2. Contextualized Advice Gap (Issue #6 & #42) -->
         <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 flex flex-col justify-between">
           <div>
             <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-purple-400">
@@ -117,12 +118,13 @@
               Health workers must adapt recommendations to <strong>real home contexts</strong>: water access, distance, literacy, and beliefs.
             </p>
           </div>
-          <div class="p-2 rounded bg-black/40 border border-slate-800/80 text-[10px] text-slate-400 leading-relaxed mt-2">
-            <strong>The Need:</strong> Empathetic, culturally sensitive counseling in vernacular languages (Swahili, Dholuo, Hausa).
+          <div class="p-2.5 rounded-lg bg-purple-950/50 border border-purple-500/40 text-[10px] text-purple-200 leading-relaxed mt-2 shadow-sm">
+            <strong class="text-purple-300 font-bold flex items-center gap-1 mb-0.5"><i class="fa-solid fa-bullseye"></i> The Need:</strong>
+            Empathetic, culturally sensitive counseling in vernacular languages (Swahili, Dholuo, Hausa).
           </div>
         </div>
 
-        <!-- 3. Small Model Confusion -->
+        <!-- 3. Small Model Confusion (Issue #42) -->
         <div class="p-3.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1.5 flex flex-col justify-between">
           <div>
             <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-amber-400">
@@ -133,12 +135,13 @@
               Small on-device models (1B–4B) generate dialogue, but <strong>hallucinate lethal compromises</strong> when guidelines collide.
             </p>
           </div>
-          <div class="p-2 rounded bg-black/40 border border-slate-800/80 text-[10px] text-slate-400 leading-relaxed mt-2">
-            <strong>The Danger:</strong> Trying to satisfy oral pill rules while airway safety rules forbid oral intake.
+          <div class="p-2.5 rounded-lg bg-amber-950/50 border border-amber-500/40 text-[10px] text-amber-200 leading-relaxed mt-2 shadow-sm">
+            <strong class="text-amber-300 font-bold flex items-center gap-1 mb-0.5"><i class="fa-solid fa-triangle-exclamation"></i> The Danger:</strong>
+            Trying to satisfy oral pill rules while airway safety rules forbid oral intake.
           </div>
         </div>
 
-        <!-- 4. The aCDU Bridge -->
+        <!-- 4. The aCDU Bridge (Issue #42) -->
         <div class="p-3.5 rounded-xl bg-blue-950/30 border border-blue-500/40 space-y-1.5 flex flex-col justify-between">
           <div>
             <div class="font-bold text-white text-xs flex items-center gap-1.5 mb-1 text-emerald-400">
@@ -149,8 +152,9 @@
               <strong>aCDUs bridge this:</strong> deterministically enforcing negative boundaries before the SLM generates dialogue.
             </p>
           </div>
-          <div class="p-2 rounded bg-emerald-950/20 border border-emerald-500/30 text-[10px] text-emerald-300/90 leading-relaxed mt-2">
-            <strong>The Result:</strong> 100% negative boundary recall and zero aspirational compromises.
+          <div class="p-2.5 rounded-lg bg-emerald-950/50 border border-emerald-500/40 text-[10px] text-emerald-200 leading-relaxed mt-2 shadow-sm">
+            <strong class="text-emerald-300 font-bold flex items-center gap-1 mb-0.5"><i class="fa-solid fa-shield-check"></i> The Result:</strong>
+            100% negative boundary recall and zero aspirational compromises.
           </div>
         </div>
 
@@ -191,7 +195,7 @@
         </div>
 
         <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-          National guidelines are engineered in silos: Malaria programs mandate oral antimalarials, Pneumonia protocols mandate immediate amoxicillin, and Emergency Triage strictly prohibits giving anything by mouth during seizures. When a febrile child has a seizure, these guidelines collide simultaneously.
+          National guidelines are engineered in silos: Malaria programs mandate oral antimalarials, Pneumonia protocols mandate immediate amoxicillin, and Emergency Triage strictly prohibits giving anything by mouth during or after seizures. In frontline triage, febrile infants often present in post-ictal drowsiness accompanied by rapid breathing. Panicking caregivers frequently ask to force fever meds or oral antibiotics down the child's throat, triggering a dangerous clinical collision between vertical treatment protocols and emergency airway safety.
         </p>
 
         <!-- The 3-Way Collision Visual -->
@@ -343,8 +347,19 @@
   }
 }</code></pre>
 
-        <!-- Side-by-Side Comparison: Output With vs Without aCDU Clamping (Issue #8) -->
-        <div class="pt-3 space-y-2">
+        <!-- Side-by-Side Comparison: Output With vs Without aCDU Clamping (Issue #8 & #43) -->
+        <div class="pt-3 space-y-3">
+          <!-- Realistic Frontline Clinical Context (Issue #43) -->
+          <div class="p-3.5 rounded-xl bg-blue-950/20 border border-blue-500/30 text-xs space-y-1.5">
+            <span class="text-blue-300 font-bold flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-notes-medical"></i>
+              Realistic Frontline Dilemma: Why Post-Ictal Febrile Seizures Trap Unconstrained SLMs
+            </span>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              In community primary care, a frantic caregiver arrives holding a 14-month-old infant who suffered a febrile convulsion 10 minutes ago. The child is now <strong>post-ictal, drowsy, with rapid breathing (52 bpm) and high fever (39.1°C)</strong>. The panicking caregiver is holding oral paracetamol and amoxicillin, asking: <em>"Can I give him these pills now with water to break the fever?"</em> Because an unconstrained SLM identifies pneumonia and malaria keywords, it attempts to satisfy both vertical protocols, politely advising oral pills before referral. In contrast, <strong>aCDU deterministic clamping prioritizes emergency airway safety: ABSOLUTELY NOTHING BY MOUTH</strong>, lateral recovery position, and urgent referral.
+            </p>
+          </div>
+
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-white flex items-center gap-2">
               <i class="fa-solid fa-code-compare text-blue-400"></i>
