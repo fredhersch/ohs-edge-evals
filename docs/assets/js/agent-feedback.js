@@ -454,6 +454,21 @@
               </button>
             </div>
           </div>
+
+          <!-- Pins Local Cache & GitHub Synchronization -->
+          <div style="border-top:1px solid #1e293b; padding-top:10px; margin-top:8px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:11px; color:#94a3b8;">
+              <i class="fa-solid fa-map-pin" style="color:#60a5fa;"></i> <span id="oaf-pin-cache-count">0 pins cached</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button id="oaf-sync-pins-btn" class="oaf-dock-btn" style="font-size:10px; padding:3px 7px;" title="Check GitHub issue status and remove closed pins">
+                <i class="fa-solid fa-rotate text-[10px]"></i> Sync GitHub
+              </button>
+              <button id="oaf-purge-pins-btn" class="oaf-dock-btn" style="font-size:10px; padding:3px 7px; color:#f87171;" title="Clear local pin cache">
+                <i class="fa-solid fa-trash text-[10px]"></i> Clear Pins
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -596,6 +611,7 @@
     // Open Auth Modal
     function openAuthModal() {
       authError.style.display = 'none';
+      updatePinCacheCount();
       authModal.style.display = 'flex';
       authTokenInput.focus();
     }
@@ -972,7 +988,65 @@
     popCloseBtn.addEventListener('click', () => { inlinePopover.style.display = 'none'; });
     popSubmitBtn.addEventListener('click', submitIssueInPage);
 
+    // Sync & Cache Helpers
+    function updatePinCacheCount() {
+      const pinCountEl = document.getElementById('oaf-pin-cache-count');
+      if (pinCountEl) {
+        const pins = getPins();
+        pinCountEl.textContent = `${pins.length} pin${pins.length === 1 ? '' : 's'} cached`;
+      }
+    }
+
+    async function syncPinsWithGitHub() {
+      const pins = getPins();
+      if (!pins.length) return;
+      try {
+        const headers = { 'Accept': 'application/vnd.github.v3+json' };
+        if (authUser && authUser.token) {
+          headers['Authorization'] = `Bearer ${authUser.token}`;
+        }
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.repoOwner}/${CONFIG.repoName}/issues?state=open&per_page=100`, { headers });
+        if (!res.ok) return;
+        const openIssues = await res.json();
+        const openNumbers = new Set(openIssues.map(i => i.number));
+
+        // Auto-remove any pin whose GitHub issue is no longer open (closed / resolved)
+        const activePins = pins.filter(p => !p.issueNumber || openNumbers.has(p.issueNumber));
+
+        if (activePins.length !== pins.length) {
+          savePins(activePins);
+          loadPinsForPage();
+          updatePinCacheCount();
+        }
+      } catch (e) {
+        // Fallback silently if offline or rate limited
+      }
+    }
+
+    const purgePinsBtn = document.getElementById('oaf-purge-pins-btn');
+    if (purgePinsBtn) {
+      purgePinsBtn.addEventListener('click', () => {
+        savePins([]);
+        loadPinsForPage();
+        updatePinCacheCount();
+      });
+    }
+
+    const syncPinsBtn = document.getElementById('oaf-sync-pins-btn');
+    if (syncPinsBtn) {
+      syncPinsBtn.addEventListener('click', async () => {
+        syncPinsBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Syncing...`;
+        await syncPinsWithGitHub();
+        syncPinsBtn.innerHTML = `<i class="fa-solid fa-check" style="color:#34d399;"></i> Synced`;
+        setTimeout(() => {
+          syncPinsBtn.innerHTML = `<i class="fa-solid fa-rotate text-[10px]"></i> Sync GitHub`;
+        }, 1500);
+      });
+    }
+
     loadPinsForPage();
+    updatePinCacheCount();
+    syncPinsWithGitHub();
   }
 
   // Safe Mount Trigger
