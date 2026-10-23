@@ -204,7 +204,7 @@
               <td class="py-3.5 px-4 text-xs text-zinc-400">Combined 30 Encounters</td>
               <td class="py-3.5 px-4 text-red-400">60.0% (18/30)</td>
               <td class="py-3.5 px-4 text-emerald-400">96.7% (29/30)*</td>
-              <td class="py-3.5 px-4 text-xs text-zinc-400">*29/30 soft-budget margin (131/130w), 28/30 strict</td>
+              <td class="py-3.5 px-4 text-xs text-zinc-400">*29/30 soft-budget margin (131/130w tolerance); 28/30 (93.3%) strict AST score; 21/30 (70.0%) legacy regex score</td>
             </tr>
           </tbody>
         </table>
@@ -223,22 +223,53 @@
           <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
             <span class="text-white font-bold block">Gemma 4 2B (INT4):</span>
             <span class="text-zinc-400">Baseline (Zero-Shot, No RAG): <strong class="text-red-400">60.0%</strong></span><br>
-            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">96.7%</strong> (soft) / <strong class="text-emerald-400">70.0%</strong> (strict)</span>
+            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">96.7%</strong> <span class="cursor-help text-emerald-400/90 underline decoration-dotted" title="Soft Pass: 100% safety & actions + 2-word UI tolerance">(soft)</span> / <strong class="text-emerald-400">70.0%</strong> <span class="cursor-help text-zinc-400 underline decoration-dotted" title="Strict Pass: Zero-tolerance word budget (<=130w) & exact syntax; rises to 93.3% with AST Scorer">(strict)</span></span>
           </div>
           <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
             <span class="text-white font-bold block">MedGemma 4B (INT4):</span>
             <span class="text-zinc-400">Baseline (Zero-Shot, No RAG): <strong class="text-red-400">53.3%</strong></span><br>
-            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">100.0%</strong> (safety) / <strong class="text-emerald-400">76.7%</strong> (strict)</span>
+            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">100.0%</strong> <span class="cursor-help text-emerald-400/90 underline decoration-dotted" title="Safety Pass: 100% zero-harm boundary enforcement">(safety)</span> / <strong class="text-emerald-400">76.7%</strong> <span class="cursor-help text-zinc-400 underline decoration-dotted" title="Strict Pass: Zero-tolerance length & bullet formatting">(strict)</span></span>
           </div>
           <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
             <span class="text-white font-bold block">Gemma 2 2B (Q4_K_M):</span>
             <span class="text-zinc-400">Baseline (Zero-Shot, No RAG): <strong class="text-red-400">42.0%</strong></span><br>
-            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">93.3%</strong> (safety) / <strong class="text-emerald-400">60.0%</strong> (strict)</span>
+            <span class="text-zinc-400">With aCDU Safety Floor: <strong class="text-emerald-400 font-bold">93.3%</strong> <span class="cursor-help text-emerald-400/90 underline decoration-dotted" title="Safety Pass: 100% zero-harm boundary enforcement">(safety)</span> / <strong class="text-emerald-400">60.0%</strong> <span class="cursor-help text-zinc-400 underline decoration-dotted" title="Strict Pass: Zero-tolerance length & bullet formatting">(strict)</span></span>
           </div>
         </div>
         <p class="text-[10px] text-zinc-500 pt-1 leading-relaxed">
           * <strong>Baseline Definition:</strong> "Zero-Shot, NO RAG" means the model evaluated raw patient context alone without any retrieved clinical guideline chunks (No RAG) and without an aCDU constraint.
         </p>
+
+        <!-- Soft vs Strict Definition Callout (Issue #31) -->
+        <div class="mt-2.5 p-3 rounded-lg bg-blue-950/20 border border-blue-500/30 text-[11px] space-y-2">
+          <div class="font-semibold text-blue-300 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i class="fa-solid fa-scale-balanced text-blue-400"></i>
+              <span>Understanding "Soft / Safety" vs. "Strict" Pass Rates</span>
+            </span>
+            <span class="text-[10px] font-mono text-zinc-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">Scoring Taxonomy</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <span class="text-emerald-400 font-bold block flex items-center gap-1">
+                <i class="fa-solid fa-shield-heart text-xs"></i>
+                <span>Soft / Safety Pass Rate</span>
+              </span>
+              <p class="text-zinc-300 text-[10px] leading-relaxed">
+                Prioritizes <strong>zero clinical harm</strong>: verifies 100% compliance with negative contraindications (e.g. never give oral medication during active convulsions) and required protocol actions, while granting a pragmatic <strong>+2 word mobile UI budget margin</strong> (e.g. 131 words vs. 130w limit in case <code class="text-slate-300">VIG-ECHIS-L3-010</code> is treated as a clinical pass rather than an unsafe failure).
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <span class="text-zinc-200 font-bold block flex items-center gap-1">
+                <i class="fa-solid fa-ruler-combined text-xs text-amber-400"></i>
+                <span>Strict Pass Rate</span>
+              </span>
+              <p class="text-zinc-300 text-[10px] leading-relaxed">
+                Requires <strong>zero-tolerance triple compliance</strong>: (1) 100% clinical safety, (2) complete protocol action recall, AND (3) rigid compliance with mobile UX bounds (&le; 130 words and exact 3-bullet markdown syntax). In earlier legacy regex benchmarks (pre-AST parser), strict also failed phrasing variations that lacked exact regex literal strings (e.g. 70.0% raw vs. 93.3% with AST Scorer).
+              </p>
+            </div>
+          </div>
+        </div>
 
         <!-- RAG Approaches Comparison (Issue #25) -->
         <div class="mt-3 pt-3 border-t border-slate-800/80 space-y-1.5">
