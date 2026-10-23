@@ -5,13 +5,14 @@
 
 (function () {
   // Global Giscus Configuration
+  // Set to false to disable Giscus in favor of the floating Agent Feedback widget
+  const GISCUS_ENABLED = false;
+
   const GISCUS_CONFIG = {
     repo: 'fredhersch/ohs-edge-evals',
     repoId: 'R_kgDOVOAdWQ',
     category: 'General',
-    // Paste your Discussion Category ID here once GitHub Discussions is enabled:
-    // (e.g. DIC_kwDOVOAdWQ4Cm...)
-    categoryId: '',
+    categoryId: 'DIC_kwDOVOAdWc4DJY6a',
     mapping: 'pathname',
     strict: '0',
     reactionsEnabled: '1',
@@ -32,9 +33,9 @@
   }
 
   function getGiscusTheme() {
-    return document.documentElement.classList.contains('light')
-      ? 'light'
-      : 'dark_dimmed';
+    return document.documentElement.classList.contains('dark')
+      ? 'dark_dimmed'
+      : 'light';
   }
 
   function sendThemeUpdate(theme) {
@@ -181,6 +182,25 @@
   }
 
   function init() {
+    if (!GISCUS_ENABLED) {
+      // Cleanly remove or hide Giscus containers and comment sections
+      document.querySelectorAll('#comments, .giscus').forEach((el) => {
+        el.style.display = 'none';
+      });
+
+      // Ensure Agent Feedback Widget is loaded if not already present
+      if (!window.__OHS_AGENT_FEEDBACK_LOADED__) {
+        const feedbackScript = document.createElement('script');
+        const scriptBase = (document.currentScript && document.currentScript.src)
+          ? document.currentScript.src.replace(/giscus-loader\.js.*$/, 'agent-feedback.js')
+          : 'assets/js/agent-feedback.js';
+        feedbackScript.src = scriptBase;
+        feedbackScript.defer = true;
+        document.body.appendChild(feedbackScript);
+      }
+      return;
+    }
+
     const containers = document.querySelectorAll('.giscus');
     if (!containers.length) return;
 

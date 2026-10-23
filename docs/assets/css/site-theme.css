@@ -1,0 +1,331 @@
+/**
+ * OHS Edge Evals — Unified Academic Light Design System
+ * Modeled directly on the Google Research / CHW Edge SLM Evaluation Hub.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Default Clean Academic Light Palette */
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --card-muted: #f1f5f9;
+  --card-highlight: #f8fafc;
+  --border: #e2e8f0;
+  --border-subtle: #edf2f7;
+  --border-strong: #cbd5e1;
+  --foreground: #0f172a;
+  --foreground-secondary: #334155;
+  --muted-foreground: #64748b;
+  --surface-hover: #f1f5f9;
+  --code-bg: #f1f5f9;
+  --code-text: #0f172a;
+
+  /* Accent Colors */
+  --text-blue: #1d4ed8;
+  --text-emerald: #047857;
+  --text-amber: #b45309;
+  --text-red: #b91c1c;
+  --text-purple: #6d28d9;
+  --text-pink: #be185d;
+
+  /* Badges */
+  --badge-blue-bg: #eff6ff;
+  --badge-blue-border: #bfdbfe;
+  --badge-emerald-bg: #ecfdf5;
+  --badge-emerald-border: #a7f3d0;
+  --badge-amber-bg: #fffbeb;
+  --badge-amber-border: #fde68a;
+  --badge-red-bg: #fef2f2;
+  --badge-red-border: #fecaca;
+  --badge-purple-bg: #faf5ff;
+  --badge-purple-border: #e9d5ff;
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Universal Light Overrides for Legacy Dark Hardcoded Elements */
+body.bg-\[\#090d16\],
+.bg-\[\#090d16\] {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.bg-\[\#111827\],
+.bg-\[\#111827\]\/90,
+.bg-\[\#172033\] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+.border-\[\#263352\],
+.border-\[\#263352\]\/60 {
+  border-color: #e2e8f0 !important;
+}
+
+.text-\[\#f8fafc\] {
+  color: #0f172a !important;
+}
+
+/* Header & Nav */
+header.border-b {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+header .text-white,
+nav .text-white {
+  color: #0f172a !important;
+}
+
+/* Ensure card headings and titles are crisp dark on light surfaces */
+.text-white {
+  color: #0f172a;
+}
+
+button.text-white,
+a.text-white[class*="bg-blue"],
+a.text-white[class*="bg-purple"],
+button[class*="bg-blue"],
+button[class*="bg-purple"],
+button[class*="bg-emerald"],
+.main-tab-active {
+  color: #ffffff !important;
+}
+
+/* Headings & Text High Contrast */
+h1, h2, h3, h4, h5, h6 {
+  color: #0f172a;
+}
+
+.text-zinc-400,
+.text-slate-400 {
+  color: #64748b !important;
+}
+
+.text-zinc-300,
+.text-slate-300 {
+  color: #475569 !important;
+}
+
+.text-zinc-200,
+.text-slate-200 {
+  color: #334155 !important;
+}
+
+/* Stat & Metric Cards (Matching Screenshot) */
+.hub-metric-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.hub-metric-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.hub-metric-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.hub-metric-value {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.hub-metric-subtext {
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  color: #475569;
+}
+
+/* Top Meta Panel (Matching Screenshot) */
+.hub-meta-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  font-size: 0.75rem;
+  line-height: 1.35rem;
+  color: #334155;
+}
+
+.hub-meta-box code {
+  font-family: 'JetBrains Mono', monospace;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  color: #0f172a;
+}
+
+.hub-pill-passed {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 0.6875rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Horizontal Tab Bar (Matching Screenshot) */
+.hub-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-top: 0.5rem;
+}
+
+.hub-tab-item {
+  color: #475569;
+  padding-bottom: 0.75rem;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.hub-tab-item:hover {
+  color: #0f172a;
+}
+
+.hub-tab-item.active {
+  color: #1d4ed8;
+  border-bottom: 2px solid #1d4ed8;
+  font-weight: 700;
+}
+
+/* Tables in Light Mode */
+table {
+  background-color: #ffffff;
+}
+
+table thead tr {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #475569 !important;
+}
+
+table tbody tr {
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+table tbody tr:hover {
+  background-color: #f8fafc !important;
+}
+
+table td {
+  color: #334155;
+}
+
+/* Code Blocks */
+pre, code {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+pre {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Dark Mode Support (if user toggles to dark) */
+html.dark {
+  --background: #090d16;
+  --surface: #111827;
+  --card: #111827;
+  --card-muted: #172033;
+  --card-highlight: #1e293b;
+  --border: #263352;
+  --border-subtle: #1e2942;
+  --border-strong: #334155;
+  --foreground: #f8fafc;
+  --foreground-secondary: #cbd5e1;
+  --muted-foreground: #94a3b8;
+  --surface-hover: #1e293b;
+  --code-bg: #060913;
+  --code-text: #f1f5f9;
+
+  --text-blue: #60a5fa;
+  --text-emerald: #34d399;
+  --text-amber: #fbbf24;
+  --text-red: #f87171;
+  --text-purple: #c084fc;
+}
+
+html.dark body {
+  background-color: #090d16 !important;
+  color: #f8fafc !important;
+}
+
+html.dark .hub-metric-card {
+  background-color: #111827;
+  border-color: #263352;
+}
+
+html.dark .hub-metric-value,
+html.dark h1, html.dark h2, html.dark h3 {
+  color: #f8fafc !important;
+}
+
+html.dark .hub-meta-box {
+  background-color: #111827;
+  border-color: #263352;
+  color: #cbd5e1;
+}
+
+html.dark .hub-meta-box code {
+  background-color: #1e293b;
+  border-color: #334155;
+  color: #93c5fd;
+}
+
+html.dark .hub-tab-bar {
+  border-color: #263352;
+}
+
+html.dark .hub-tab-item {
+  color: #94a3b8;
+}
+
+html.dark .hub-tab-item.active {
+  color: #60a5fa;
+  border-bottom-color: #60a5fa;
+}
