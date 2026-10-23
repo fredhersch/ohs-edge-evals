@@ -698,6 +698,39 @@
 
     <!-- TAB 4: LIVE VISUAL EVAL RUNNER -->
     <section id="view-runner" class="space-y-6 hidden">
+      <!-- Runner Overview Banner (Issue #38) -->
+      <div class="ohs-card p-5 bg-white border border-[#e1e8eb] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-toolkit">Live Testbed</span>
+            <h2 class="font-bold text-[#1c2830] text-base">Interactive Local Evaluation Runner</h2>
+          </div>
+          <p class="text-xs text-[#4e5f6a] mt-1.5 leading-relaxed max-w-4xl">
+            Execute the complete 20-case frontline evaluation suite directly against an on-device Small Language Model (e.g., <strong>Gemma 2 2B</strong>, <strong>Qwen 2.5 3B</strong>, or <strong>Llama 3.2 3B</strong> via Ollama). Streams per-token latency, memory telemetry, and Tier-1 deterministic audit passes in real-time.
+          </p>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button onclick="simulateMockRun()" class="btn-pill btn-secondary px-3 py-1.5 text-xs">
+            <i class="fa-solid fa-vial text-xs"></i>
+            <span>Simulate Demo Run</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Runner Quickstart & Guidance -->
+      <div class="p-3.5 rounded-xl border border-blue-500/25 bg-blue-950/20 text-xs space-y-1.5">
+        <div class="flex items-center gap-1.5 font-semibold text-blue-300">
+          <i class="fa-solid fa-terminal text-blue-400"></i>
+          <span>How to Run Locally or in the Field</span>
+        </div>
+        <p class="text-slate-300 text-[11px] leading-relaxed">
+          When viewing this studio statically on GitHub Pages, start the local backend server via:
+          <code class="px-2 py-0.5 rounded bg-black/60 text-emerald-400 font-mono text-[11px] border border-slate-800 ml-1">python3 visual_eval_studio.py</code>
+          or execute directly from the terminal via:
+          <code class="px-2 py-0.5 rounded bg-black/60 text-emerald-400 font-mono text-[11px] border border-slate-800 ml-1">python3 chw-edge-evals/runners/run_evals.py --model gemma2:2b-instruct-q4_K_M --dry-run</code>
+        </p>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Configuration Card -->
         <div class="ohs-card p-6 bg-white border border-[#e1e8eb] space-y-4 lg:col-span-1">
@@ -767,7 +800,7 @@
         <div>
           <h2 class="text-sm font-bold text-[#1c2830] flex items-center space-x-2">
             <i class="fa-solid fa-scale-balanced text-[#7a4db8]"></i>
-            <span>Human & AI Clinical Preference Studio (RLHF / DPO)</span>
+            <span>Human &amp; AI Clinical Preference Studio (RLHF / DPO)</span>
           </h2>
           <p class="text-xs text-[#4e5f6a] mt-1">Review candidate SLM responses, vote on clinical preference, edit gold corrections, and export directly to Hugging Face TRL.</p>
         </div>
@@ -778,9 +811,37 @@
           <button onclick="autoBootstrapDpo()" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
             <i class="fa-solid fa-wand-magic-sparkles text-xs font-medium"></i><span>Auto-Bootstrap Pairs</span>
           </button>
-          <a href="/api/preferences" target="_blank" class="btn-pill btn-secondary px-3.5 py-2 text-xs">
+          <button onclick="exportPreferencesJsonl()" class="btn-pill btn-secondary px-3.5 py-2 text-xs cursor-pointer">
             <i class="fa-solid fa-download text-xs font-medium text-[#4e5f6a]"></i><span>Export TRL JSONL</span>
-          </a>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode & Architecture Advisory Callout (Issue #39) -->
+      <div class="p-4 rounded-xl border border-blue-500/25 bg-blue-950/20 text-xs space-y-2">
+        <div class="flex items-center justify-between text-blue-300 font-semibold">
+          <span class="flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-info text-blue-400"></i>
+            <span>How This Studio Works (Online &amp; Offline Modes)</span>
+          </span>
+          <span class="text-[10px] font-mono bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/30">Dual-Mode Ready</span>
+        </div>
+        <p class="text-slate-300 text-[11px] leading-relaxed">
+          This studio curates pairwise preference datasets for Direct Preference Optimization (DPO) and ORPO on small edge models:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] pt-1">
+          <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+            <strong class="text-white block font-mono text-[10px]">🌐 Static / Offline Mode (Current)</strong>
+            <p class="text-slate-400 leading-relaxed text-[10px]">
+              Votes, gold corrections, and bootstrapped pairs are securely stored in your browser's <code class="text-blue-300 font-mono">localStorage</code>. Click <strong>Export TRL JSONL</strong> to download your preference dataset ready for Hugging Face TRL fine-tuning.
+            </p>
+          </div>
+          <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+            <strong class="text-white block font-mono text-[10px]">⚡ Local Backend Server Mode</strong>
+            <p class="text-slate-400 leading-relaxed text-[10px]">
+              Run <code class="text-blue-300 font-mono">python3 visual_eval_studio.py</code> to connect directly to local Ollama inference, stream live telemetry, auto-save to disk, and trigger on-device LoRA training.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -4082,10 +4143,40 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
     async function loadPreferencesCount() {
       try {
         const res = await fetch('/api/preferences');
+        if (!res.ok) throw new Error("offline");
         preferences = await res.json();
-        const badge = document.getElementById('dpo-count-badge');
-        if (badge) badge.innerText = preferences.length;
-      } catch (e) {}
+      } catch (e) {
+        try {
+          const raw = localStorage.getItem('ohs_dpo_preferences');
+          preferences = raw ? JSON.parse(raw) : [];
+        } catch (_) { preferences = []; }
+      }
+      const badge = document.getElementById('dpo-count-badge');
+      if (badge) badge.innerText = preferences.length;
+    }
+
+    function exportPreferencesJsonl() {
+      let list = preferences;
+      if (!list || list.length === 0) {
+        try {
+          const raw = localStorage.getItem('ohs_dpo_preferences');
+          if (raw) list = JSON.parse(raw);
+        } catch (_) {}
+      }
+      if (!list || list.length === 0) {
+        alert("No preference pairs have been recorded yet. Vote on a candidate pair or click Auto-Bootstrap first.");
+        return;
+      }
+      const jsonlContent = list.map(p => JSON.stringify(p)).join('\n');
+      const blob = new Blob([jsonlContent], { type: 'application/x-jsonlines;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ohs_clinical_dpo_preferences_${new Date().toISOString().slice(0,10)}.jsonl`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     }
 
     function populateRunSelectors() {
@@ -4562,7 +4653,8 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
         chosen: chosenWinner === 'A' ? outA : outB,
         rejected: chosenWinner === 'A' ? outB : outA,
         critique_tags: checkedTags,
-        rationale: `Clinician manually preferred Candidate ${chosenWinner}.`
+        rationale: `Clinician manually preferred Candidate ${chosenWinner}.`,
+        timestamp: new Date().toISOString()
       };
 
       try {
@@ -4571,11 +4663,22 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
+        if (!res.ok) throw new Error("offline");
         const data = await res.json();
-        alert(`Preference saved! Total curated pairs: ${data.count}`);
+        alert(`Preference saved to server! Total curated pairs: ${data.count}`);
         loadPreferencesCount();
       } catch (e) {
-        alert('Failed to save preference: ' + e);
+        let stored = [];
+        try {
+          const raw = localStorage.getItem('ohs_dpo_preferences');
+          if (raw) stored = JSON.parse(raw);
+        } catch (_) {}
+        stored.push(payload);
+        localStorage.setItem('ohs_dpo_preferences', JSON.stringify(stored));
+        preferences = stored;
+        const badge = document.getElementById('dpo-count-badge');
+        if (badge) badge.innerText = preferences.length;
+        alert(`Preference vote saved to browser storage! Total curated pairs: ${preferences.length}. Click 'Export TRL JSONL' anytime.`);
       }
     }
 
@@ -4590,21 +4693,32 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
         return;
       }
 
+      const payload = {
+        case_id: caseId,
+        task: task,
+        instruction: task === 'summarization' ? 'Summarize patient record in 3 bullets under 120 words' : 'Provide grounded visit prep counseling under 130 words',
+        input: prompt,
+        output: goldText,
+        timestamp: new Date().toISOString()
+      };
+
       try {
         const res = await fetch('/api/sft/save', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            case_id: caseId,
-            task: task,
-            instruction: task === 'summarization' ? 'Summarize patient record in 3 bullets under 120 words' : 'Provide grounded visit prep counseling under 130 words',
-            input: prompt,
-            output: goldText
-          })
+          body: JSON.stringify(payload)
         });
+        if (!res.ok) throw new Error("offline");
         alert('Gold SFT demonstration saved to sft_clinical_data.jsonl!');
       } catch (e) {
-        alert('Failed to save SFT demonstration: ' + e);
+        let stored = [];
+        try {
+          const raw = localStorage.getItem('ohs_sft_data');
+          if (raw) stored = JSON.parse(raw);
+        } catch (_) {}
+        stored.push(payload);
+        localStorage.setItem('ohs_sft_data', JSON.stringify(stored));
+        alert('Gold SFT demonstration saved to local browser storage!');
       }
     }
 
@@ -4626,13 +4740,93 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
               low_model_run: lowRun.filename
             })
           });
+          if (!res.ok) throw new Error("offline");
           const data = await res.json();
           alert(data.message);
           loadPreferencesCount();
         } catch (e) {
-          alert('Failed to auto-bootstrap: ' + e);
+          // Client-side bootstrap from STATIC_RUN_DETAILS
+          let stored = [];
+          try {
+            const raw = localStorage.getItem('ohs_dpo_preferences');
+            if (raw) stored = JSON.parse(raw);
+          } catch (_) {}
+
+          const highData = typeof STATIC_RUN_DETAILS !== "undefined" ? STATIC_RUN_DETAILS[highRun.filename] : null;
+          const lowData = typeof STATIC_RUN_DETAILS !== "undefined" ? STATIC_RUN_DETAILS[lowRun.filename] : null;
+
+          let count = 0;
+          if (highData && lowData) {
+            (highData.results || []).forEach(resA => {
+              const resB = (lowData.results || []).find(r => r.id === resA.id);
+              if (resB) {
+                const caseMeta = (evalCases || []).find(c => c.id === resA.id) || {};
+                if (resA.summarization?.tier1_pass && !resB.summarization?.tier1_pass) {
+                  stored.push({
+                    case_id: resA.id,
+                    task: 'summarization',
+                    model_chosen: highRun.model,
+                    model_rejected: lowRun.model,
+                    prompt: caseMeta.patient_markdown || '',
+                    chosen: resA.summarization.output,
+                    rejected: resB.summarization.output,
+                    critique_tags: resB.summarization.tier1_failures || ['entity_omission'],
+                    rationale: 'Automated Tier-1 pass vs fail bootstrap.',
+                    timestamp: new Date().toISOString()
+                  });
+                  count++;
+                }
+              }
+            });
+            localStorage.setItem('ohs_dpo_preferences', JSON.stringify(stored));
+            preferences = stored;
+            const badge = document.getElementById('dpo-count-badge');
+            if (badge) badge.innerText = preferences.length;
+            alert(`Auto-bootstrapped ${count} contrastive preference pairs in browser storage! Total curated pairs: ${preferences.length}. Click 'Export TRL JSONL' anytime.`);
+          } else {
+            alert('Auto-bootstrap failed: No local run details available.');
+          }
         }
       }
+    }
+
+    function simulateMockRun() {
+      const logsEl = document.getElementById('runner-logs');
+      const dot = document.getElementById('runner-dot');
+      const text = document.getElementById('runner-text');
+      const timeEl = document.getElementById('runner-exec-time');
+
+      if (!logsEl) return;
+      dot.className = 'w-2 h-2 rounded-full bg-[#7a4db8] animate-pulse';
+      text.innerText = 'Simulating Eval Run...';
+      logsEl.innerText = '[DEMO SIMULATION] Initializing local test runner...\n';
+      timeEl.innerText = 'Running (Demo)';
+
+      const steps = [
+        "Connecting to target runtime: gemma2:2b-instruct-q4_K_M (INT4)... Connected (1.7 GB resident)",
+        "Loading 20 Primary Care Vignettes from bundles/BUNDLE-ECHIS-GOLD-CORE-V1.json...",
+        "Case 01 [ANC]: Fatima Bello (32w PIH) -> TTFT: 184ms | Speed: 98.2 t/s | Tier-1 PASS",
+        "Case 02 [ANC]: Halima Yakubu (Severe Anemia) -> TTFT: 191ms | Speed: 96.4 t/s | Tier-1 PASS",
+        "Case 03 [ANC]: Grace Asante (Bleeding Trap) -> TTFT: 178ms | Speed: 101.0 t/s | Tier-1 PASS (aCDU Deontic Clamped)",
+        "Case 05 [PNC]: Baby Kwesi (Newborn Omphalitis) -> TTFT: 165ms | Speed: 99.8 t/s | Tier-1 PASS",
+        "================================================================================",
+        "EVALUATION COMPLETE: 20/20 Cases Evaluated. Pass Rate: 95.0% (19/20). Memory Peak: 1.74 GB.",
+        "Note: To execute real live inference with your local Ollama instance, run: 'python3 visual_eval_studio.py' and reload."
+      ];
+
+      let idx = 0;
+      const interval = setInterval(() => {
+        if (idx < steps.length) {
+          logsEl.innerText += steps[idx] + '\n';
+          logsEl.scrollTop = logsEl.scrollHeight;
+          idx++;
+        } else {
+          clearInterval(interval);
+          dot.className = 'w-2 h-2 rounded-full bg-[#1ca564]';
+          text.innerText = 'Demo Completed';
+          timeEl.innerText = 'Completed in 2.4s';
+        }
+      }, 350);
     }
 
     async function startEvaluationRun() {
@@ -4663,7 +4857,16 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
           alert('Error: ' + err.error);
         }
       } catch (e) {
-        alert('Failed to start run: ' + e);
+        const logsEl = document.getElementById('runner-logs');
+        if (logsEl) {
+          logsEl.innerText = `[OFFLINE MODE] Could not connect to local studio backend at /api/runner/start.\n\n` +
+            `To execute live model evaluations:\n` +
+            `1. In your terminal, run the local backend server:\n` +
+            `   python3 visual_eval_studio.py\n` +
+            `2. Or run evaluations directly via CLI:\n` +
+            `   python3 chw-edge-evals/runners/run_evals.py --model ${model} ${dryRun ? '--dry-run' : ''}\n\n` +
+            `Tip: Click 'Simulate Demo Run' in the upper-right corner to preview execution telemetry streaming!`;
+        }
       }
     }
 
@@ -5792,7 +5995,7 @@ fun ClinicalTrendChart(
     let trainPollInterval = null;
 
     async function synthesizeAdversarialPairs() {
-      if (!confirm('Synthesize 100 systematic adversarial contrastive pairs (resolved-to-active hallucination, scope violations, missed danger signs, verbosity) derived from evaluation scenarios?')) {
+      if (!confirm('Synthesize systematic adversarial contrastive pairs (resolved-to-active hallucination, scope violations, missed danger signs) derived from evaluation scenarios?')) {
         return;
       }
       try {
@@ -5801,11 +6004,41 @@ fun ClinicalTrendChart(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ overwrite: false, dry_run: false })
         });
+        if (!res.ok) throw new Error("offline");
         const data = await res.json();
         alert(data.message);
         loadPreferencesCount();
       } catch (e) {
-        alert('Failed to synthesize adversarial pairs: ' + e);
+        // Client-side synthesis into localStorage
+        let stored = [];
+        try {
+          const raw = localStorage.getItem('ohs_dpo_preferences');
+          if (raw) stored = JSON.parse(raw);
+        } catch (_) {}
+
+        const synthCases = (evalCases || []).slice(0, 5);
+        let count = 0;
+        synthCases.forEach(c => {
+          stored.push({
+            case_id: c.id,
+            task: 'summarization',
+            model_chosen: 'Clinical Gold Standard',
+            model_rejected: 'Synthetic Sycophantic Baseline',
+            prompt: c.patient_markdown || '',
+            chosen: `**Patient & Context:** ${c.title}\n**Recent Vitals:** Grounded vitals without unconfirmed additions.\n**Open Tasks:** Priority referral scheduled immediately.`,
+            rejected: `**Patient & Context:** ${c.title}\n**Vitals:** Patient reported feeling fine so no referral needed.\n**Tasks:** None required.`,
+            critique_tags: ['sycophantic_reassurance', 'missed_danger_sign'],
+            rationale: 'Adversarial synthetic pair training resistance to ungrounded reassurance.',
+            timestamp: new Date().toISOString()
+          });
+          count++;
+        });
+
+        localStorage.setItem('ohs_dpo_preferences', JSON.stringify(stored));
+        preferences = stored;
+        const badge = document.getElementById('dpo-count-badge');
+        if (badge) badge.innerText = preferences.length;
+        alert(`Synthesized ${count} adversarial contrastive pairs in browser storage! Total curated pairs: ${preferences.length}. Click 'Export TRL JSONL' to download.`);
       }
     }
 
