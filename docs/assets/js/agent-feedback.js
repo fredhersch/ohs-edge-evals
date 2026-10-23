@@ -1,7 +1,11 @@
 /**
  * OHS Edge Evals - Inline Agent Feedback & Directives Widget
- * Role-Based Access Control (RBAC): Visible ONLY to repository collaborators with write/admin roles.
- * Features: Inline element pinning, anchored popover comments, and direct GitHub Issue dispatch for AI agents.
+ * Strictly in-page workflow: Never redirects to GitHub.
+ * Features:
+ *  - Inline element inspection & speech-bubble popovers anchored directly to elements
+ *  - Direct REST API issue creation on fredhersch/ohs-edge-evals with in-card confirmation
+ *  - Persistent inline pin badges (#issue) anchored on target elements
+ *  - Role-based collaborator verification (Admin, Maintainer, Write) with inline token capture
  */
 
 (function () {
@@ -14,7 +18,7 @@
     repoOwner: 'fredhersch',
     repoName: 'ohs-edge-evals',
     defaultLabels: ['agent-task', 'ui-feedback'],
-    storageKey: 'ohs_agent_feedback_auth_v1',
+    storageAuthKey: 'ohs_agent_feedback_auth_v1',
     storagePinsKey: 'ohs_agent_feedback_pins_v1'
   };
 
@@ -23,16 +27,15 @@
   let isInspectMode = false;
   let hoveredElement = null;
   let activePin = null;
-  let placedPins = [];
 
-  // Determine current page location in repo
+  // Relative file path in repository
   function getPageLocation() {
     let path = window.location.pathname || 'index.html';
     if (path === '/' || path.endsWith('/')) path += 'index.html';
     return path.replace(/^\//, '');
   }
 
-  // Construct stable, clean CSS selector
+  // Reliable CSS Selector Generator
   function generateCssSelector(el) {
     if (!el || el === document.body || el === document.documentElement) return 'body';
     if (el.id) return `#${CSS.escape(el.id)}`;
@@ -75,18 +78,18 @@
     return html;
   }
 
-  // Stylesheet
+  // Inject Scoped Stylesheet
   const styleEl = document.createElement('style');
   styleEl.textContent = `
-    /* Collaborator Bar (Bottom Dock) */
-    #oaf-collab-bar {
+    /* Floating Dock */
+    #oaf-dock {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 999990;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       padding: 6px 14px;
       border-radius: 9999px;
       background: #090d16;
@@ -96,56 +99,59 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 12px;
       user-select: none;
-      animation: oaf-fade-in 0.25s ease-out;
+      transition: all 0.2s ease;
     }
-    @keyframes oaf-fade-in {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    #oaf-dock:hover {
+      border-color: #3b82f6;
     }
 
-    #oaf-collab-bar img {
+    #oaf-dock-avatar {
       width: 22px;
       height: 22px;
       border-radius: 50%;
       border: 1px solid #3b82f6;
+      display: none;
     }
 
-    .oaf-badge-role {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(37, 99, 235, 0.2);
-      color: #60a5fa;
-      border: 1px solid rgba(59, 130, 246, 0.4);
-    }
-
-    .oaf-bar-btn {
+    .oaf-dock-btn {
       background: #172033;
       border: 1px solid #263352;
       color: #f8fafc;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       transition: all 0.15s ease;
     }
-    .oaf-bar-btn:hover {
+    .oaf-dock-btn:hover {
       background: #1e2942;
       border-color: #3b82f6;
     }
-    .oaf-bar-btn-primary {
+    .oaf-dock-btn-primary {
       background: #2563eb;
       border-color: #1d4ed8;
       color: #ffffff;
     }
-    .oaf-bar-btn-primary:hover {
+    .oaf-dock-btn-primary:hover {
       background: #1d4ed8;
+    }
+
+    .oaf-pulse-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+      animation: oaf-pulse-anim 2s infinite;
+    }
+    @keyframes oaf-pulse-anim {
+      0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
     }
 
     /* Inspector Overlay */
@@ -154,10 +160,10 @@
       pointer-events: none;
       z-index: 999980;
       border: 2px solid #3b82f6;
-      background: rgba(59, 130, 246, 0.12);
+      background: rgba(59, 130, 246, 0.14);
       border-radius: 4px;
       display: none;
-      transition: top 0.04s ease, left 0.04s ease, width 0.04s ease, height 0.04s ease;
+      transition: top 0.03s ease, left 0.03s ease, width 0.03s ease, height 0.03s ease;
     }
     #oaf-inspect-tooltip {
       position: absolute;
@@ -165,15 +171,16 @@
       left: 0;
       background: #090d16;
       color: #93c5fd;
-      padding: 2px 6px;
+      padding: 2px 7px;
       font-size: 11px;
-      font-family: ui-monospace, monospace;
+      font-family: ui-monospace, SFMono-Regular, monospace;
       border-radius: 4px;
       border: 1px solid #263352;
       white-space: nowrap;
+      pointer-events: none;
     }
 
-    /* Target Mode Banner */
+    /* Targeting Banner */
     #oaf-target-banner {
       position: fixed;
       top: 16px;
@@ -185,7 +192,7 @@
       padding: 8px 18px;
       border-radius: 9999px;
       border: 1px solid #3b82f6;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       display: none;
       align-items: center;
       gap: 12px;
@@ -193,14 +200,15 @@
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
-    /* Anchored Inline Pin */
+    /* Anchored Pin */
     .oaf-pin {
       position: absolute;
       z-index: 999900;
       transform: translate(-50%, -50%);
-      width: 26px;
+      min-width: 26px;
       height: 26px;
-      border-radius: 50%;
+      padding: 0 6px;
+      border-radius: 9999px;
       background: #2563eb;
       color: #ffffff;
       display: flex;
@@ -209,29 +217,31 @@
       font-size: 11px;
       font-weight: 700;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3), 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3), 0 4px 10px rgba(0,0,0,0.4);
       cursor: pointer;
       transition: transform 0.15s ease, background-color 0.15s ease;
+      user-select: none;
     }
     .oaf-pin:hover {
       transform: translate(-50%, -50%) scale(1.15);
       background: #1d4ed8;
     }
     .oaf-pin.has-issue {
-      background: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 4px 10px rgba(0,0,0,0.3);
+      background: #059669;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3), 0 4px 10px rgba(0,0,0,0.4);
     }
 
-    /* Inline Popover Card (Anchored directly next to element) */
+    /* Anchored Speech Bubble Popover */
     #oaf-inline-popover {
       position: absolute;
       z-index: 999992;
-      width: 360px;
+      width: 370px;
+      max-width: calc(100vw - 32px);
       background: #0f172a;
       color: #f8fafc;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid #263352;
-      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
       padding: 14px;
       display: none;
       flex-direction: column;
@@ -245,7 +255,7 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* Popover Arrow */
+    /* Arrow Pointer */
     #oaf-inline-popover::before {
       content: '';
       position: absolute;
@@ -267,20 +277,20 @@
       border-bottom: 1px solid #263352;
     }
 
-    .oaf-target-tag {
+    .oaf-pop-tag {
       font-family: ui-monospace, monospace;
       font-size: 11px;
       color: #60a5fa;
       background: rgba(37, 99, 235, 0.15);
       padding: 2px 6px;
       border-radius: 4px;
-      max-width: 200px;
+      max-width: 220px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
-    .oaf-popover-textarea {
+    .oaf-textarea, .oaf-input {
       width: 100%;
       border-radius: 8px;
       padding: 8px 10px;
@@ -290,46 +300,16 @@
       color: #f8fafc;
       box-sizing: border-box;
       outline: none;
-      resize: vertical;
       font-family: inherit;
     }
-    .oaf-popover-textarea:focus {
+    .oaf-textarea:focus, .oaf-input:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-    }
-
-    /* Auth Dialog */
-    #oaf-auth-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 999999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    #oaf-auth-card {
-      width: 420px;
-      max-width: calc(100vw - 32px);
-      background: #0f172a;
-      border: 1px solid #263352;
-      border-radius: 14px;
-      padding: 22px;
-      color: #f8fafc;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
     }
   `;
   document.head.appendChild(styleEl);
 
-  // Root container
+  // Widget DOM
   const root = document.createElement('div');
   root.id = 'oaf-root';
   root.innerHTML = `
@@ -338,277 +318,273 @@
       <div id="oaf-inspect-tooltip">&lt;tag&gt;</div>
     </div>
 
-    <!-- Inspector Active Banner -->
+    <!-- Target Mode Banner -->
     <div id="oaf-target-banner">
-      <span>🎯 <strong>Inline Targeting Active:</strong> Click any element to pin a comment.</span>
-      <button id="oaf-cancel-inspect-btn" class="oaf-bar-btn">Cancel (Esc)</button>
+      <span class="oaf-pulse-dot"></span>
+      <span><strong>Inline Mode:</strong> Click any element to anchor a comment</span>
+      <button id="oaf-cancel-target-btn" class="oaf-dock-btn" style="padding:3px 8px; font-size:11px;">Cancel (Esc)</button>
     </div>
 
     <!-- Anchored Inline Popover -->
     <div id="oaf-inline-popover">
       <div style="display:flex; justify-content:space-between; align-items:center;">
         <div style="display:flex; align-items:center; gap:6px;">
-          <span id="oaf-pop-tag" class="oaf-target-tag">&lt;button&gt;</span>
+          <span id="oaf-pop-tag" class="oaf-pop-tag">&lt;element&gt;</span>
           <span id="oaf-pop-page" style="font-size:10px; color:#94a3b8; font-family:monospace;">${getPageLocation()}</span>
         </div>
-        <button id="oaf-pop-close" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:14px;">✕</button>
+        <button id="oaf-pop-close-btn" style="background:none; border:none; color:#94a3b8; cursor:pointer; font-size:14px; padding:2px;">✕</button>
       </div>
 
-      <div style="display:flex; gap:4px;" id="oaf-pop-cats">
-        <button class="oaf-bar-btn oaf-cat-btn" data-cat="UI Fix" style="font-size:10px; padding:2px 6px;">🎨 UI Fix</button>
-        <button class="oaf-bar-btn oaf-cat-btn" data-cat="Bug" style="font-size:10px; padding:2px 6px;">🐛 Bug</button>
-        <button class="oaf-bar-btn oaf-cat-btn" data-cat="Copy" style="font-size:10px; padding:2px 6px;">✍️ Copy</button>
-      </div>
+      <!-- Main Comment View -->
+      <div id="oaf-pop-view-main" style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; gap:4px;" id="oaf-pop-cats">
+          <button class="oaf-dock-btn oaf-cat-btn oaf-dock-btn-primary" data-cat="UI Fix" style="font-size:10px; padding:2px 7px;">🎨 UI Fix</button>
+          <button class="oaf-dock-btn oaf-cat-btn" data-cat="Bug" style="font-size:10px; padding:2px 7px;">🐛 Bug</button>
+          <button class="oaf-dock-btn oaf-cat-btn" data-cat="Copy" style="font-size:10px; padding:2px 7px;">✍️ Copy</button>
+          <button class="oaf-dock-btn oaf-cat-btn" data-cat="Feature" style="font-size:10px; padding:2px 7px;">💡 Feature</button>
+        </div>
 
-      <textarea id="oaf-pop-input" class="oaf-popover-textarea" rows="3" placeholder="Describe the change or fix needed for this element..."></textarea>
+        <textarea id="oaf-pop-textarea" class="oaf-textarea" rows="3" placeholder="Describe the change, fix, or directive for this element..."></textarea>
 
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; pt-1;">
-        <button id="oaf-pop-copy-btn" class="oaf-bar-btn" title="Copy markdown task to clipboard for AI agent">
-          <i class="fa-regular fa-clipboard"></i>
-          <span>Copy for Agent</span>
-        </button>
-        <button id="oaf-pop-submit-btn" class="oaf-bar-btn oaf-bar-btn-primary" title="Post directly to GitHub Issues">
-          <i class="fa-brands fa-github"></i>
-          <span id="oaf-pop-submit-label">Create Issue</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Collaborator Bar (Rendered only when authenticated) -->
-    <div id="oaf-collab-bar" style="display:none;">
-      <img id="oaf-bar-avatar" src="" alt="avatar" />
-      <span id="oaf-bar-user" style="font-weight:600;">@user</span>
-      <span id="oaf-bar-role" class="oaf-badge-role">Admin</span>
-      <button id="oaf-bar-pin-btn" class="oaf-bar-btn oaf-bar-btn-primary" title="Pin comment directly to any element on page (Hotkey: C)">
-        <i class="fa-solid fa-map-pin"></i>
-        <span>Inline Comment</span>
-      </button>
-      <button id="oaf-bar-logout-btn" class="oaf-bar-btn" title="Log out and hide widget" style="padding:4px 6px;">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-      </button>
-    </div>
-
-    <!-- Auth Modal (Shown via shortcut or ?feedback=login) -->
-    <div id="oaf-auth-modal">
-      <div id="oaf-auth-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div style="display:flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-shield-halved" style="color:#60a5fa; font-size:16px;"></i>
-            <strong style="font-size:14px;">Collaborator Access Verification</strong>
+        <!-- Inline Token Entry (only shown if not yet authorized) -->
+        <div id="oaf-pop-token-box" style="display:none; padding:10px; border-radius:8px; background:rgba(37,99,235,0.08); border:1px solid rgba(59,130,246,0.3); flex-direction:column; gap:6px;">
+          <div style="font-size:11px; font-weight:600; color:#93c5fd; display:flex; align-items:center; gap:5px;">
+            <i class="fa-solid fa-key text-[10px]"></i>
+            <span>Enter GitHub Token Once for Direct In-Page Creation:</span>
           </div>
-          <button id="oaf-auth-close" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer;">✕</button>
+          <input id="oaf-pop-token-input" type="password" placeholder="ghp_... (saved securely in your local browser)" class="oaf-input" style="font-size:11px; padding:5px 8px;" />
+          <div id="oaf-pop-token-error" style="color:#f87171; font-size:10px; display:none;"></div>
         </div>
-        <p style="font-size:12px; color:#94a3b8; margin:0; line-height:1.5;">
-          This inline widget is restricted to repository collaborators on <code style="color:#60a5fa;">${CONFIG.repoOwner}/${CONFIG.repoName}</code>.
-          Enter your GitHub Personal Access Token to verify your collaborator role.
-        </p>
-        <div>
-          <label style="font-size:11px; font-weight:600; text-transform:uppercase; color:#94a3b8; display:block; margin-bottom:4px;">GitHub Personal Access Token (PAT)</label>
-          <input id="oaf-auth-token-input" type="password" placeholder="ghp_... or github_pat_..." class="oaf-popover-textarea" style="height:36px; padding:6px 10px;" />
-          <span style="font-size:10px; color:#64748b; margin-top:3px; display:block;">Requires read repo metadata &amp; write issues permission. Token is saved only in your browser.</span>
+
+        <!-- Buttons Row -->
+        <div style="display:flex; justify-content:space-between; align-items:center; pt-1;">
+          <button id="oaf-pop-copy-btn" class="oaf-dock-btn" title="Copy structured task markdown to clipboard for agent">
+            <i class="fa-regular fa-clipboard"></i>
+            <span>Copy for Agent</span>
+          </button>
+          <button id="oaf-pop-submit-btn" class="oaf-dock-btn oaf-dock-btn-primary" title="Post issue directly to GitHub without leaving this page">
+            <i class="fa-solid fa-paper-plane"></i>
+            <span id="oaf-pop-submit-label">Create Issue</span>
+          </button>
         </div>
-        <div id="oaf-auth-error" style="color:#f87171; font-size:11px; display:none;"></div>
-        <div style="display:flex; justify-content:flex-end; gap:8px;">
-          <button id="oaf-auth-cancel" class="oaf-bar-btn">Cancel</button>
-          <button id="oaf-auth-submit" class="oaf-bar-btn oaf-bar-btn-primary">
-            <span>Verify &amp; Unlock</span>
+      </div>
+
+      <!-- Success View (Shown in-card after issue is created) -->
+      <div id="oaf-pop-view-success" style="display:none; flex-direction:column; gap:8px; padding:4px 0;">
+        <div style="display:flex; align-items:center; gap:8px; color:#34d399;">
+          <div style="width:24px; height:24px; border-radius:50%; background:rgba(16,185,129,0.2); display:flex; align-items:center; justify-content:center;">
+            <i class="fa-solid fa-check text-xs"></i>
+          </div>
+          <div>
+            <strong style="font-size:13px; color:#f8fafc;" id="oaf-success-title">Issue Created!</strong>
+            <div style="font-size:10px; color:#94a3b8;">Anchored inline on this element</div>
+          </div>
+        </div>
+        <div id="oaf-success-body" style="font-size:11px; color:#cbd5e1; background:#090d16; padding:8px 10px; border-radius:6px; border:1px solid #263352; max-height:80px; overflow-y:auto;"></div>
+        <div style="display:flex; justify-content:flex-end; gap:6px; pt-1;">
+          <button id="oaf-success-done-btn" class="oaf-dock-btn oaf-dock-btn-primary" style="padding:4px 12px;">Done</button>
+        </div>
+      </div>
+
+      <!-- Existing Pin View (When clicking an already submitted pin) -->
+      <div id="oaf-pop-view-existing" style="display:none; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="oaf-existing-badge" style="font-size:11px; font-weight:700; color:#34d399; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:4px;">#Issue</span>
+          <span id="oaf-existing-cat" style="font-size:10px; color:#94a3b8;">UI Fix</span>
+        </div>
+        <div id="oaf-existing-comment" style="font-size:12px; color:#f8fafc; background:#090d16; padding:8px 10px; border-radius:6px; border:1px solid #263352; line-height:1.4;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <button id="oaf-delete-pin-btn" class="oaf-dock-btn" style="color:#f87171; border-color:rgba(239,68,68,0.3); font-size:11px;">
+            <i class="fa-regular fa-trash-can"></i>
+            <span>Remove Pin</span>
+          </button>
+          <button id="oaf-existing-copy-btn" class="oaf-dock-btn">
+            <i class="fa-regular fa-clipboard"></i>
+            <span>Copy Task</span>
           </button>
         </div>
       </div>
     </div>
+
+    <!-- Floating Dock (Present on every page) -->
+    <div id="oaf-dock" title="Inline Agent Feedback">
+      <div class="oaf-pulse-dot"></div>
+      <img id="oaf-dock-avatar" src="" alt="user" />
+      <span id="oaf-dock-user" style="font-weight:600; display:none;">@user</span>
+      <span id="oaf-dock-role" style="font-size:10px; text-transform:uppercase; padding:2px 5px; border-radius:4px; background:rgba(37,99,235,0.2); color:#60a5fa; display:none;">Admin</span>
+      <button id="oaf-dock-pin-btn" class="oaf-dock-btn oaf-dock-btn-primary" title="Click to pin a comment inline to any UI element (Hotkey: C)">
+        <i class="fa-solid fa-map-pin"></i>
+        <span>Inline Comment</span>
+      </button>
+      <button id="oaf-dock-settings-btn" class="oaf-dock-btn" title="GitHub Connection Settings" style="padding:5px 8px;">
+        <i class="fa-solid fa-gear text-xs"></i>
+      </button>
+    </div>
   `;
   document.body.appendChild(root);
 
-  // Cached DOM elements
-  const collabBar = document.getElementById('oaf-collab-bar');
-  const barAvatar = document.getElementById('oaf-bar-avatar');
-  const barUser = document.getElementById('oaf-bar-user');
-  const barRole = document.getElementById('oaf-bar-role');
-  const barPinBtn = document.getElementById('oaf-bar-pin-btn');
-  const barLogoutBtn = document.getElementById('oaf-bar-logout-btn');
+  // Cached DOM
+  const dock = document.getElementById('oaf-dock');
+  const dockAvatar = document.getElementById('oaf-dock-avatar');
+  const dockUser = document.getElementById('oaf-dock-user');
+  const dockRole = document.getElementById('oaf-dock-role');
+  const dockPinBtn = document.getElementById('oaf-dock-pin-btn');
+  const dockSettingsBtn = document.getElementById('oaf-dock-settings-btn');
   const inspectBox = document.getElementById('oaf-inspect-box');
   const inspectTooltip = document.getElementById('oaf-inspect-tooltip');
   const targetBanner = document.getElementById('oaf-target-banner');
-  const cancelInspectBtn = document.getElementById('oaf-cancel-inspect-btn');
+  const cancelTargetBtn = document.getElementById('oaf-cancel-target-btn');
   const inlinePopover = document.getElementById('oaf-inline-popover');
   const popTag = document.getElementById('oaf-pop-tag');
   const popPage = document.getElementById('oaf-pop-page');
-  const popClose = document.getElementById('oaf-pop-close');
-  const popInput = document.getElementById('oaf-pop-input');
+  const popCloseBtn = document.getElementById('oaf-pop-close-btn');
+  const popViewMain = document.getElementById('oaf-pop-view-main');
+  const popViewSuccess = document.getElementById('oaf-pop-view-success');
+  const popViewExisting = document.getElementById('oaf-pop-view-existing');
+  const popTextarea = document.getElementById('oaf-pop-textarea');
+  const popTokenBox = document.getElementById('oaf-pop-token-box');
+  const popTokenInput = document.getElementById('oaf-pop-token-input');
+  const popTokenError = document.getElementById('oaf-pop-token-error');
   const popSubmitBtn = document.getElementById('oaf-pop-submit-btn');
   const popSubmitLabel = document.getElementById('oaf-pop-submit-label');
   const popCopyBtn = document.getElementById('oaf-pop-copy-btn');
-  const authModal = document.getElementById('oaf-auth-modal');
-  const authClose = document.getElementById('oaf-auth-close');
-  const authCancel = document.getElementById('oaf-auth-cancel');
-  const authSubmit = document.getElementById('oaf-auth-submit');
-  const authTokenInput = document.getElementById('oaf-auth-token-input');
-  const authError = document.getElementById('oaf-auth-error');
+  const successTitle = document.getElementById('oaf-success-title');
+  const successBody = document.getElementById('oaf-success-body');
+  const successDoneBtn = document.getElementById('oaf-success-done-btn');
+  const existingBadge = document.getElementById('oaf-existing-badge');
+  const existingCat = document.getElementById('oaf-existing-cat');
+  const existingComment = document.getElementById('oaf-existing-comment');
+  const existingCopyBtn = document.getElementById('oaf-existing-copy-btn');
+  const deletePinBtn = document.getElementById('oaf-delete-pin-btn');
 
   let activeCategory = 'UI Fix';
 
-  // Category buttons
+  // Category Toggle
   document.querySelectorAll('#oaf-pop-cats .oaf-cat-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#oaf-pop-cats .oaf-cat-btn').forEach(b => b.classList.remove('oaf-bar-btn-primary'));
-      btn.classList.add('oaf-bar-btn-primary');
+      document.querySelectorAll('#oaf-pop-cats .oaf-cat-btn').forEach(b => b.classList.remove('oaf-dock-btn-primary'));
+      btn.classList.add('oaf-dock-btn-primary');
       activeCategory = btn.dataset.cat;
     });
   });
 
-  // Verify GitHub Token & Repo Role
-  async function verifyGitHubAccess(token) {
-    try {
-      // 1. Fetch user profile
-      const userRes = await fetch('https://api.github.com/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (!userRes.ok) throw new Error('Invalid token: unable to fetch authenticated user.');
-      const userData = await userRes.json();
-
-      // 2. Fetch repository permissions for this user
-      const repoRes = await fetch(`https://api.github.com/repos/${CONFIG.repoOwner}/${CONFIG.repoName}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/vnd.github.v3+json'
-        }
-      });
-      if (!repoRes.ok) throw new Error(`Unable to access ${CONFIG.repoOwner}/${CONFIG.repoName} with this token.`);
-      const repoData = await repoRes.json();
-
-      const perms = repoData.permissions || {};
-      const hasWrite = perms.admin || perms.maintain || perms.push;
-
-      if (!hasWrite) {
-        throw new Error(`Access Denied: @${userData.login} has read-only access. Write/collaborator access is required.`);
+  // Verify GitHub Token & Collaborator Access
+  async function verifyToken(token) {
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
       }
+    });
+    if (!userRes.ok) throw new Error('Invalid token: unable to fetch authenticated user.');
+    const userData = await userRes.json();
 
-      let roleName = 'Collaborator';
-      if (perms.admin) roleName = 'Admin';
-      else if (perms.maintain) roleName = 'Maintainer';
-      else if (perms.push) roleName = 'Write';
+    const repoRes = await fetch(`https://api.github.com/repos/${CONFIG.repoOwner}/${CONFIG.repoName}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!repoRes.ok) throw new Error(`Token lacks access to ${CONFIG.repoOwner}/${CONFIG.repoName}.`);
+    const repoData = await repoRes.json();
 
-      return {
-        token,
-        login: userData.login,
-        role: roleName,
-        avatar_url: userData.avatar_url || '',
-        checkedAt: Date.now()
-      };
-    } catch (err) {
-      throw err;
+    const perms = repoData.permissions || {};
+    const hasWrite = perms.admin || perms.maintain || perms.push;
+    if (!hasWrite) {
+      throw new Error(`@${userData.login} has read-only access. Write/collaborator access is required.`);
+    }
+
+    let roleName = 'Write';
+    if (perms.admin) roleName = 'Admin';
+    else if (perms.maintain) roleName = 'Maintainer';
+
+    return {
+      token: token,
+      login: userData.login,
+      role: roleName,
+      avatar_url: userData.avatar_url || '',
+      checkedAt: Date.now()
+    };
+  }
+
+  // Update Dock UI when user is authenticated
+  function updateDockAuth(user) {
+    if (user) {
+      authUser = user;
+      dockAvatar.src = user.avatar_url || 'https://github.com/ghost.png';
+      dockAvatar.style.display = 'block';
+      dockUser.textContent = `@${user.login}`;
+      dockUser.style.display = 'inline';
+      dockRole.textContent = user.role;
+      dockRole.style.display = 'inline';
+      popTokenBox.style.display = 'none';
+    } else {
+      authUser = null;
+      dockAvatar.style.display = 'none';
+      dockUser.style.display = 'none';
+      dockRole.style.display = 'none';
     }
   }
 
-  // Mount UI when collaborator access is confirmed
-  function mountCollaboratorUI(user) {
-    authUser = user;
-    barAvatar.src = user.avatar_url || 'https://github.com/ghost.png';
-    barUser.textContent = `@${user.login}`;
-    barRole.textContent = user.role;
-    collabBar.style.display = 'flex';
-    authModal.style.display = 'none';
-
-    // Render stored pins for this page if any
-    loadPinsForPage();
-  }
-
-  // Check stored auth on initialization
-  async function checkAuth() {
-    // Check URL parameters for manual trigger
-    const params = new URLSearchParams(window.location.search);
-    const wantsLogin = params.has('feedback') || params.has('agent_feedback');
-
-    const stored = localStorage.getItem(CONFIG.storageKey);
+  // Check stored credentials
+  async function initAuth() {
+    const stored = localStorage.getItem(CONFIG.storageAuthKey);
     if (stored) {
       try {
         const cached = JSON.parse(stored);
-        // If checked in last 12 hours, trust; otherwise re-verify
-        if (cached.token && Date.now() - (cached.checkedAt || 0) < 12 * 3600 * 1000) {
-          mountCollaboratorUI(cached);
-          return;
-        } else if (cached.token) {
-          const fresh = await verifyGitHubAccess(cached.token);
-          localStorage.setItem(CONFIG.storageKey, JSON.stringify(fresh));
-          mountCollaboratorUI(fresh);
-          return;
+        if (cached && cached.token) {
+          updateDockAuth(cached);
+          // Background re-verify if older than 12h
+          if (Date.now() - (cached.checkedAt || 0) > 12 * 3600 * 1000) {
+            verifyToken(cached.token).then(fresh => {
+              localStorage.setItem(CONFIG.storageAuthKey, JSON.stringify(fresh));
+              updateDockAuth(fresh);
+            }).catch(() => {
+              // Ignore background network blip
+            });
+          }
         }
       } catch (e) {
-        localStorage.removeItem(CONFIG.storageKey);
+        localStorage.removeItem(CONFIG.storageAuthKey);
       }
     }
-
-    // Only if URL param explicitly requests login
-    if (wantsLogin) {
-      authModal.style.display = 'flex';
-      authTokenInput.focus();
-    }
+    loadPinsForPage();
   }
 
-  // Handle Auth submission
-  authSubmit.addEventListener('click', async () => {
-    const token = authTokenInput.value.trim();
-    if (!token) {
-      authError.textContent = 'Please enter a GitHub Personal Access Token.';
-      authError.style.display = 'block';
-      return;
-    }
-
-    authSubmit.disabled = true;
-    authSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Checking permissions...`;
-    authError.style.display = 'none';
-
-    try {
-      const verified = await verifyGitHubAccess(token);
-      localStorage.setItem(CONFIG.storageKey, JSON.stringify(verified));
-      mountCollaboratorUI(verified);
-    } catch (err) {
-      authError.textContent = err.message;
-      authError.style.display = 'block';
-    } finally {
-      authSubmit.disabled = false;
-      authSubmit.innerHTML = `Verify &amp; Unlock`;
-    }
-  });
-
-  authClose.addEventListener('click', () => { authModal.style.display = 'none'; });
-  authCancel.addEventListener('click', () => { authModal.style.display = 'none'; });
-
-  // Logout
-  barLogoutBtn.addEventListener('click', () => {
-    if (confirm('Log out of Agent Feedback collaborator mode?')) {
-      localStorage.removeItem(CONFIG.storageKey);
-      authUser = null;
-      collabBar.style.display = 'none';
-      inlinePopover.style.display = 'none';
-      document.querySelectorAll('.oaf-pin').forEach(p => p.remove());
-    }
-  });
-
-  // Shortcut: Cmd+Shift+F or Ctrl+Shift+F opens auth if logged out, or toggles comment mode if logged in
-  window.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'f') {
-      e.preventDefault();
-      if (!authUser) {
-        authModal.style.display = 'flex';
-        authTokenInput.focus();
-      } else {
-        toggleInspectMode();
+  // Settings / Disconnect
+  dockSettingsBtn.addEventListener('click', () => {
+    if (authUser) {
+      if (confirm(`Connected as @${authUser.login} (${authUser.role}).\n\nLog out of inline feedback mode?`)) {
+        localStorage.removeItem(CONFIG.storageAuthKey);
+        updateDockAuth(null);
+        alert('Logged out. You can enter a new token when placing a comment.');
       }
-    } else if (authUser && e.key.toLowerCase() === 'c' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+    } else {
+      const token = prompt('Enter your GitHub Personal Access Token (PAT) with repo/issues permissions:');
+      if (token && token.trim()) {
+        verifyToken(token.trim()).then(user => {
+          localStorage.setItem(CONFIG.storageAuthKey, JSON.stringify(user));
+          updateDockAuth(user);
+          alert(`✅ Verified as @${user.login} (${user.role})!`);
+        }).catch(err => {
+          alert(`Authentication error: ${err.message}`);
+        });
+      }
+    }
+  });
+
+  // Hotkey support: C to pin, Esc to cancel
+  window.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() === 'c' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
       e.preventDefault();
       toggleInspectMode();
     } else if (e.key === 'Escape') {
       if (isInspectMode) stopInspectMode();
       if (inlinePopover.style.display === 'flex') inlinePopover.style.display = 'none';
-      if (authModal.style.display === 'flex') authModal.style.display = 'none';
     }
   });
 
-  // Inline Pin Management
+  // Pins Persistence
   function getPins() {
     try {
       return JSON.parse(localStorage.getItem(CONFIG.storagePinsKey) || '[]');
@@ -637,7 +613,6 @@
     let top = pinData.top;
     let left = pinData.left;
 
-    // If element still exists in DOM, snap to current element coordinates
     if (el) {
       const rect = el.getBoundingClientRect();
       top = rect.top + window.scrollY;
@@ -653,23 +628,22 @@
 
     pin.addEventListener('click', (e) => {
       e.stopPropagation();
-      openPopoverForPin(pinData, pin);
+      openExistingPin(pinData, pin);
     });
 
     document.body.appendChild(pin);
     return pin;
   }
 
-  // Positioning the Inline Popover next to element
+  // Positioning the Popover directly next to element
   function positionPopover(targetEl, pinEl) {
     const rect = targetEl ? targetEl.getBoundingClientRect() : pinEl.getBoundingClientRect();
-    const popWidth = 360;
-    const popHeight = 240;
+    const popWidth = 370;
+    const popHeight = 220;
 
-    let left = (targetEl ? rect.left : rect.left) + window.scrollX;
-    let top = (targetEl ? rect.bottom : rect.bottom) + window.scrollY + 8;
+    let left = rect.left + window.scrollX;
+    let top = rect.bottom + window.scrollY + 8;
 
-    // Check bottom viewport boundary
     if (rect.bottom + popHeight > window.innerHeight && rect.top - popHeight > 0) {
       top = rect.top + window.scrollY - popHeight - 8;
       inlinePopover.classList.add('arrow-bottom');
@@ -677,7 +651,6 @@
       inlinePopover.classList.remove('arrow-bottom');
     }
 
-    // Keep within left/right viewport boundaries
     if (left + popWidth > window.innerWidth - 20) {
       left = window.innerWidth - popWidth - 20;
     }
@@ -688,26 +661,46 @@
     inlinePopover.style.display = 'flex';
   }
 
-  function openPopoverForPin(pinData, pinEl) {
+  // Open Popover for Existing Pin
+  function openExistingPin(pinData, pinEl) {
     activePin = pinData;
     popTag.textContent = `<${pinData.tagName || 'element'}>`;
     popPage.textContent = pinData.page;
-    popInput.value = pinData.comment || '';
 
-    if (pinData.issueNumber) {
-      popSubmitLabel.innerHTML = `Issue #${pinData.issueNumber} ↗`;
-      popSubmitBtn.onclick = () => window.open(pinData.issueUrl, '_blank');
-    } else {
-      popSubmitLabel.innerHTML = `Create Issue`;
-      popSubmitBtn.onclick = submitInlineComment;
-    }
+    popViewMain.style.display = 'none';
+    popViewSuccess.style.display = 'none';
+    popViewExisting.style.display = 'flex';
+
+    existingBadge.textContent = pinData.issueNumber ? `Issue #${pinData.issueNumber}` : 'Draft Pin';
+    existingCat.textContent = pinData.category || 'UI Fix';
+    existingComment.textContent = pinData.comment || '(No description)';
 
     const targetEl = document.querySelector(pinData.selector);
     positionPopover(targetEl, pinEl);
-    popInput.focus();
   }
 
-  // Targeting / Inspect Mode
+  // Delete Existing Pin
+  deletePinBtn.addEventListener('click', () => {
+    if (!activePin) return;
+    let pins = getPins();
+    pins = pins.filter(p => p.id !== activePin.id);
+    savePins(pins);
+    loadPinsForPage();
+    inlinePopover.style.display = 'none';
+  });
+
+  existingCopyBtn.addEventListener('click', () => {
+    if (!activePin) return;
+    const markdown = buildAgentInstruction(activePin, activePin.comment);
+    navigator.clipboard.writeText(markdown).then(() => {
+      existingCopyBtn.innerHTML = `<i class="fa-solid fa-check" style="color:#34d399;"></i><span>Copied!</span>`;
+      setTimeout(() => {
+        existingCopyBtn.innerHTML = `<i class="fa-regular fa-clipboard"></i><span>Copy Task</span>`;
+      }, 1500);
+    });
+  });
+
+  // Inspection / Target Mode
   function toggleInspectMode() {
     if (isInspectMode) stopInspectMode();
     else startInspectMode();
@@ -786,20 +779,25 @@
 
       popTag.textContent = `<${activePin.tagName}>`;
       popPage.textContent = activePin.page;
-      popInput.value = '';
-      popSubmitLabel.textContent = 'Create Issue';
-      popSubmitBtn.onclick = submitInlineComment;
+      popTextarea.value = '';
+
+      popViewMain.style.display = 'flex';
+      popViewSuccess.style.display = 'none';
+      popViewExisting.style.display = 'none';
+
+      // Show token box if not yet authenticated
+      popTokenBox.style.display = authUser ? 'none' : 'flex';
 
       positionPopover(selected, null);
-      popInput.focus();
+      popTextarea.focus();
     }
   }
 
-  // Construct Markdown for coding agent
+  // Construct structured Markdown for AI Coding Assistant
   function buildAgentInstruction(pinData, comment) {
     return [
-      `### 🎯 UI Directive for Agent (Inline Pin)`,
-      `**Category**: \`${activeCategory}\` | **Page**: [\`${pinData.page}\`](file:///${pinData.page})`,
+      `### 🎯 UI Directive for Agent (Inline Element Pin)`,
+      `**Category**: \`${pinData.category || activeCategory}\` | **Page**: [\`${pinData.page}\`](file:///${pinData.page})`,
       ``,
       `#### 💬 User Instruction`,
       `> ${comment}`,
@@ -815,22 +813,55 @@
       pinData.outerHtml,
       `\`\`\``,
       ``,
-      `> 🤖 **Agent Guidance**: Locate this element in \`${pinData.page}\` using the text, class, or selector above and apply the requested change.`
+      `> 🤖 **Agent Guidance**: Locate this element in \`${pinData.page}\` using the text, class, or selector above and apply the requested change cleanly.`
     ].join('\n');
   }
 
-  // Submit issue directly via GitHub REST API with collaborator token
-  async function submitInlineComment() {
+  // Submit Issue Strictly In-Page (Never Opens GitHub!)
+  async function submitIssueInPage() {
     if (!activePin) return;
-    const comment = popInput.value.trim();
+    const comment = popTextarea.value.trim();
     if (!comment) {
-      alert('Please enter an instruction or description of the fix.');
-      popInput.focus();
+      alert('Please describe what needs to be changed.');
+      popTextarea.focus();
       return;
     }
 
+    // If not authenticated, verify token from inline box first
+    let token = authUser ? authUser.token : null;
+    if (!token) {
+      const enteredToken = popTokenInput.value.trim();
+      if (!enteredToken) {
+        popTokenBox.style.display = 'flex';
+        popTokenError.textContent = 'Please paste your GitHub Personal Access Token to submit.';
+        popTokenError.style.display = 'block';
+        popTokenInput.focus();
+        return;
+      }
+
+      popSubmitBtn.disabled = true;
+      popSubmitLabel.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying...`;
+
+      try {
+        const verified = await verifyToken(enteredToken);
+        localStorage.setItem(CONFIG.storageAuthKey, JSON.stringify(verified));
+        updateDockAuth(verified);
+        token = verified.token;
+      } catch (err) {
+        popTokenError.textContent = err.message;
+        popTokenError.style.display = 'block';
+        popSubmitBtn.disabled = false;
+        popSubmitLabel.textContent = 'Create Issue';
+        return;
+      }
+    }
+
+    // Now submit issue via GitHub REST API
     popSubmitBtn.disabled = true;
-    popSubmitLabel.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Submitting...`;
+    popSubmitLabel.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Posting in-page...`;
+
+    activePin.category = activeCategory;
+    activePin.comment = comment;
 
     const title = `[${activeCategory}] ${activePin.page}: <${activePin.tagName}> ${comment.substring(0, 50)}`;
     const body = buildAgentInstruction(activePin, comment);
@@ -840,7 +871,7 @@
       const res = await fetch(`https://api.github.com/repos/${CONFIG.repoOwner}/${CONFIG.repoName}/issues`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authUser.token}`,
+          'Authorization': `Bearer ${token}`,
           'Accept': 'application/vnd.github.v3+json',
           'Content-Type': 'application/json'
         },
@@ -848,62 +879,68 @@
       });
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.message || 'Failed to create GitHub issue via API');
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.message || `GitHub API error (${res.status})`);
       }
 
       const issue = await res.json();
-      activePin.comment = comment;
       activePin.issueNumber = issue.number;
       activePin.issueUrl = issue.html_url;
 
-      // Save pin locally
+      // Save locally
       const pins = getPins();
       pins.push(activePin);
       savePins(pins);
 
-      // Render pin badge on element
+      // Render pin badge directly on element
       createPinBadge(activePin, pins.length);
 
-      inlinePopover.style.display = 'none';
-      alert(`✅ Issue #${issue.number} created on GitHub and pinned inline!`);
+      // Show inline success view inside popover (NO redirection!)
+      popViewMain.style.display = 'none';
+      popViewSuccess.style.display = 'flex';
+      successTitle.textContent = `Issue #${issue.number} Created!`;
+      successBody.textContent = `"${comment}"`;
     } catch (err) {
-      alert(`API Error: ${err.message}\nFalling back to opening pre-filled issue URL.`);
-      const fallbackUrl = `https://github.com/${CONFIG.repoOwner}/${CONFIG.repoName}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
-      window.open(fallbackUrl, '_blank');
+      alert(`Could not create issue: ${err.message}\n\nPlease verify your token permissions (requires repo/issues write access).`);
     } finally {
       popSubmitBtn.disabled = false;
       popSubmitLabel.textContent = 'Create Issue';
     }
   }
 
-  // Copy structured prompt for AI agent
+  // Copy structured prompt
   popCopyBtn.addEventListener('click', () => {
     if (!activePin) return;
-    const comment = popInput.value.trim();
+    const comment = popTextarea.value.trim();
     if (!comment) {
       alert('Please enter a comment or instruction.');
-      popInput.focus();
+      popTextarea.focus();
       return;
     }
-
     const markdown = buildAgentInstruction(activePin, comment);
     navigator.clipboard.writeText(markdown).then(() => {
-      const orig = popCopyBtn.innerHTML;
       popCopyBtn.innerHTML = `<i class="fa-solid fa-check" style="color:#34d399;"></i><span>Copied!</span>`;
-      setTimeout(() => { popCopyBtn.innerHTML = orig; }, 2000);
+      setTimeout(() => {
+        popCopyBtn.innerHTML = `<i class="fa-regular fa-clipboard"></i><span>Copy for Agent</span>`;
+      }, 1500);
     });
   });
 
-  // UI Event bindings
-  barPinBtn.addEventListener('click', toggleInspectMode);
-  cancelInspectBtn.addEventListener('click', stopInspectMode);
-  popClose.addEventListener('click', () => { inlinePopover.style.display = 'none'; });
+  // Done button on success view
+  successDoneBtn.addEventListener('click', () => {
+    inlinePopover.style.display = 'none';
+  });
 
-  // Initialize Auth Check on page load
+  // UI Event bindings
+  dockPinBtn.addEventListener('click', toggleInspectMode);
+  cancelTargetBtn.addEventListener('click', stopInspectMode);
+  popCloseBtn.addEventListener('click', () => { inlinePopover.style.display = 'none'; });
+  popSubmitBtn.addEventListener('click', submitIssueInPage);
+
+  // Initialize Auth on page load
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', checkAuth);
+    document.addEventListener('DOMContentLoaded', initAuth);
   } else {
-    checkAuth();
+    initAuth();
   }
 })();
