@@ -236,6 +236,7 @@
     </button>
     <button onclick="switchTab('explorer')" id="tab-explorer" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-microscope text-xs"></i><span>Evaluation Visualizer</span>
+      <span class="ml-1 text-xs font-semibold bg-[#f3effa] text-[#7a4db8] px-1.5 py-0.2 rounded-full font-bold">20 Cases</span>
     </button>
     <button onclick="switchTab('trends')" id="tab-trends" class="tab-btn px-4 py-3 font-medium border-b-2 border-transparent text-[#4e5f6a] hover:text-[#1c2830] flex items-center space-x-2">
       <i class="fa-solid fa-mobile-screen text-xs"></i><span>Trend &amp; Android Studio</span>
@@ -372,6 +373,25 @@
 
     <!-- TAB 2: EVALUATION VISUALIZER & CASE EXPLORER -->
     <section id="view-explorer" class="space-y-6 hidden">
+      <!-- Visualizer Overview Banner (Issue #36) -->
+      <div class="ohs-card p-5 bg-white border border-[#e1e8eb] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-ai">Case-by-Case Audit</span>
+            <h2 class="font-bold text-[#1c2830] text-base">Clinical Evaluation Visualizer &amp; Response Explorer</h2>
+          </div>
+          <p class="text-xs text-[#4e5f6a] mt-1.5 leading-relaxed max-w-4xl">
+            This visualizer provides an interactive, case-by-case forensic audit of edge SLM performance across primary care scenarios. Review the original FHIR/Tokempic patient record, model responses, deterministic <strong>Tier-1 rule checks</strong> (Check A: Patient Summarization, Check B: Protocol Preparation), and <strong>Tier-2 LLM-as-a-Judge clinical safety audits</strong>.
+          </p>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <span class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#f3effa] text-[#7a4db8] border border-[#7a4db8]/20 flex items-center gap-1.5">
+            <i class="fa-solid fa-microscope text-xs"></i>
+            <span>Interactive Visualizer</span>
+          </span>
+        </div>
+      </div>
+
       <!-- Filters and Search Toolbar -->
       <div class="flex flex-col md:flex-row gap-4 items-center justify-between ohs-card p-4 bg-white border border-[#e1e8eb]">
         <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -637,6 +657,19 @@
 
     <!-- TAB 3: SIDE-BY-SIDE COMPARATOR -->
     <section id="view-comparator" class="space-y-6 hidden">
+      <!-- Comparator Header Banner (Issue #37) -->
+      <div class="ohs-card p-5 bg-white border border-[#e1e8eb] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full badge-toolkit">Model Comparison</span>
+            <h2 class="font-bold text-[#1c2830] text-base">Side-by-Side Candidate Model Comparator</h2>
+          </div>
+          <p class="text-xs text-[#4e5f6a] mt-1.5 leading-relaxed max-w-4xl">
+            Directly compare generation throughput, latency, Tier-1 clinical checklist compliance, and guideline preparation across any two edge SLM benchmark runs on identical clinical cases.
+          </p>
+        </div>
+      </div>
+
       <div class="ohs-card p-5 bg-white border border-[#e1e8eb] flex flex-col md:flex-row items-center gap-4 justify-between">
         <div class="flex items-center space-x-3 w-full md:w-auto">
           <div>
@@ -4120,6 +4153,8 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
         if (typeof STATIC_RUN_DETAILS !== "undefined" && STATIC_RUN_DETAILS[filename]) currentRunData = STATIC_RUN_DETAILS[filename];
         updateDashboardMetrics();
         renderExplorerCases();
+        renderComparison();
+        renderRlhfStudio();
       }
     }
 
@@ -4333,50 +4368,124 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       document.getElementById('explorer-count-label').innerText = `Showing ${visible} of ${cards.length} cases`;
     }
 
+    async function getRunData(file) {
+      if (!file) return null;
+      try {
+        const res = await fetch(`/api/runs/${file}`);
+        if (res.ok) return await res.json();
+      } catch (e) {}
+      if (typeof STATIC_RUN_DETAILS !== "undefined" && STATIC_RUN_DETAILS[file]) {
+        return STATIC_RUN_DETAILS[file];
+      }
+      return null;
+    }
+
     async function renderComparison() {
       const fileA = document.getElementById('comp-model-a')?.value;
       const fileB = document.getElementById('comp-model-b')?.value;
       const caseId = document.getElementById('comp-case-select')?.value;
       const container = document.getElementById('comp-results-view');
-      if (!container || !fileA || !fileB || !caseId) return;
+      if (!container) return;
+      if (!fileA || !fileB || !caseId) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-[#778893]">Please select both models and a clinical case to compare.</div>`;
+        return;
+      }
 
-      const [runA, runB] = await Promise.all([
-        fetch(`/api/runs/${fileA}`).then(r => r.json()),
-        fetch(`/api/runs/${fileB}`).then(r => r.json())
-      ]);
+      let runA = null;
+      let runB = null;
+      try {
+        [runA, runB] = await Promise.all([
+          getRunData(fileA),
+          getRunData(fileB)
+        ]);
+      } catch (err) {
+        console.warn("Failed to load run comparison data:", err);
+      }
+
+      if (!runA || !runB) {
+        container.innerHTML = `<div class="p-6 text-center text-xs text-[#dc3e42] bg-[#fdf2f2] rounded-xl border border-[#f5c2c7]">Unable to load candidate model data for side-by-side comparison. Please select valid runs.</div>`;
+        return;
+      }
 
       const itemA = (runA.results || []).find(r => r.id === caseId) || {};
       const itemB = (runB.results || []).find(r => r.id === caseId) || {};
+      const caseMeta = evalCases.find(c => c.id === caseId) || {};
 
       container.innerHTML = `
+        <!-- Case Header -->
+        <div class="ohs-card p-4 bg-[#f8faf9] border border-[#e1e8eb] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold text-[#7a4db8] uppercase tracking-wider font-mono">${escapeHtml(caseMeta.id || caseId)}</span>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">${escapeHtml(caseMeta.domain || 'Primary Care')}</span>
+            </div>
+            <h3 class="text-sm font-bold text-[#1c2830] mt-0.5">${escapeHtml(caseMeta.title || caseId)}</h3>
+          </div>
+          <button onclick="switchTab('explorer')" class="text-xs font-semibold text-[#7a4db8] hover:text-[#54328c] flex items-center space-x-1 shrink-0">
+            <span>View Full Case in Explorer</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="ohs-card p-5 bg-white border border-[#e1e8eb] space-y-3 shadow-xs">
+          <!-- Candidate Model A -->
+          <div class="ohs-card p-5 bg-white border border-[#e1e8eb] space-y-4 shadow-xs">
             <div class="flex items-center justify-between pb-2 border-b border-[#e1e8eb]">
               <span class="font-bold text-[#1ca564] text-sm flex items-center space-x-1.5">
-                <i class="fa-solid fa-cube"></i><span>${runA.model}</span>
+                <i class="fa-solid fa-cube"></i><span>${escapeHtml(runA.model || fileA)}</span>
               </span>
               <span class="text-xs text-[#778893]">${itemA.summarization?.metrics?.tok_per_sec || '--'} t/s | ${itemA.summarization?.metrics?.latency_s || '--'}s</span>
             </div>
-            <h4 class="text-xs font-bold text-[#1c2830]">Pre-Visit Summarization Check</h4>
-            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap">${escapeHtml(itemA.summarization?.output || 'N/A')}</pre>
-            <div class="text-xs">${itemA.summarization?.tier1_pass ? '<span class="badge-pass px-2.5 py-0.5 rounded-full font-bold">Tier-1 PASS</span>' : '<span class="badge-fail px-2.5 py-0.5 rounded-full font-bold">Tier-1 FAIL</span>: <span class="text-[#dc3e42] font-semibold">' + (itemA.summarization?.tier1_failures || []).join(', ') + '</span>'}</div>
+            
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-[#1c2830]">Check A: Patient Summarization</h4>
+                <div>${itemA.summarization?.tier1_pass ? '<span class="badge-pass px-2 py-0.5 rounded-full font-bold text-[10px]">Tier-1 PASS</span>' : '<span class="badge-fail px-2 py-0.5 rounded-full font-bold text-[10px]">FAIL</span>'}</div>
+              </div>
+              <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap leading-relaxed">${escapeHtml(itemA.summarization?.output || 'No output recorded')}</pre>
+              ${itemA.summarization?.tier1_failures?.length ? `<div class="text-[11px] text-[#dc3e42] font-semibold">Missing Entities: ${escapeHtml(itemA.summarization.tier1_failures.join(', '))}</div>` : ''}
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-[#edf2f4]">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-[#1c2830]">Check B: Mini-RAG Protocol Preparation</h4>
+                <div>${itemA.visit_prep_rag?.tier1_pass ? '<span class="badge-pass px-2 py-0.5 rounded-full font-bold text-[10px]">Tier-1 PASS</span>' : '<span class="badge-fail px-2 py-0.5 rounded-full font-bold text-[10px]">FAIL</span>'}</div>
+              </div>
+              <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap leading-relaxed">${escapeHtml(itemA.visit_prep_rag?.output || 'No protocol preparation output')}</pre>
+              ${itemA.visit_prep_rag?.tier1_failures?.length ? `<div class="text-[11px] text-[#dc3e42] font-semibold">Missing Protocols / Boundary Breaches: ${escapeHtml(itemA.visit_prep_rag.tier1_failures.join(', '))}</div>` : ''}
+            </div>
           </div>
 
-          <div class="ohs-card p-5 bg-white border border-[#e1e8eb] space-y-3 shadow-xs">
+          <!-- Candidate Model B -->
+          <div class="ohs-card p-5 bg-white border border-[#e1e8eb] space-y-4 shadow-xs">
             <div class="flex items-center justify-between pb-2 border-b border-[#e1e8eb]">
               <span class="font-bold text-[#1f75a8] text-sm flex items-center space-x-1.5">
-                <i class="fa-solid fa-cube"></i><span>${runB.model}</span>
+                <i class="fa-solid fa-cube"></i><span>${escapeHtml(runB.model || fileB)}</span>
               </span>
               <span class="text-xs text-[#778893]">${itemB.summarization?.metrics?.tok_per_sec || '--'} t/s | ${itemB.summarization?.metrics?.latency_s || '--'}s</span>
             </div>
-            <h4 class="text-xs font-bold text-[#1c2830]">Pre-Visit Summarization Check</h4>
-            <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap">${escapeHtml(itemB.summarization?.output || 'N/A')}</pre>
-            <div class="text-xs">${itemB.summarization?.tier1_pass ? '<span class="badge-pass px-2.5 py-0.5 rounded-full font-bold">Tier-1 PASS</span>' : '<span class="badge-fail px-2.5 py-0.5 rounded-full font-bold">Tier-1 FAIL</span>: <span class="text-[#dc3e42] font-semibold">' + (itemB.summarization?.tier1_failures || []).join(', ') + '</span>'}</div>
+            
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-[#1c2830]">Check A: Patient Summarization</h4>
+                <div>${itemB.summarization?.tier1_pass ? '<span class="badge-pass px-2 py-0.5 rounded-full font-bold text-[10px]">Tier-1 PASS</span>' : '<span class="badge-fail px-2 py-0.5 rounded-full font-bold text-[10px]">FAIL</span>'}</div>
+              </div>
+              <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap leading-relaxed">${escapeHtml(itemB.summarization?.output || 'No output recorded')}</pre>
+              ${itemB.summarization?.tier1_failures?.length ? `<div class="text-[11px] text-[#dc3e42] font-semibold">Missing Entities: ${escapeHtml(itemB.summarization.tier1_failures.join(', '))}</div>` : ''}
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-[#edf2f4]">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-[#1c2830]">Check B: Mini-RAG Protocol Preparation</h4>
+                <div>${itemB.visit_prep_rag?.tier1_pass ? '<span class="badge-pass px-2 py-0.5 rounded-full font-bold text-[10px]">Tier-1 PASS</span>' : '<span class="badge-fail px-2 py-0.5 rounded-full font-bold text-[10px]">FAIL</span>'}</div>
+              </div>
+              <pre class="bg-[#111820] text-[#d6e2e9] border border-[#23313d] p-3 rounded-lg text-xs whitespace-pre-wrap leading-relaxed">${escapeHtml(itemB.visit_prep_rag?.output || 'No protocol preparation output')}</pre>
+              ${itemB.visit_prep_rag?.tier1_failures?.length ? `<div class="text-[11px] text-[#dc3e42] font-semibold">Missing Protocols / Boundary Breaches: ${escapeHtml(itemB.visit_prep_rag.tier1_failures.join(', '))}</div>` : ''}
+            </div>
           </div>
         </div>
       `;
     }
-
 
     async function renderRlhfStudio() {
       const caseId = document.getElementById('rlhf-case-select')?.value;
@@ -4387,10 +4496,18 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       const runA_file = runsList[0].filename;
       const runB_file = runsList.length > 1 ? runsList[1].filename : runsList[0].filename;
 
-      const [runA, runB] = await Promise.all([
-        fetch(`/api/runs/${runA_file}`).then(r => r.json()),
-        fetch(`/api/runs/${runB_file}`).then(r => r.json())
-      ]);
+      let runA = null;
+      let runB = null;
+      try {
+        [runA, runB] = await Promise.all([
+          getRunData(runA_file),
+          getRunData(runB_file)
+        ]);
+      } catch (e) {
+        console.warn("Failed to load RLHF run data:", e);
+      }
+
+      if (!runA || !runB) return;
 
       const itemA = (runA.results || []).find(r => r.id === caseId) || {};
       const itemB = (runB.results || []).find(r => r.id === caseId) || {};
@@ -4398,8 +4515,8 @@ python3 chw-edge-evals/run_evals.py --model gemma2:2b-chw-dpo</pre>
       const outA = itemA[task]?.output || 'No output';
       const outB = itemB[task]?.output || 'No output';
 
-      document.getElementById('rlhf-model-a-name').innerText = runA.model;
-      document.getElementById('rlhf-model-b-name').innerText = runB.model;
+      document.getElementById('rlhf-model-a-name').innerText = runA.model || runA_file;
+      document.getElementById('rlhf-model-b-name').innerText = runB.model || runB_file;
       document.getElementById('rlhf-output-a').innerText = outA;
       document.getElementById('rlhf-output-b').innerText = outB;
       document.getElementById('rlhf-model-a-words').innerText = `${outA.split(/\s+/).length} words`;

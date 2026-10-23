@@ -454,11 +454,72 @@
           <p class="text-xs text-[var(--muted-foreground)]">Comparing Gemma 4 2B against prior generations and desktop models</p>
         </div>
 
+        <!-- Evaluation Metrics Taxonomy Guide (Issue #34) -->
+        <div class="p-4 rounded-xl border border-blue-500/30 bg-blue-950/20 text-xs space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-blue-500/20 text-blue-300">
+            <strong class="flex items-center gap-2 text-white font-semibold">
+              <i class="fa-solid fa-scale-balanced text-blue-400"></i>
+              <span>Understanding the Evaluation Metrics</span>
+            </strong>
+            <span class="text-[10px] font-mono text-zinc-400 bg-slate-900/80 px-2 py-0.5 rounded border border-slate-800">Scoring Taxonomy</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-[11px]">
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>Overall Tier-1 Score
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Aggregates 40 deterministic checks (20 cases &times; 2 tasks: Summarization + Protocol Prep). Tests keyword recall, negative boundary refusals, and word limits with zero judge variance.
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Check A: Patient Summarization
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Zero-shot extraction from compressed Tokempic FHIR records. Verifies accurate patient demographics, vitals, active conditions, and overdue clinical tasks without hallucination.
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Check B: Raw Protocol Prep
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Closed-book MOH guideline recall without an aCDU constraint. Tests whether the raw SLM independently identifies contraindications and respects frontline scope boundaries.
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>Generation Throughput
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Real-time tokens per second generated on-device (target: &ge;15&ndash;20 tok/sec). Prevents UI freezing during household counseling visits.
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>Average Time-to-Answer
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Total wall-clock latency from prompt ingestion to final token (&le;2.5s acceptable on edge; &gt;10s creates conversational barrier).
+              </p>
+            </div>
+            <div class="p-2.5 rounded bg-black/40 border border-slate-800 space-y-1">
+              <strong class="text-white block flex items-center gap-1 font-mono text-[10px]">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Memory Footprint
+              </strong>
+              <p class="text-slate-300 text-[10px] leading-relaxed">
+                Resident RAM consumption in memory. Must stay &le;2.0 GB to avoid Android Low Memory Killer (LMK) termination on standard 3GB/4GB frontline smartphones.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] overflow-x-auto shadow-sm">
           <table class="w-full text-left text-xs">
             <thead class="border-b border-[var(--border)] text-[var(--muted-foreground)] font-bold uppercase tracking-wider bg-[var(--card-muted)]">
               <tr>
-                <th class="py-3 px-4">Evaluation Metric</th>
+                <th class="py-3 px-4">Evaluation Metric <span class="cursor-help text-blue-400 text-xs ml-1" title="See metrics taxonomy guide above">ⓘ</span></th>
                 <th class="py-3 px-3 text-[var(--text-purple)]">Gemma 4 2B (1.7 GB)</th>
                 <th class="py-3 px-3">Gemma 2 2B (1.7 GB)</th>
                 <th class="py-3 px-3">Gemma 4 (9.6 GB Desktop)</th>

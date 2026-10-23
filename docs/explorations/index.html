@@ -50,6 +50,7 @@
         <a href="../index.html" class="text-zinc-400 hover:text-white transition-colors">Overview</a>
         <a href="../acdu-architecture.html" class="text-zinc-400 hover:text-white transition-colors">Two-Box Architecture</a>
         <a href="../benchmarks.html" class="text-zinc-400 hover:text-white transition-colors">Benchmarks</a>
+        <a href="../gemma4_benchmark_report.html" class="text-purple-300 hover:text-white transition-colors font-medium">Gemma 4 Report</a>
         <a href="../datasets.html" class="text-zinc-400 hover:text-white transition-colors">Datasets</a>
       </nav>
       <div class="flex items-center gap-3">
@@ -141,6 +142,24 @@
         </div>
       </a>
 
+    </div>
+
+    <!-- Featured Model Benchmark Banner (Issue #35) -->
+    <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-950/40 to-blue-950/40 border border-purple-500/30 flex flex-col md:flex-row items-center justify-between gap-4 shadow-lg">
+      <div class="space-y-1">
+        <div class="flex items-center gap-2">
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30">Hardware &amp; Safety Report</span>
+          <span class="text-xs text-slate-400">Low-Resource Primary Care CDS</span>
+        </div>
+        <h3 class="text-lg font-bold text-white">Gemma 4 2B Edge Clinical Decision Support: Benchmark &amp; Safety Analysis</h3>
+        <p class="text-xs text-slate-300 max-w-2xl leading-relaxed">
+          In-depth empirical evaluation of Gemma 4 2B across 30 Kenya eCHIS encounters, analyzing zero-RAM aCDU safety floor enforcement, INT4 resident memory footprints, and forensic audits of edge regressions.
+        </p>
+      </div>
+      <a href="../gemma4_benchmark_report.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition shadow-md shrink-0">
+        <i class="fa-solid fa-file-medical"></i>
+        <span>Read Benchmark Report ↗</span>
+      </a>
     </div>
 
     <!-- Community Comments & Directives (Giscus) -->
